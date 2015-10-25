@@ -9,9 +9,9 @@
 
 # Binary folders
 
-/Birtemag/Degug
-/Birtemag/Release
-/Birtemag/x64
+/GameVoid/Degug
+/GameVoid/Release
+/GameVoid/x64
 /x64
 /Release
 /.vs
