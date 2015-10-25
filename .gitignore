@@ -1,0 +1,17 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Executables
+*.exe
+
+# Binary folders
+
+/Birtemag/Degug
+/Birtemag/Release
+/Birtemag/x64
+/x64
+/Release
+/.vs
