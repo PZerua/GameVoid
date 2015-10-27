@@ -10,7 +10,7 @@ Cartridge::Cartridge(const string &gamePath)
 	ifstream rom(gamePath, ios::binary | ios::ate);
 
 	// tellg() returns the actual position, since we are in the end of file, it returns the size
-	_ROMsize = (unsigned) rom.tellg();
+	_ROMsize = (int) rom.tellg();
 
 	if (_ROMsize != -1)
 	{

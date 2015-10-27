@@ -18,7 +18,7 @@ public:
 
 private:
 	BYTE *ROMdata;
-	unsigned _ROMsize;
+	int _ROMsize;
 	unsigned _RAMsize;
 	bool _CGBfeatures;
 	bool _SGBfeatures;
