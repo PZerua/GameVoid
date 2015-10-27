@@ -25,8 +25,7 @@ Cartridge::Cartridge(const string &gamePath)
 		// Read info from ROM
 		init();
 	}
-	else
-		cout << "Error reading rom" << endl;
+	else cout << "Error reading rom" << endl;
 
 	rom.close();
 }
@@ -42,6 +41,5 @@ void Cartridge::init()
 	// Get game title
 	memcpy(_title, &ROMdata[HEADER_TITLE], 17);
 	cout << "GAME TITLE: " << _title << endl;
-
 
 }

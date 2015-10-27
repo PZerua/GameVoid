@@ -25,4 +25,3 @@ private:
 
 	char _title[17];
 };
-
