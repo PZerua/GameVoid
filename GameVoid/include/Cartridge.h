@@ -18,10 +18,9 @@ public:
 
 private:
 	BYTE *ROMdata;
-	int _ROMsize;
-	int _RAMsize;
+	unsigned _ROMsize;
+	unsigned _RAMsize;
 	bool _CGBfeatures;
 	bool _SGBfeatures;
-
 	char _title[17];
 };
