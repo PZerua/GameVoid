@@ -65,11 +65,10 @@ void MBC1::write(const WORD &address, const BYTE &value)
 	// Select RAM Bank Number or upper bits of ROM Bank Number
 	else if (address >= 0x4000 && address < 0x6000)
 	{
-		if (_mode = ROMmode)
+		if (_mode == ROMmode)
 			_ROMbank = _ROMbank + ((value & 0x02) << 5);
-		else if (_mode = RAMmode)
+		else if (_mode == RAMmode)
 			_RAMbank = value & 0x02;
-
 	}
 	// Select ROM or RAM mode
 	else if (address >= 0x6000 && address < 0x8000)
