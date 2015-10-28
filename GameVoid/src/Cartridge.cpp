@@ -1,6 +1,5 @@
 #include "Cartridge.h"
 
-
 Cartridge::Cartridge(const string &gamePath)
 {
 
@@ -18,9 +17,9 @@ Cartridge::Cartridge(const string &gamePath)
 		rom.seekg(0, ios::beg);
 
 		// Array of BYTEs containing the ROM
-		ROMdata = new BYTE[_ROMsize];
+		_ROMdata = new BYTE[_ROMsize];
 
-		rom.read((char *) ROMdata, _ROMsize);
+		rom.read((char *) _ROMdata, _ROMsize);
 
 		// Read info from ROM
 		init();
@@ -34,28 +33,29 @@ Cartridge::Cartridge(const string &gamePath)
 Cartridge::~Cartridge()
 {
 	// Delete array in destructor
-	delete[] ROMdata;
+	delete[] _ROMdata;
 }
 
 void Cartridge::init()
 {
 
 	// Get game title
-	memcpy(_title, &ROMdata[HEADER_TITLE], 17);
+	memcpy(_title, &_ROMdata[HEADER_TITLE], 17);
+	_title[16] = '\0';
 	cout << "GAME TITLE: " << _title << endl;
 
 	// We check if the size of ROM was properly calculated
 	int tempSize = 0;
 
 	// From ROM Header documentation: size = 32KB << N
-	tempSize = 32768 << ROMdata[HEADER_ROM_SIZE];
+	tempSize = 32768 << _ROMdata[HEADER_ROM_SIZE];
 
 	if (tempSize != _ROMsize)
 		cout << "Error reading ROM size" << endl;
 	else cout << "GAME SIZE: " << _ROMsize << " KB" << endl;
 
 	// Read RAM size info
-	switch (ROMdata[HEADER_RAM_SIZE])
+	switch (_ROMdata[HEADER_RAM_SIZE])
 	{
 	case 0x00:
 		_RAMsize = 0; // 0 KB
@@ -80,18 +80,21 @@ void Cartridge::init()
 		break;
 	}
 
-
 	// Read Cartridge type info
-	switch (ROMdata[HEADER_CART_TYPE])
+	switch (_ROMdata[HEADER_CART_TYPE])
 	{
 	case 0x00:		// ROM
 	case 0x08:		// ROM+RAM
+	case 0x09:		// ROM+RAM+BATTERY
+		mbc = new None(_ROMdata);
+		break;
 	case 0x01:		// MBC1
 	case 0x02:		// MBC1+RAM
 	case 0x03:		// MBC1+RAM+BATTERY
+		mbc = new MBC1(_ROMdata);
+		break;
 	case 0x05:		// MBC2
 	case 0x06:		// MBC2+BATTERY
-	case 0x09:		// ROM+RAM+BATTERY
 	case 0x0B:		// MMM01
 	case 0x0C:		// MMM01+RAM
 	case 0x0D:		// MMM01+RAM+BATTERY

@@ -21,10 +21,15 @@
   <ItemGroup>
     <ClCompile Include="src\Cartridge.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\MBC1.cpp" />
+    <ClCompile Include="src\None.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Cartridge.h" />
     <ClInclude Include="include\Header.h" />
+    <ClInclude Include="include\MBC.h" />
+    <ClInclude Include="include\MBC1.h" />
+    <ClInclude Include="include\None.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4362BBFB-E121-4690-B92A-FD5BFE0D0EC1}</ProjectGuid>

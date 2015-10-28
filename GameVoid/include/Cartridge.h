@@ -1,5 +1,8 @@
 #pragma once
 #include "Header.h"
+#include "MBC.h"
+#include "None.h"
+#include "MBC1.h"
 
 #define HEADER_TITLE 0x134
 #define HEADER_CGB_FLAG 0x143
@@ -17,10 +20,11 @@ public:
 	void init();
 
 private:
-	BYTE *ROMdata;
+	BYTE *_ROMdata;
 	int _ROMsize;
 	unsigned _RAMsize;
 	bool _CGBfeatures;
 	bool _SGBfeatures;
 	char _title[17];
+	MBC *mbc;
 };
