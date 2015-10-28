@@ -1,8 +1,10 @@
 #include "None.h"
 
-None::None(BYTE *ROMdata)
+None::None(BYTE *ROMdata, const unsigned &RAMsize)
 {
 	_ROMdata = ROMdata;
+	_RAMenabled = false;
+	_RAMsize = RAMsize;
 }
 
 None::~None()
@@ -20,7 +22,8 @@ BYTE None::read(const WORD &address)
 	// Read RAM data 
 	else if (address >= 0xA000 && address < 0xC000)
 	{
-
+		if (_RAMsize != 0 && _RAMenabled)
+			return _ROMdata[address];
 	}
 }
 
@@ -29,12 +32,22 @@ void None::write(const WORD &address, const BYTE &value)
 	// Enable or disable RAM
 	if (address >= 0x0000 && address < 0x2000)
 	{
-
+		// Any value with 0x0A in lower 4 bits enables RAM
+		if ((value & 0x0F) == 0x0A)
+		{
+			_RAMenabled = true;
+		}
+		// Other value disables it
+		else
+		{
+			_RAMenabled = false;
+		}
 	}
 	// Write to RAM 
 	else if (address >= 0xA000 && address < 0xC000)
 	{
-
+		if (_RAMsize != 0 && _RAMenabled)
+			_ROMdata[address] = value;
 	}
 	else cout << "Error: writing to a ROM without MBC" << endl;
 }

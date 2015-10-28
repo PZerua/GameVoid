@@ -18,6 +18,7 @@ public:
 	Cartridge(const string &gamePath);
 	~Cartridge();
 	void init();
+	MBC *_MBC;
 
 private:
 	BYTE *_ROMdata;
@@ -26,5 +27,5 @@ private:
 	bool _CGBfeatures;
 	bool _SGBfeatures;
 	char _title[17];
-	MBC *mbc;
+	
 };

@@ -79,19 +79,23 @@ void Cartridge::init()
 		cout << "Error reading RAM size" << endl;
 		break;
 	}
+	cout << "RAM SIZE: " << _RAMsize << " KB" << endl;
 
+	BYTE cartType = _ROMdata[HEADER_CART_TYPE];
 	// Read Cartridge type info
-	switch (_ROMdata[HEADER_CART_TYPE])
+	switch (cartType)
 	{
 	case 0x00:		// ROM
 	case 0x08:		// ROM+RAM
 	case 0x09:		// ROM+RAM+BATTERY
-		mbc = new None(_ROMdata);
+		cout << "CARTRIDGE TYPE: " << hex << (int)cartType << " - NO MBC" << dec << endl;
+		_MBC = new None(_ROMdata, _RAMsize);
 		break;
 	case 0x01:		// MBC1
 	case 0x02:		// MBC1+RAM
 	case 0x03:		// MBC1+RAM+BATTERY
-		mbc = new MBC1(_ROMdata);
+		cout << "CARTRIDGE TYPE: " << hex << (int)cartType << " - MBC1" << dec << endl;
+		_MBC = new MBC1(_ROMdata, _RAMsize);
 		break;
 	case 0x05:		// MBC2
 	case 0x06:		// MBC2+BATTERY
