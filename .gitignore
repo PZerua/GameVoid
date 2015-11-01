@@ -17,4 +17,4 @@
 /.vs
 
 # Visual Studio Files
-.sdf
+*.sdf

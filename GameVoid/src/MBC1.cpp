@@ -66,7 +66,7 @@ void MBC1::write(const WORD &address, const BYTE &value)
 	else if (address >= 0x4000 && address < 0x6000)
 	{
 		if (_mode == ROMmode)
-			_ROMbank = _ROMbank + ((value & 0x02) << 5);
+			_ROMbank = (_ROMbank & 0x1F) + ((value & 0x02) << 5);
 		else if (_mode == RAMmode)
 			_RAMbank = value & 0x02;
 	}
