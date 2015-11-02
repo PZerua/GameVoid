@@ -10,7 +10,11 @@ public:
 	Instructions(Memory *memory, Registers *registers);
 	~Instructions();
 
+	WORD read16();
+	BYTE read8();
 	void NOP();
+	void LD_n_nn(WORD &n);
+	void LD_n_A(const regID &id);
 	
 private:
 	Memory *_memory;
