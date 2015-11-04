@@ -110,10 +110,7 @@ void Instructions::INC_nn(WORD &nn)
 // n = A, B, C, D, E, H, L, (HL)
 void Instructions::INC_n(const regID &n)
 {
-
-	if (hasHalfCarry8(n, 1))
-		_registers->setF_H(1);
-	else _registers->setF_H(0);
+	_registers->setF_H(hasHalfCarry8(n, 1));
 
 	switch (n)
 	{
@@ -125,9 +122,7 @@ void Instructions::INC_n(const regID &n)
 		break;
 	}
 
-	if (n == 0)
-		_registers->setF_Z(1);
-	else _registers->setF_Z(0);
+	_registers->setF_Z(n == 0);
 
 	_registers->setF_N(0);
 

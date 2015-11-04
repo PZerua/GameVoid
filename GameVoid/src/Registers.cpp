@@ -251,42 +251,18 @@ WORD Registers::getReg(const regID &id)
 {
 	switch (id)
 	{
-	case A:
-		return getA();
-		break;
-	case B:
-		return getB();
-		break;
-	case C:
-		return getC();
-		break;
-	case D:
-		return getD();
-		break;
-	case E:
-		return getE();
-		break;
-	case F:
-		return getF();
-		break;
-	case H:
-		return getH();
-		break;
-	case L:
-		return getL();
-		break;
-	case af:
-		return getAF();
-		break;
-	case bc:
-		return getBC();
-		break;
-	case de:
-		return getDE();
-		break;
-	case hl:
-		return getHL();
-		break;
+	case A: return getA();
+	case B: return getB();
+	case C: return getC();
+	case D: return getD();
+	case E: return getE();
+	case F: return getF();
+	case H: return getH();
+	case L: return getL();
+	case af: return getAF();
+	case bc: return getBC();
+	case de: return getDE();
+	case hl: return getHL();
 	default:
 		throw exception("GetReg error, unimplemented enum");
 		break;

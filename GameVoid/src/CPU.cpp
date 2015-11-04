@@ -15,10 +15,6 @@ void CPU::run()
 	_inst = new Instructions(_memory, &_registers);
 	bool run = true;
 
-	int temp = 0xFF + 0xFF;
-
-	cout << _inst->hasCarry8(0xFF, 0xFF) << endl;
-
 	while (run)
 	{
 		WORD OPCODE = _memory->read(_registers.getPC());
@@ -59,5 +55,4 @@ void CPU::run()
 			break;
 		}
 	}
-
 }
