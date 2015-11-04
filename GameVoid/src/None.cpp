@@ -24,6 +24,7 @@ BYTE None::read(const WORD &address)
 	{
 		if (_RAMsize != 0 && _RAMenabled)
 			return _ROMdata[address];
+		else throw exception("Trying to read uninitialized or null RAM");
 	}
 }
 

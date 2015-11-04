@@ -111,6 +111,30 @@ void Registers::setF(const BYTE &value)
 	AF.n[1] = value;
 }
 
+// Zero Flag
+void Registers::setF_Z(const bool &value)
+{
+	AF.n[1] = (AF.n[1] & 0x7F) + (value << 7);
+}
+
+// Subtract Flag
+void Registers::setF_N(const bool &value)
+{
+	AF.n[1] = (AF.n[1] & 0xBF) + (value << 6);
+}
+
+// Half Carry Flag
+void Registers::setF_H(const bool &value)
+{
+	AF.n[1] = (AF.n[1] & 0xDF) + (value << 5);
+}
+
+// Carry Flag
+void Registers::setF_C(const bool &value)
+{
+	AF.n[1] = (AF.n[1] & 0xEF) + (value << 4);
+}
+
 // Set higher 8 bits of BC
 void Registers::setB(const BYTE &value)
 {
@@ -218,7 +242,53 @@ void Registers::setReg(const regID &id, const WORD &value)
 		setHL(value);
 		break;
 	default:
-		cout << "SetReg error, unimplemented enum" << endl;
+		throw exception("SetReg error, unimplemented enum");
+		break;
+	}
+}
+
+WORD Registers::getReg(const regID &id)
+{
+	switch (id)
+	{
+	case A:
+		return getA();
+		break;
+	case B:
+		return getB();
+		break;
+	case C:
+		return getC();
+		break;
+	case D:
+		return getD();
+		break;
+	case E:
+		return getE();
+		break;
+	case F:
+		return getF();
+		break;
+	case H:
+		return getH();
+		break;
+	case L:
+		return getL();
+		break;
+	case af:
+		return getAF();
+		break;
+	case bc:
+		return getBC();
+		break;
+	case de:
+		return getDE();
+		break;
+	case hl:
+		return getHL();
+		break;
+	default:
+		throw exception("GetReg error, unimplemented enum");
 		break;
 	}
 }

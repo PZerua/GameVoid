@@ -15,5 +15,5 @@ public:
 private:
 	Registers _registers;
 	Memory *_memory;
-	Instructions *_instructions;
+	Instructions *_inst;
 };
