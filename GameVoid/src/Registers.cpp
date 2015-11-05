@@ -112,27 +112,35 @@ void Registers::setF(const BYTE &value)
 }
 
 // Zero Flag
-void Registers::setF_Z(const bool &value)
+void Registers::setF_Z(const BYTE &value)
 {
-	AF.n[1] = (AF.n[1] & 0x7F) + (value << 7);
+	if ( value == 0x00 || value == 0x01)
+		AF.n[1] = (AF.n[1] & 0x7F) + (value << 7);
+	else throw exception("Value should always be 0 or 1");
 }
 
 // Subtract Flag
-void Registers::setF_N(const bool &value)
+void Registers::setF_N(const BYTE &value)
 {
-	AF.n[1] = (AF.n[1] & 0xBF) + (value << 6);
+	if (value == 0x00 || value == 0x01)
+		AF.n[1] = (AF.n[1] & 0xBF) + (value << 6);
+	else throw exception("Value should always be 0 or 1");
 }
 
 // Half Carry Flag
-void Registers::setF_H(const bool &value)
+void Registers::setF_H(const BYTE &value)
 {
-	AF.n[1] = (AF.n[1] & 0xDF) + (value << 5);
+	if (value == 0x00 || value == 0x01)
+		AF.n[1] = (AF.n[1] & 0xDF) + (value << 5);
+	else throw exception("Value should always be 0 or 1");
 }
 
 // Carry Flag
-void Registers::setF_C(const bool &value)
+void Registers::setF_C(const BYTE &value)
 {
-	AF.n[1] = (AF.n[1] & 0xEF) + (value << 4);
+	if (value == 0x00 || value == 0x01)
+		AF.n[1] = (AF.n[1] & 0xEF) + (value << 4);
+	else throw exception("Value should always be 0 or 1");
 }
 
 // Set higher 8 bits of BC
@@ -241,6 +249,9 @@ void Registers::setReg(const regID &id, const WORD &value)
 	case hl:
 		setHL(value);
 		break;
+	case sp:
+		setSP(value);
+		break;
 	default:
 		throw exception("SetReg error, unimplemented enum");
 		break;
@@ -263,6 +274,7 @@ WORD Registers::getReg(const regID &id)
 	case bc: return getBC();
 	case de: return getDE();
 	case hl: return getHL();
+	case sp: return getSP();
 	default:
 		throw exception("GetReg error, unimplemented enum");
 		break;

@@ -34,10 +34,10 @@ public:
 
 	void setA(const BYTE &value);
 	void setF(const BYTE &value);
-	void setF_Z(const bool &value);
-	void setF_N(const bool &value);
-	void setF_H(const bool &value);
-	void setF_C(const bool &value);
+	void setF_Z(const BYTE &value);
+	void setF_N(const BYTE &value);
+	void setF_H(const BYTE &value);
+	void setF_C(const BYTE &value);
 	void setB(const BYTE &value);
 	void setC(const BYTE &value);
 	void setD(const BYTE &value);

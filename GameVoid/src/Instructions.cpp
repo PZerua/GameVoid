@@ -55,6 +55,34 @@ bool Instructions::hasCarry16(const int &a, const int &b)
 	else return 0;
 }
 
+bool Instructions::hasHalfBorrow8(const int &a, const int &b)
+{
+	if ((((a & 0x000F) - (b & 0x000F)) & 0x10) == 0x10)
+		return 1;
+	else return 0;
+}
+
+bool Instructions::hasBorrow8(const int &a, const int &b)
+{
+	if ((((a & 0x00FF) - (b & 0x00FF)) & 0x100) == 0x100)
+		return 1;
+	else return 0;
+}
+
+bool Instructions::hasHalfBorrow16(const int &a, const int &b)
+{
+	if ((((a & 0x0FFF) - (b & 0x0FFF)) & 0x1000) == 0x1000)
+		return 1;
+	else return 0;
+}
+
+bool Instructions::hasBorrow16(const int &a, const int &b)
+{
+	if ((((a & 0xFFFF) - (b & 0xFFFF)) & 0x10000) == 0x10000)
+		return 1;
+	else return 0;
+}
+
 // 0x00
 void Instructions::NOP()
 {
@@ -64,10 +92,10 @@ void Instructions::NOP()
 // 0x01, 0x11, 0x21, 0x31
 // n = BC, DE, HL, SP
 // nn = 16 bit value
-void Instructions::LD_n_nn(WORD &n)
+void Instructions::LD_n_nn(const regID &n)
 {
 	// nn = read16()
-	n = read16();
+	_registers->setReg(n, read16());
 	_registers->addPC(3);
 }
 
@@ -100,9 +128,9 @@ void Instructions::LD_n_A(const regID &n)
 
 // 0x03, 0x13, 0x23, 0x33
 // nn = BC, DE, HL, SP
-void Instructions::INC_nn(WORD &nn)
+void Instructions::INC_nn(const regID &nn)
 {
-	nn++;
+	_registers->setReg(nn, _registers->getReg(nn) + 1);
 	_registers->addPC(1);
 }
 
@@ -110,7 +138,8 @@ void Instructions::INC_nn(WORD &nn)
 // n = A, B, C, D, E, H, L, (HL)
 void Instructions::INC_n(const regID &n)
 {
-	_registers->setF_H(hasHalfCarry8(n, 1));
+	// Set carry in flag
+	_registers->setF_H(hasHalfCarry8(_registers->getReg(n), 1));
 
 	switch (n)
 	{
@@ -122,9 +151,99 @@ void Instructions::INC_n(const regID &n)
 		break;
 	}
 
+	// Set Z and N in flag
 	_registers->setF_Z(n == 0);
-
 	_registers->setF_N(0);
+
+	_registers->addPC(1);
+}
+
+// 0x05, 0x0D, 0x15, 0x1D, 0x25, 0x2D, 0x35, 0x3D
+void Instructions::DEC_n(const regID &n)
+{
+	// Set carry in flag
+	_registers->setF_H(hasHalfBorrow8(_registers->getReg(n), 1));
+
+	switch (n)
+	{
+	case mHL:
+		_memory->write(_registers->getHL(), _memory->read(_registers->getHL()) - 1);
+		break;
+	default:
+		_registers->setReg(n, _registers->getReg(n) + 1);
+		break;
+	}
+
+	// Set Z and N in flag
+	_registers->setF_Z(n == 0);
+	_registers->setF_N(1);
+
+	_registers->addPC(1);
+}
+
+// 0x06, 0x0E, 0x16, 0x1E, 0x26, 0x2E
+// nn = B, C, D, E, H, L
+// n = immediate 8 bits
+void Instructions::LD_nn_n(const regID &nn)
+{
+	_registers->setReg(nn, read8());
+	_registers->addPC(2);
+}
+
+// 0x07
+void Instructions::RLCA()
+{
+	// Set bit 7 as carry
+	_registers->setF_C((_registers->getA() & 0x80) >> 7);
+	// Rotate
+	_registers->setA(_registers->getA() << 1);
+	// Set flag values
+	_registers->setF_Z(_registers->getA() == 0);
+	_registers->setF_N(0);
+	_registers->setF_H(0);
+
+	_registers->addPC(1);
+}
+
+//0x08
+// nn = 16 bits address
+void Instructions::LD_nn_SP()
+{
+	_memory->write(read16(), _registers->getSP() & 0x00FF);
+	_memory->write(read16() + 1, _registers->getSP() & 0xFF00 >> 8);
+	_registers->addPC(3);
+}
+
+// 0x09, 0x19, 0x29, 0x39
+void Instructions::ADD_HL_n(const regID &n)
+{
+
+	// Set carries in flag
+	_registers->setF_C(hasCarry16(_registers->getHL(), _registers->getReg(n)));
+	_registers->setF_H(hasHalfCarry16(_registers->getHL(), _registers->getReg(n)));
+
+	// Add values
+	_registers->setHL(_registers->getHL() + _registers->getReg(n));
+
+	// Reset flag value N
+	_registers->setF_N(0);
+
+	_registers->addPC(1);
+}
+
+// 0x17
+void Instructions::RLC()
+{
+	// Save previous carry
+	BYTE prevC = (_registers->getF() & 0x10) >> 4;
+	// Set bit 7 as carry
+	_registers->setF_C((_registers->getA() & 0x80) >> 7);
+	// Rotate
+	_registers->setA(((_registers->getA() << 1) & 0xFE) + prevC);
+	// Set flag values
+	_registers->setF_Z(_registers->getA() == 0);
+	_registers->setF_N(0);
+	_registers->setF_H(0);
 
 	_registers->addPC(1);
 }
