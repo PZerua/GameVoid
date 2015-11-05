@@ -24,6 +24,7 @@ public:
 	void LD_nn_n(const regID &nn);
 	void LD_n_nn(const regID &n);
 	void LD_n_A(const regID &n);
+	void LD_A_n(const regID &n);
 	void LD_nn_SP();
 	void ADD_HL_n(const regID &n);
 	void INC_nn(const regID &n);

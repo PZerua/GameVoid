@@ -114,7 +114,7 @@ void Instructions::LD_n_A(const regID &n)
 	case mHL:
 		_memory->write(_registers->getHL(), _registers->getA());
 		break;
-	case nn:
+	case n16:
 		_memory->write(read16(), _registers->getA());
 		break;
 	default:
@@ -198,7 +198,6 @@ void Instructions::RLCA()
 	// Rotate
 	_registers->setA(_registers->getA() << 1);
 	// Set flag values
-	_registers->setF_Z(_registers->getA() == 0);
 	_registers->setF_N(0);
 	_registers->setF_H(0);
 
@@ -231,6 +230,34 @@ void Instructions::ADD_HL_n(const regID &n)
 	_registers->addPC(1);
 }
 
+// 0x0A, 0x1A, 0x3E, 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E, 0x7F, 0xFA
+void Instructions::LD_A_n(const regID &n)
+{
+	switch (n)
+	{
+	case mBC:
+		_registers->setA(_memory->read(_registers->getBC()));
+		break;
+	case mDE:
+		_registers->setA(_memory->read(_registers->getDE()));
+		break;
+	case mHL:
+		_registers->setA(_memory->read(_registers->getHL()));
+		break;
+	case n8:
+		_registers->setA(read8());
+		break;
+	case n16:
+		_registers->setA(_memory->read(read16()));
+		break;
+	default:
+		_registers->setA(_registers->getReg(n));
+		break;
+	}
+
+	_registers->addPC(1);
+}
+
 // 0x17
 void Instructions::RLC()
 {
@@ -241,7 +268,6 @@ void Instructions::RLC()
 	// Rotate
 	_registers->setA(((_registers->getA() << 1) & 0xFE) + prevC);
 	// Set flag values
-	_registers->setF_Z(_registers->getA() == 0);
 	_registers->setF_N(0);
 	_registers->setF_H(0);
 

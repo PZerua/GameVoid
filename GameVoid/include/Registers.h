@@ -6,7 +6,7 @@ enum regID
 {
 	A, B, C, D, E, F, H, L,
 	af, bc, de, hl, sp, pc,
-	nn, mBC, mDE, mHL
+	n8, n16, mBC, mDE, mHL
 };
 
 class Registers
