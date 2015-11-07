@@ -196,7 +196,7 @@ void Instructions::RLCA()
 	// Set bit 7 as carry
 	_registers->setF_C((_registers->getA() & 0x80) >> 7);
 	// Rotate
-	_registers->setA(_registers->getA() << 1);
+	_registers->setA(((_registers->getA() << 1) & 0xFE) + _registers->getF_C());
 	// Set flag values
 	_registers->setF_N(0);
 	_registers->setF_H(0);
@@ -251,15 +251,43 @@ void Instructions::LD_A_n(const regID &n)
 		_registers->setA(_memory->read(read16()));
 		break;
 	default:
-		_registers->setA(_registers->getReg(n));
+		_registers->setA((BYTE)_registers->getReg(n));
 		break;
 	}
 
 	_registers->addPC(1);
 }
 
+// 0x0B
+void Instructions::DEC_nn(const regID &nn)
+{
+	_registers->setReg(nn, _registers->getReg(nn) - 1);
+	_registers->addPC(1);
+}
+
+// 0x0F
+void Instructions::RRCA()
+{
+	// Set bit 0 as carry
+	_registers->setF_C(_registers->getA() & 0x01);
+	// Rotate
+	_registers->setA(((_registers->getA() >> 1) & 0x7F) + (_registers->getF_C() << 7));
+	// Set flag values
+	_registers->setF_N(0);
+	_registers->setF_H(0);
+
+	_registers->addPC(1);
+}
+
+// 0x10
+void Instructions::STOP()
+{
+	// TODO
+	_registers->addPC(2);
+}
+
 // 0x17
-void Instructions::RLC()
+void Instructions::RLA()
 {
 	// Save previous carry
 	BYTE prevC = (_registers->getF() & 0x10) >> 4;
@@ -270,6 +298,82 @@ void Instructions::RLC()
 	// Set flag values
 	_registers->setF_N(0);
 	_registers->setF_H(0);
+
+	_registers->addPC(1);
+}
+
+// 0x18
+void Instructions::JR_n()
+{
+	_registers->addPC(read8());
+}
+
+// 0x1F
+void Instructions::RRA()
+{
+	// Save previous carry
+	BYTE prevC = (_registers->getF() & 0x10) >> 4;
+	// Set bit 0 as carry
+	_registers->setF_C(_registers->getA() & 0x01);
+	// Rotate
+	_registers->setA(((_registers->getA() >> 1) & 0xFE) + (prevC << 7));
+	// Set flag values
+	_registers->setF_N(0);
+	_registers->setF_H(0);
+
+	_registers->addPC(1);
+}
+
+// 0x20, 0x28, 0x30, 0x38
+void Instructions::JR_cc_n(const regID &id)
+{
+	switch (id)
+	{
+	case nZ:
+		if (_registers->getF_Z() == 0)
+			_registers->addPC(read8());
+		else _registers->addPC(2);
+		break;
+	case Z:
+		if (_registers->getF_Z() == 1)
+			_registers->addPC(read8());
+		else _registers->addPC(2);
+		break;
+	case nC:
+		if (_registers->getF_C() == 0)
+			_registers->addPC(read8());
+		else _registers->addPC(2);
+		break;
+	case sC:
+		if (_registers->getF_C() == 1)
+			_registers->addPC(read8());
+		else _registers->addPC(2);
+		break;
+	default:
+		cout << "Wrong register identifier set" << endl;
+		break;
+	}
+	
+}
+
+// 0x22
+void Instructions::LD_HLI_A()
+{
+	// Load A in address contained in HL
+	_memory->write(_registers->getHL(), _registers->getA());
+	// Increments HL
+	_registers->setHL(_registers->getHL() + 1);
+
+	_registers->addPC(1);
+}
+
+// 0x32
+void Instructions::LD_HLD_A()
+{
+	// Load A in address contained in HL
+	_memory->write(_registers->getHL(), _registers->getA());
+	// Increments HL
+	_registers->setHL(_registers->getHL() - 1);
 
 	_registers->addPC(1);
 }

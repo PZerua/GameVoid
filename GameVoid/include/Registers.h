@@ -6,7 +6,8 @@ enum regID
 {
 	A, B, C, D, E, F, H, L,
 	af, bc, de, hl, sp, pc,
-	n8, n16, mBC, mDE, mHL
+	n8, n16, mBC, mDE, mHL,
+	nZ, Z, nC, sC
 };
 
 class Registers
@@ -17,20 +18,24 @@ public:
 
 	void reset();
 
-	BYTE &getA();
-	BYTE &getF();
-	BYTE &getB();
-	BYTE &getC();
-	BYTE &getD();
-	BYTE &getE();
-	BYTE &getH();
-	BYTE &getL();
-	WORD &getAF();
-	WORD &getBC();
-	WORD &getDE();
-	WORD &getHL();
-	WORD &getPC();
-	WORD &getSP();
+	const BYTE getA();
+	const BYTE getF();
+	const BYTE getF_Z();
+	const BYTE getF_N();
+	const BYTE getF_H();
+	const BYTE getF_C();
+	const BYTE getB();
+	const BYTE getC();
+	const BYTE getD();
+	const BYTE getE();
+	const BYTE getH();
+	const BYTE getL();
+	const WORD getAF();
+	const WORD getBC();
+	const WORD getDE();
+	const WORD getHL();
+	const WORD getPC();
+	const WORD getSP();
 
 	void setA(const BYTE &value);
 	void setF(const BYTE &value);
@@ -52,7 +57,7 @@ public:
 	void setSP(const WORD &value);
 
 	void setReg(const regID &id, const WORD &value);
-	WORD getReg(const regID &id);
+	const WORD getReg(const regID &id);
 
 private:
 

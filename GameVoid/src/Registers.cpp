@@ -22,79 +22,103 @@ void Registers::reset()
 }
 
 // Get A from AF (higher 8 bits)
-BYTE &Registers::getA()
+const BYTE Registers::getA()
 {
 	return AF.n[0];
 }
 
 // Get F from AF (lower 8 bits)
-BYTE &Registers::getF()
+const BYTE Registers::getF()
 {
 	return AF.n[1];
 }
 
+// Get Z flag
+const BYTE Registers::getF_Z()
+{
+	return (getF() & 0x80) >> 7;
+}
+
+// Get N flag
+const BYTE Registers::getF_N()
+{
+	return (getF() & 0x40) >> 6;
+}
+
+// Get H flag
+const BYTE Registers::getF_H()
+{
+	return (getF() & 0x20) >> 5;
+}
+
+// Get C flag
+const BYTE Registers::getF_C()
+{
+	return (getF() & 0x10) >> 4;
+}
+
 // Get B from BC (higher 8 bits)
-BYTE &Registers::getB()
+const BYTE Registers::getB()
 {
 	return BC.n[0];
 }
 
 // Get C from BC (lower 8 bits)
-BYTE &Registers::getC()
+const BYTE Registers::getC()
 {
 	return BC.n[1];
 }
 
 // Get D from DE (higher 8 bits)
-BYTE &Registers::getD()
+const BYTE Registers::getD()
 {
 	return DE.n[0];
 }
 
 // Get E from DE (lower 8 bits)
-BYTE &Registers::getE()
+const BYTE Registers::getE()
 {
 	return DE.n[1];
 }
 
 // Get H from HL (higher 8 bits)
-BYTE &Registers::getH()
+const BYTE Registers::getH()
 {
 	return HL.n[0];
 }
 
 // Get L from HL (lower 8 bits)
-BYTE &Registers::getL()
+const BYTE Registers::getL()
 {
 	return AF.n[1];
 }
 
-WORD &Registers::getAF()
+const WORD Registers::getAF()
 {
 	return AF.nn;
 }
 
-WORD &Registers::getBC()
+const WORD Registers::getBC()
 {
 	return BC.nn;
 }
 
-WORD &Registers::getDE()
+const WORD Registers::getDE()
 {
 	return DE.nn;
 }
 
-WORD &Registers::getHL()
+const WORD Registers::getHL()
 {
 	return HL.nn;
 }
 
-WORD &Registers::getPC()
+const WORD Registers::getPC()
 {
 	return PC;
 }
 
-WORD &Registers::getSP()
+const WORD Registers::getSP()
 {
 	return SP;
 }
@@ -258,7 +282,7 @@ void Registers::setReg(const regID &id, const WORD &value)
 	}
 }
 
-WORD Registers::getReg(const regID &id)
+const WORD Registers::getReg(const regID &id)
 {
 	switch (id)
 	{

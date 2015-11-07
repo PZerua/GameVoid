@@ -26,12 +26,20 @@ public:
 	void LD_n_A(const regID &n);
 	void LD_A_n(const regID &n);
 	void LD_nn_SP();
+	void LD_HLI_A();
+	void LD_HLD_A();
 	void ADD_HL_n(const regID &n);
 	void INC_nn(const regID &n);
 	void INC_n(const regID &n);
+	void DEC_nn(const regID &nn);
 	void DEC_n(const regID &n);
 	void RLCA();
-	void RLC();
+	void RLA();
+	void RRCA();
+	void RRA();
+	void STOP();
+	void JR_n();
+	void JR_cc_n(const regID &id);
 	
 private:
 	Memory *_memory;
