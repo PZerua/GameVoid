@@ -28,6 +28,8 @@ public:
 	void LD_nn_SP();
 	void LD_HLI_A();
 	void LD_HLD_A();
+	void LD_A_HLI();
+	void LD_r1_r2(const regID &r1, const regID &r2);
 	void ADD_HL_n(const regID &n);
 	void INC_nn(const regID &n);
 	void INC_n(const regID &n);
@@ -40,6 +42,9 @@ public:
 	void STOP();
 	void JR_n();
 	void JR_cc_n(const regID &id);
+	void DAA();
+	void CPL();
+	void HALT();
 	
 private:
 	Memory *_memory;

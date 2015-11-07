@@ -367,6 +367,69 @@ void Instructions::LD_HLI_A()
 	_registers->addPC(1);
 }
 
+// 0x27
+void Instructions::DAA()
+{
+	// Least significant bits
+	BYTE LSB;
+	// Most significant bits
+	BYTE MSB;
+
+	if (!_registers->getF_N())
+	{
+		LSB = _registers->getA() & 0x0F;
+		if (LSB > 0x09 || _registers->getF_H())
+		{
+			_registers->setA(_registers->getA() + 0x06);
+		}
+		MSB = (_registers->getA() & 0xF0) >> 4;
+		if (MSB > 0x09 || _registers->getF_C())
+		{
+			_registers->setA(_registers->getA() + 0x60);
+			_registers->setF_C(1);
+		}
+		else _registers->setF_C(0);
+	}
+	else
+	{
+		LSB = _registers->getA() & 0x0F;
+		if (LSB > 0x09 || _registers->getF_H())
+		{
+			_registers->setA(_registers->getA() + 0x06);
+		}
+		MSB = (_registers->getA() & 0xF0) >> 4;
+		if (MSB > 0x09 || _registers->getF_C())
+		{
+			_registers->setA(_registers->getA() + 0x60);
+			_registers->setF_C(1);
+		}
+		else _registers->setF_C(0);
+	}
+
+	_registers->setF_Z(_registers->getA() == 0);
+	_registers->setF_H(0);
+
+	_registers->addPC(1);
+}
+
+// 0x2A
+void Instructions::LD_A_HLI()
+{
+	// Loads HL address value into A
+	_registers->setA(_memory->read(_registers->getHL()));
+	// Increment HL
+	_registers->setHL(_registers->getHL() + 1);
+
+	_registers->addPC(1);
+}
+
+// 0x2F
+void Instructions::CPL()
+{
+	_registers->setA(~_registers->getA());
+	_registers->addPC(1);
+}
+
 // 0x32
 void Instructions::LD_HLD_A()
 {
@@ -375,5 +438,35 @@ void Instructions::LD_HLD_A()
 	// Increments HL
 	_registers->setHL(_registers->getHL() - 1);
 
+	_registers->addPC(1);
+}
+
+// 0x36, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x48, 0x49, 0x4A, 0x4B
+// 0x4C, 0x4D, 0x4E, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x58, 0x59
+// 0x5A, 0x5B, 0x5C, 0x5D, 0x5E, 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66
+// 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x70, 0x71, 0x72, 0x73, 0x74
+// 0x75, 0x76, 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E
+void Instructions::LD_r1_r2(const regID &r1, const regID &r2)
+{
+	switch (r1)
+	{
+	case mHL:
+		if (r2 != n8)
+			_memory->write(_registers->getHL(), (BYTE)_registers->getReg(r2));
+		else _memory->write(_registers->getHL(), read8());
+		break;
+	default:
+		if (r2 != mHL)
+			_registers->setReg(r1, _registers->getReg(r2));
+		else _registers->setReg(r1, _memory->read(_registers->getReg(r2)));
+		break;
+	}
+	_registers->addPC(1);
+}
+
+// 0x76
+void Instructions::HALT()
+{
+	// TODO
 	_registers->addPC(1);
 }
