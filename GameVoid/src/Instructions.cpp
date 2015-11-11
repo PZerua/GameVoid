@@ -123,7 +123,9 @@ void Instructions::LD_n_A(const regID &n)
 		break;
 	}
 
-	_registers->addPC(1);
+	if (n != n16)
+		_registers->addPC(1);
+	else _registers->addPC(3);
 }
 
 // 0x03, 0x13, 0x23, 0x33
@@ -255,7 +257,9 @@ void Instructions::LD_A_n(const regID &n)
 		break;
 	}
 
-	_registers->addPC(1);
+	if (n != n16)
+		_registers->addPC(1);
+	else _registers->addPC(3);
 }
 
 // 0x0B
@@ -353,7 +357,6 @@ void Instructions::JR_cc_n(const regID &id)
 		cout << "Wrong register identifier set" << endl;
 		break;
 	}
-	
 }
 
 // 0x22
@@ -469,4 +472,250 @@ void Instructions::HALT()
 {
 	// TODO
 	_registers->addPC(1);
+}
+
+// 0x80, 0x81, 0x82, 0x83, 0x84, 0x85 0x86, 0x87, 0xC6
+void Instructions::ADD_A_n(const regID &n)
+{
+	switch (n)
+	{
+	case mHL:
+		_registers->setF_H(hasHalfCarry8(_registers->getA(), _memory->read(_registers->getHL())));
+		_registers->setF_C(hasCarry8(_registers->getA(), _memory->read(_registers->getHL())));
+		_registers->setA(_registers->getA() + _memory->read(_registers->getHL()));
+		break;
+	case n8:
+		_registers->setF_H(hasHalfCarry8(_registers->getA(), read8()));
+		_registers->setF_C(hasCarry8(_registers->getA(), read8()));
+		_registers->setA(_registers->getA() + read8());
+		break;
+	default:
+		_registers->setF_H(hasHalfCarry8(_registers->getA(), _registers->getReg(n)));
+		_registers->setF_C(hasCarry8(_registers->getA(), _registers->getReg(n)));
+		_registers->setA(_registers->getA() + _registers->getReg(n));
+		break;
+	}
+	// Set flags
+	_registers->setF_Z(_registers->getA() == 0);
+	_registers->setF_N(0);
+	
+	if (n != n8)
+		_registers->addPC(1);
+	else _registers->addPC(2);
+}
+
+// 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F, 0xCE
+void Instructions::ADC_A_n(const regID &n)
+{
+	switch (n)
+	{
+	case mHL:
+		_registers->setF_H(hasHalfCarry8(_registers->getA(), _memory->read(_registers->getHL() + _registers->getF_C())));
+		_registers->setF_C(hasCarry8(_registers->getA(), _memory->read(_registers->getHL() + _registers->getF_C())));
+		_registers->setA(_registers->getA() + _memory->read(_registers->getHL()) + _registers->getF_C());
+		break;
+	case n8:
+		_registers->setF_H(hasHalfCarry8(_registers->getA(), read8() + _registers->getF_C()));
+		_registers->setF_C(hasCarry8(_registers->getA(), read8() + _registers->getF_C()));
+		_registers->setA(_registers->getA() + read8() + _registers->getF_C());
+		break;
+	default:
+		_registers->setF_H(hasHalfCarry8(_registers->getA(), _registers->getReg(n)));
+		_registers->setF_C(hasCarry8(_registers->getA(), _registers->getReg(n)));
+		_registers->setA(_registers->getA() + _registers->getReg(n) + _registers->getF_C());
+		break;
+	}
+	// Set flags
+	_registers->setF_Z(_registers->getA() == 0);
+	_registers->setF_N(0);
+
+	if (n != n8)
+		_registers->addPC(1);
+	else _registers->addPC(2);
+}
+
+// 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0xD6
+void Instructions::SUB_A_n(const regID &n)
+{
+	switch (n)
+	{
+	case mHL:
+		_registers->setF_H(hasHalfBorrow8(_registers->getA(), _memory->read(_registers->getHL())));
+		_registers->setF_C(hasBorrow8(_registers->getA(), _memory->read(_registers->getHL())));
+		_registers->setA(_registers->getA() - _memory->read(_registers->getHL()));
+		break;
+	case n8:
+		_registers->setF_H(hasHalfBorrow8(_registers->getA(), read8()));
+		_registers->setF_C(hasBorrow8(_registers->getA(), read8()));
+		_registers->setA(_registers->getA() - read8());
+		break;
+	default:
+		_registers->setF_H(hasHalfBorrow8(_registers->getA(), _registers->getReg(n)));
+		_registers->setF_C(hasBorrow8(_registers->getA(), _registers->getReg(n)));
+		_registers->setA(_registers->getA() - _registers->getReg(n));
+		break;
+	}
+	// Set flags
+	_registers->setF_Z(_registers->getA() == 0);
+	_registers->setF_N(1);
+
+	if (n != n8)
+		_registers->addPC(1);
+	else _registers->addPC(2);
+}
+
+// 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D, 0x9E, 0x9F, 0xDE
+void Instructions::SBC_A_n(const regID &n)
+{
+	switch (n)
+	{
+	case mHL:
+		_registers->setF_H(hasHalfBorrow8(_registers->getA(), _memory->read(_registers->getHL() + _registers->getF_C())));
+		_registers->setF_C(hasBorrow8(_registers->getA(), _memory->read(_registers->getHL() + _registers->getF_C())));
+		_registers->setA(_registers->getA() - (_memory->read(_registers->getHL()) + _registers->getF_C()));
+		break;
+	case n8:
+		_registers->setF_H(hasHalfBorrow8(_registers->getA(), read8() + _registers->getF_C()));
+		_registers->setF_C(hasBorrow8(_registers->getA(), read8() + _registers->getF_C()));
+		_registers->setA(_registers->getA() - (read8() + _registers->getF_C()));
+		break;
+	default:
+		_registers->setF_H(hasHalfBorrow8(_registers->getA(), _registers->getReg(n)));
+		_registers->setF_C(hasBorrow8(_registers->getA(), _registers->getReg(n)));
+		_registers->setA(_registers->getA() - (_registers->getReg(n) + _registers->getF_C()));
+		break;
+	}
+	// Set flags
+	_registers->setF_Z(_registers->getA() == 0);
+	_registers->setF_N(1);
+
+	if (n != n8)
+		_registers->addPC(1);
+	else _registers->addPC(2);
+}
+
+// 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xE6
+void Instructions::AND_n(const regID &n)
+{
+	switch (n)
+	{
+	case mHL:
+		_registers->setA(_memory->read(_registers->getHL()) & _registers->getA());
+		break;
+	case n8:
+		_registers->setA(read8() & _registers->getA());
+		break;
+	default:
+		_registers->setA(_registers->getReg(n) & _registers->getA());
+		break;
+	}
+	// Set Flags
+	_registers->setF_N(0);
+	_registers->setF_C(0);
+	_registers->setF_H(1);
+	_registers->setF_Z(_registers->getA() == 0);
+
+	if (n != n8)
+		_registers->addPC(1);
+	else _registers->addPC(2);
+}
+
+// 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF, 0xEE
+void Instructions::XOR_n(const regID &n)
+{
+	switch (n)
+	{
+	case mHL:
+		_registers->setA(_memory->read(_registers->getHL()) ^ _registers->getA());
+		break;
+	case n8:
+		_registers->setA(read8() ^ _registers->getA());
+		break;
+	default:
+		_registers->setA(_registers->getReg(n) ^ _registers->getA());
+		break;
+	}
+	// Set Flags
+	_registers->setF_N(0);
+	_registers->setF_C(0);
+	_registers->setF_H(0);
+	_registers->setF_Z(_registers->getA() == 0);
+
+	if (n != n8)
+		_registers->addPC(1);
+	else _registers->addPC(2);
+}
+
+// 0xB0, 0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7, 0xF6
+void Instructions::OR_n(const regID &n)
+{
+	switch (n)
+	{
+	case mHL:
+		_registers->setA(_memory->read(_registers->getHL()) | _registers->getA());
+		break;
+	case n8:
+		_registers->setA(read8() | _registers->getA());
+		break;
+	default:
+		_registers->setA(_registers->getReg(n) | _registers->getA());
+		break;
+	}
+	// Set Flags
+	_registers->setF_N(0);
+	_registers->setF_C(0);
+	_registers->setF_H(0);
+	_registers->setF_Z(_registers->getA() == 0);
+
+	if (n != n8)
+		_registers->addPC(1);
+	else _registers->addPC(2);
+}
+
+// 0xB8, 0xB9, 0xBA, 0xBB, 0xBC, 0xBD, 0xBE, 0xBF, 0xFE
+void Instructions::CP_n(const regID &n)
+{
+	switch (n)
+	{
+	case mHL:
+		_registers->setF_H(hasHalfBorrow8(_registers->getA(), _memory->read(_registers->getHL())));
+		_registers->setF_C(hasBorrow8(_registers->getA(), _memory->read(_registers->getHL())));
+		break;
+	case n8:
+		_registers->setF_H(hasHalfBorrow8(_registers->getA(), read8()));
+		_registers->setF_C(hasBorrow8(_registers->getA(), read8()));
+		break;
+	default:
+		_registers->setF_H(hasHalfBorrow8(_registers->getA(), _registers->getReg(n)));
+		_registers->setF_C(hasBorrow8(_registers->getA(), _registers->getReg(n)));
+		break;
+	}
+	// Set flags
+	_registers->setF_Z(_registers->getA() == 0);
+	_registers->setF_N(1);
+
+	if (n != n8)
+		_registers->addPC(1);
+	else _registers->addPC(2);
+}
+
+// 0xC0, 0xC8, 0xD0, 0xD8
+void Instructions::RET_cc(const regID &n)
+{
+
+}
+
+// 0xC3
+void Instructions::JP_nn()
+{
+	_registers->setPC(read16());
+}
+
+// 0xC9
+void Instructions::RET()
+{
+	_registers->setPC(_memory->read(_registers->getSP()));
+	_registers->addSP(1);
+	_registers->setPC((_registers->getPC() << 8) + _memory->read(_registers->getSP()));
+	_registers->addSP(1);
 }

@@ -53,8 +53,10 @@ public:
 	void setBC(const WORD &value);
 	void setDE(const WORD &value);
 	void setHL(const WORD &value);
-	void addPC(const int &value);
+	void addPC(const BYTE &value);
+	void addSP(const BYTE &value);
 	void setSP(const WORD &value);
+	void setPC(const WORD &value);
 
 	void setReg(const regID &id, const WORD &value);
 	const WORD getReg(const regID &id);

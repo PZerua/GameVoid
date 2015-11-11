@@ -15,6 +15,10 @@ void CPU::run()
 	_inst = new Instructions(_memory, &_registers);
 	bool run = true;
 
+	_registers.addPC(1);
+	cout << "PC: " << hex << (int)_registers.getPC() << endl;
+	cout << hex << (int)_inst->read16() << endl;
+
 	while (run)
 	{
 		WORD OPCODE = _memory->read(_registers.getPC());
@@ -146,10 +150,83 @@ void CPU::run()
 		case 0x7D:	_inst->LD_A_n(L); break;
 		case 0x7E:	_inst->LD_A_n(mHL); break;
 		case 0x7F:	_inst->LD_A_n(A); break;
+		case 0x80:	_inst->ADD_A_n(B); break;
+		case 0x81:	_inst->ADD_A_n(C); break;
+		case 0x82:	_inst->ADD_A_n(D); break;
+		case 0x83:	_inst->ADD_A_n(E); break;
+		case 0x84:	_inst->ADD_A_n(H); break;
+		case 0x85:	_inst->ADD_A_n(L); break;
+		case 0x86:	_inst->ADD_A_n(mHL); break;
+		case 0x87:	_inst->ADD_A_n(A); break;
+		case 0x88:	_inst->ADC_A_n(B); break;
+		case 0x89:	_inst->ADC_A_n(C); break;
+		case 0x8A:	_inst->ADC_A_n(D); break;
+		case 0x8B:	_inst->ADC_A_n(E); break;
+		case 0x8C:	_inst->ADC_A_n(H); break;
+		case 0x8D:	_inst->ADC_A_n(L); break;
+		case 0x8E:	_inst->ADC_A_n(mHL); break;
+		case 0x8F:	_inst->ADC_A_n(A); break;
+		case 0x90:	_inst->SUB_A_n(B); break;
+		case 0x91:	_inst->SUB_A_n(C); break;
+		case 0x92:	_inst->SUB_A_n(D); break;
+		case 0x93:	_inst->SUB_A_n(E); break;
+		case 0x94:	_inst->SUB_A_n(H); break;
+		case 0x95:	_inst->SUB_A_n(L); break;
+		case 0x96:	_inst->SUB_A_n(mHL); break;
+		case 0x97:	_inst->SUB_A_n(A); break;
+		case 0x98:	_inst->SBC_A_n(B); break;
+		case 0x99:	_inst->SBC_A_n(C); break;
+		case 0x9A:	_inst->SBC_A_n(D); break;	
+		case 0x9B:	_inst->SBC_A_n(E); break;
+		case 0x9C:	_inst->SBC_A_n(H); break;
+		case 0x9D:	_inst->SBC_A_n(L); break;
+		case 0x9E:	_inst->SBC_A_n(mHL); break;
+		case 0x9F:	_inst->SBC_A_n(A); break;
+		case 0xA0:	_inst->AND_n(B); break;
+		case 0xA1:	_inst->AND_n(C); break;
+		case 0xA2:	_inst->AND_n(D); break;
+		case 0xA3:	_inst->AND_n(E); break;
+		case 0xA4:	_inst->AND_n(H); break;
+		case 0xA5:	_inst->AND_n(L); break;
+		case 0xA6:	_inst->AND_n(mHL); break;
+		case 0xA7:	_inst->AND_n(A); break;
+		case 0xA8:	_inst->XOR_n(B); break;
+		case 0xA9:	_inst->XOR_n(C); break;
+		case 0xAA:	_inst->XOR_n(D); break;
+		case 0xAB:	_inst->XOR_n(E); break;
+		case 0xAC:	_inst->XOR_n(H); break;
+		case 0xAD:	_inst->XOR_n(L); break;
+		case 0xAE:	_inst->XOR_n(mHL); break;
+		case 0xAF:	_inst->XOR_n(A); break;
+		case 0xB0:	_inst->OR_n(B); break;
+		case 0xB1:	_inst->OR_n(C); break;
+		case 0xB2:	_inst->OR_n(D); break;
+		case 0xB3:	_inst->OR_n(E); break;
+		case 0xB4:	_inst->OR_n(H); break;
+		case 0xB5:	_inst->OR_n(L); break;
+		case 0xB6:	_inst->OR_n(mHL); break;
+		case 0xB7:	_inst->OR_n(A); break;
+		case 0xB8:	_inst->CP_n(B); break;
+		case 0xB9:	_inst->CP_n(C); break;
+		case 0xBA:	_inst->CP_n(D); break;
+		case 0xBB:	_inst->CP_n(E); break;
+		case 0xBC:	_inst->CP_n(H); break;
+		case 0xBD:	_inst->CP_n(L); break;
+		case 0xBE:	_inst->CP_n(mHL); break;
+		case 0xBF:	_inst->CP_n(A); break;
+		case 0xC3:	_inst->JP_nn(); break;
+		case 0xC6:	_inst->ADD_A_n(n8); break;
+		case 0xC9:	_inst->RET(); break;
+		case 0xCE:	_inst->ADC_A_n(n8); break;
+		case 0xD6:	_inst->SUB_A_n(n8); break;
+		case 0xDE:	_inst->SBC_A_n(n8); break;
 		case 0xEA:	_inst->LD_n_A(n16); break;
+		case 0xEE:	_inst->XOR_n(n8); break;
+		case 0xF6:	_inst->OR_n(n8); break;
 		case 0xFA:	_inst->LD_A_n(n16); break;
 		default:
-			cout << "Unknown or unimplemented instruction: " << hex << OPCODE << dec << endl;
+			cout << hex << "Unknown or unimplemented instruction \""<< OPCODE << "\" at PC = " 
+				<< _registers.getPC() << dec << endl;
 			run = false;
 			break;
 		}

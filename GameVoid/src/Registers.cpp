@@ -22,118 +22,58 @@ void Registers::reset()
 }
 
 // Get A from AF (higher 8 bits)
-const BYTE Registers::getA()
-{
-	return AF.n[0];
-}
+const BYTE Registers::getA() { return AF.n[0]; }
 
 // Get F from AF (lower 8 bits)
-const BYTE Registers::getF()
-{
-	return AF.n[1];
-}
+const BYTE Registers::getF() { return AF.n[1]; }
 
 // Get Z flag
-const BYTE Registers::getF_Z()
-{
-	return (getF() & 0x80) >> 7;
-}
+const BYTE Registers::getF_Z() { return (getF() & 0x80) >> 7; }
 
 // Get N flag
-const BYTE Registers::getF_N()
-{
-	return (getF() & 0x40) >> 6;
-}
+const BYTE Registers::getF_N() { return (getF() & 0x40) >> 6; }
 
 // Get H flag
-const BYTE Registers::getF_H()
-{
-	return (getF() & 0x20) >> 5;
-}
+const BYTE Registers::getF_H() { return (getF() & 0x20) >> 5; }
 
 // Get C flag
-const BYTE Registers::getF_C()
-{
-	return (getF() & 0x10) >> 4;
-}
+const BYTE Registers::getF_C() { return (getF() & 0x10) >> 4; }
 
 // Get B from BC (higher 8 bits)
-const BYTE Registers::getB()
-{
-	return BC.n[0];
-}
+const BYTE Registers::getB() { return BC.n[0]; }
 
 // Get C from BC (lower 8 bits)
-const BYTE Registers::getC()
-{
-	return BC.n[1];
-}
+const BYTE Registers::getC() { return BC.n[1]; }
 
 // Get D from DE (higher 8 bits)
-const BYTE Registers::getD()
-{
-	return DE.n[0];
-}
+const BYTE Registers::getD() { return DE.n[0]; }
 
 // Get E from DE (lower 8 bits)
-const BYTE Registers::getE()
-{
-	return DE.n[1];
-}
+const BYTE Registers::getE() { return DE.n[1]; }
 
 // Get H from HL (higher 8 bits)
-const BYTE Registers::getH()
-{
-	return HL.n[0];
-}
+const BYTE Registers::getH() { return HL.n[0]; }
 
 // Get L from HL (lower 8 bits)
-const BYTE Registers::getL()
-{
-	return AF.n[1];
-}
+const BYTE Registers::getL() { return AF.n[1]; }
 
-const WORD Registers::getAF()
-{
-	return AF.nn;
-}
+const WORD Registers::getAF() { return AF.nn; }
 
-const WORD Registers::getBC()
-{
-	return BC.nn;
-}
+const WORD Registers::getBC() { return BC.nn; }
 
-const WORD Registers::getDE()
-{
-	return DE.nn;
-}
+const WORD Registers::getDE() { return DE.nn; }
 
-const WORD Registers::getHL()
-{
-	return HL.nn;
-}
+const WORD Registers::getHL() { return HL.nn; }
 
-const WORD Registers::getPC()
-{
-	return PC;
-}
+const WORD Registers::getPC() { return PC; }
 
-const WORD Registers::getSP()
-{
-	return SP;
-}
+const WORD Registers::getSP() { return SP; }
 
 // Set higher 8 bits of AF
-void Registers::setA(const BYTE &value)
-{
-	AF.n[0] = value;
-}
+void Registers::setA(const BYTE &value) { AF.n[0] = value; }
 
 // Set lower 8 bits of AF
-void Registers::setF(const BYTE &value)
-{
-	AF.n[1] = value;
-}
+void Registers::setF(const BYTE &value) { AF.n[1] = value; }
 
 // Zero Flag
 void Registers::setF_Z(const BYTE &value)
@@ -168,114 +108,56 @@ void Registers::setF_C(const BYTE &value)
 }
 
 // Set higher 8 bits of BC
-void Registers::setB(const BYTE &value)
-{
-	BC.n[0] = value;
-}
+void Registers::setB(const BYTE &value) { BC.n[0] = value; }
 
 // Set lower 8 bits of BC
-void Registers::setC(const BYTE &value)
-{
-	BC.n[1] = value;
-}
+void Registers::setC(const BYTE &value) { BC.n[1] = value; }
 
 // Set higher 8 bits of DE
-void Registers::setD(const BYTE &value)
-{
-	DE.n[0] = value;
-}
+void Registers::setD(const BYTE &value) { DE.n[0] = value; }
 
 // Set lower 8 bits of DE
-void Registers::setE(const BYTE &value)
-{
-	DE.n[1] = value;
-}
+void Registers::setE(const BYTE &value) { DE.n[1] = value; }
 
 // Set higher 8 bits of HL
-void Registers::setH(const BYTE &value)
-{
-	HL.n[0] = value;
-}
+void Registers::setH(const BYTE &value) { HL.n[0] = value; }
 
 // Set lower 8 bits of HL
-void Registers::setL(const BYTE &value)
-{
-	HL.n[1] = value;
-}
+void Registers::setL(const BYTE &value) { HL.n[1] = value; }
 
-void Registers::setAF(const WORD &value)
-{
-	AF.nn = value;
-}
+void Registers::setAF(const WORD &value) { AF.nn = value; }
 
-void Registers::setBC(const WORD &value)
-{
-	BC.nn = value;
-}
+void Registers::setBC(const WORD &value) { BC.nn = value; }
 
-void Registers::setDE(const WORD &value)
-{
-	DE.nn = value;
-}
+void Registers::setDE(const WORD &value) { DE.nn = value; }
 
-void Registers::setHL(const WORD &value)
-{
-	HL.nn = value;
-}
+void Registers::setHL(const WORD &value) { HL.nn = value; }
 
-void Registers::setSP(const WORD &value)
-{
-	SP = value;
-}
+void Registers::setSP(const WORD &value) { SP = value; }
 
-void Registers::addPC(const int &value)
-{
-	PC += value;
-}
+void Registers::addPC(const BYTE &value) { PC += value; }
+
+void Registers::addSP(const BYTE &value) { SP += value; }
+
+void Registers::setPC(const WORD &value) { PC = value; }
 
 void Registers::setReg(const regID &id, const WORD &value)
 {
 	switch (id)
 	{
-	case A:
-		setA((BYTE)value);
-		break;
-	case B:
-		setB((BYTE)value);
-		break;
-	case C:
-		setC((BYTE)value);
-		break;
-	case D:
-		setD((BYTE)value);
-		break;
-	case E:
-		setE((BYTE)value);
-		break;
-	case F:
-		setF((BYTE)value);
-		break;
-	case H:
-		setH((BYTE)value);
-		break;
-	case L:
-		setL((BYTE)value);
-		break;
-	case af:
-		setAF(value);
-		break;
-	case bc:
-		setBC(value);
-		break;
-	case de:
-		setDE(value);
-		break;
-	case hl:
-		setHL(value);
-		break;
-	case sp:
-		setSP(value);
-		break;
+	case A: setA((BYTE)value); break;
+	case B: setB((BYTE)value); break;
+	case C: setC((BYTE)value); break;
+	case D: setD((BYTE)value); break;
+	case E: setE((BYTE)value); break;
+	case F: setF((BYTE)value); break;
+	case H: setH((BYTE)value); break;
+	case L: setL((BYTE)value); break;
+	case af: setAF(value); break;
+	case bc: setBC(value); break;
+	case de: setDE(value); break;
+	case hl: setHL(value); break;
+	case sp: setSP(value); break;
 	default:
 		throw exception("SetReg error, unimplemented enum");
 		break;

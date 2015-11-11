@@ -31,8 +31,12 @@ public:
 	void LD_A_HLI();
 	void LD_r1_r2(const regID &r1, const regID &r2);
 	void ADD_HL_n(const regID &n);
+	void ADD_A_n(const regID &n);
+	void ADC_A_n(const regID &n);
 	void INC_nn(const regID &n);
 	void INC_n(const regID &n);
+	void SUB_A_n(const regID &n);
+	void SBC_A_n(const regID &n);
 	void DEC_nn(const regID &nn);
 	void DEC_n(const regID &n);
 	void RLCA();
@@ -45,6 +49,13 @@ public:
 	void DAA();
 	void CPL();
 	void HALT();
+	void JP_nn();
+	void AND_n(const regID &n);
+	void XOR_n(const regID &n);
+	void OR_n(const regID &n);
+	void CP_n(const regID &n);
+	void RET_cc(const regID &cc);
+	void RET();
 	
 private:
 	Memory *_memory;
