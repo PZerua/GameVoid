@@ -30,6 +30,8 @@ public:
 	void LD_HLD_A();
 	void LD_A_HLI();
 	void LD_r1_r2(const regID &r1, const regID &r2);
+	void LDH_n_A();
+	void LDH_A_n();
 	void ADD_HL_n(const regID &n);
 	void ADD_A_n(const regID &n);
 	void ADC_A_n(const regID &n);
@@ -45,7 +47,8 @@ public:
 	void RRA();
 	void STOP();
 	void JR_n();
-	void JR_cc_n(const regID &id);
+	void JR_cc_n(const regID &n);
+	void JP_cc_nn(const regID &cc);
 	void DAA();
 	void CPL();
 	void HALT();
@@ -56,6 +59,13 @@ public:
 	void CP_n(const regID &n);
 	void RET_cc(const regID &cc);
 	void RET();
+	void POP_nn(const regID &nn);
+	void CALL_nn();
+	void CALL_cc_nn(const regID &cc);
+	void DI();
+	void EI();
+	void SCF();
+	void CCF();
 	
 private:
 	Memory *_memory;

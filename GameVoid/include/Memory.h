@@ -31,6 +31,7 @@
 #define LCDC	0xFF40
 #define SCY		0xFF42
 #define SCX		0xFF43
+#define LY		0xFF44
 #define LYC		0xFF45
 // LCD Monochrome Palettes
 #define BGP		0xFF47

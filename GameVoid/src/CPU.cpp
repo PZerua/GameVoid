@@ -13,15 +13,13 @@ CPU::~CPU()
 void CPU::run()
 {
 	_inst = new Instructions(_memory, &_registers);
-	bool run = true;
-
-	_registers.addPC(1);
-	cout << "PC: " << hex << (int)_registers.getPC() << endl;
-	cout << hex << (int)_inst->read16() << endl;
+	bool run = true;	
 
 	while (run)
 	{
 		WORD OPCODE = _memory->read(_registers.getPC());
+
+		cout << hex << "PC: " << (int)_registers.getPC() << " , OPCODE: " << OPCODE << endl;
 
 		switch (OPCODE)
 		{
@@ -79,13 +77,15 @@ void CPU::run()
 		case 0x33:	_inst->INC_nn(sp); break;
 		case 0x34:	_inst->INC_n(mHL); break;
 		case 0x35:	_inst->DEC_n(mHL); break;
-		case 0x36:	_inst->LD_r1_r2(mHL, n8);
+		case 0x36:	_inst->LD_r1_r2(mHL, n8); break;
+		case 0x37:	_inst->SCF(); break;
 		case 0x38:	_inst->JR_cc_n(sC); break;
 		case 0x39:	_inst->ADD_HL_n(sp); break;
 		case 0x3B:	_inst->DEC_nn(sp); break;
 		case 0x3C:	_inst->INC_n(A); break;
 		case 0x3D:	_inst->DEC_n(A); break;
 		case 0x3E:	_inst->LD_A_n(n8); break;
+		case 0x3F:	_inst->CCF(); break;
 		case 0x40:	_inst->LD_r1_r2(B, B); break;
 		case 0x41:	_inst->LD_r1_r2(B, C); break;
 		case 0x42:	_inst->LD_r1_r2(B, D); break;
@@ -214,16 +214,38 @@ void CPU::run()
 		case 0xBD:	_inst->CP_n(L); break;
 		case 0xBE:	_inst->CP_n(mHL); break;
 		case 0xBF:	_inst->CP_n(A); break;
+		case 0xC0:	_inst->RET_cc(nZ); break;
+		case 0xC1:	_inst->POP_nn(bc); break;
+		case 0xC2:	_inst->JP_cc_nn(nZ); break;
 		case 0xC3:	_inst->JP_nn(); break;
+		case 0xC4:	_inst->CALL_cc_nn(nZ); break;
 		case 0xC6:	_inst->ADD_A_n(n8); break;
+		case 0xC8:	_inst->RET_cc(Z); break;
 		case 0xC9:	_inst->RET(); break;
+		case 0xCA:	_inst->JP_cc_nn(Z); break;
+		case 0xCC:	_inst->CALL_cc_nn(Z); break;
+		case 0xCD:	_inst->CALL_nn(); break;
 		case 0xCE:	_inst->ADC_A_n(n8); break;
+		case 0xD0:	_inst->RET_cc(nC); break;
+		case 0xD1:	_inst->POP_nn(de); break;
+		case 0xD2:	_inst->JP_cc_nn(nC); break;
+		case 0xD4:	_inst->CALL_cc_nn(nC); break;
 		case 0xD6:	_inst->SUB_A_n(n8); break;
+		case 0xD8:	_inst->RET_cc(sC); break;
+		case 0xDA:	_inst->JP_cc_nn(sC); break;
+		case 0xDC:	_inst->CALL_cc_nn(sC); break;
 		case 0xDE:	_inst->SBC_A_n(n8); break;
+		case 0xE0:	_inst->LDH_n_A(); break;
+		case 0xE1:	_inst->POP_nn(hl); break;
 		case 0xEA:	_inst->LD_n_A(n16); break;
 		case 0xEE:	_inst->XOR_n(n8); break;
+		case 0xF0:	_inst->LDH_A_n(); break;
+		case 0xF1:	_inst->POP_nn(af); break;
+		case 0xF3:	_inst->DI(); break;
 		case 0xF6:	_inst->OR_n(n8); break;
 		case 0xFA:	_inst->LD_A_n(n16); break;
+		case 0xFB:	_inst->EI(); break;
+		case 0xFE:	_inst->CP_n(n8); break;
 		default:
 			cout << hex << "Unknown or unimplemented instruction \""<< OPCODE << "\" at PC = " 
 				<< _registers.getPC() << dec << endl;

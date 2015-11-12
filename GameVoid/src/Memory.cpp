@@ -38,12 +38,12 @@ void Memory::write(const WORD &address, const BYTE &value)
 	else if (address >= 0xC000 && address < 0xE000)
 	{
 		// If we write to internal RAM, value also appears in echoed RAM
-		_MEMORY[address + 0x4000] = value;
+		_MEMORY[address + 0x2000] = value;
 	}
 	else if (address >= 0xE000 && address < 0xFE00)
 	{
 		// if we write to echoed RAM, value also appears in internal RAM
-		_MEMORY[address - 0x4000] = value;
+		_MEMORY[address - 0x2000] = value;
 	}
 
 	// Write to memory
@@ -72,6 +72,7 @@ void Memory::reset()
 	_MEMORY[NR51] = 0xF3;
 	_MEMORY[NR52] = 0xF1;
 	_MEMORY[LCDC] = 0x91;
+	_MEMORY[LY]   = 0x90;
 	_MEMORY[BGP]  = 0xFC;
 	_MEMORY[OBP0] = 0xFF;
 	_MEMORY[OBP1] = 0xFF;

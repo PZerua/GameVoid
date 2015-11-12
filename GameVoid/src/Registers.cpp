@@ -13,7 +13,7 @@ Registers::~Registers()
 // Set initial values
 void Registers::reset()
 {
-	AF.nn = 0x01B0;
+	AF.nn = 0x11B0;
 	BC.nn = 0x0013;
 	DE.nn = 0x00D8;
 	HL.nn = 0x014D;
@@ -22,10 +22,10 @@ void Registers::reset()
 }
 
 // Get A from AF (higher 8 bits)
-const BYTE Registers::getA() { return AF.n[0]; }
+const BYTE Registers::getA() { return AF.n[1]; }
 
 // Get F from AF (lower 8 bits)
-const BYTE Registers::getF() { return AF.n[1]; }
+const BYTE Registers::getF() { return AF.n[0]; }
 
 // Get Z flag
 const BYTE Registers::getF_Z() { return (getF() & 0x80) >> 7; }
@@ -40,22 +40,22 @@ const BYTE Registers::getF_H() { return (getF() & 0x20) >> 5; }
 const BYTE Registers::getF_C() { return (getF() & 0x10) >> 4; }
 
 // Get B from BC (higher 8 bits)
-const BYTE Registers::getB() { return BC.n[0]; }
+const BYTE Registers::getB() { return BC.n[1]; }
 
 // Get C from BC (lower 8 bits)
-const BYTE Registers::getC() { return BC.n[1]; }
+const BYTE Registers::getC() { return BC.n[0]; }
 
 // Get D from DE (higher 8 bits)
-const BYTE Registers::getD() { return DE.n[0]; }
+const BYTE Registers::getD() { return DE.n[1]; }
 
 // Get E from DE (lower 8 bits)
-const BYTE Registers::getE() { return DE.n[1]; }
+const BYTE Registers::getE() { return DE.n[0]; }
 
 // Get H from HL (higher 8 bits)
-const BYTE Registers::getH() { return HL.n[0]; }
+const BYTE Registers::getH() { return HL.n[1]; }
 
 // Get L from HL (lower 8 bits)
-const BYTE Registers::getL() { return AF.n[1]; }
+const BYTE Registers::getL() { return AF.n[0]; }
 
 const WORD Registers::getAF() { return AF.nn; }
 
@@ -70,16 +70,16 @@ const WORD Registers::getPC() { return PC; }
 const WORD Registers::getSP() { return SP; }
 
 // Set higher 8 bits of AF
-void Registers::setA(const BYTE &value) { AF.n[0] = value; }
+void Registers::setA(const BYTE &value) { AF.n[1] = value; }
 
 // Set lower 8 bits of AF
-void Registers::setF(const BYTE &value) { AF.n[1] = value; }
+void Registers::setF(const BYTE &value) { AF.n[0] = value; }
 
 // Zero Flag
 void Registers::setF_Z(const BYTE &value)
 {
 	if ( value == 0x00 || value == 0x01)
-		AF.n[1] = (AF.n[1] & 0x7F) + (value << 7);
+		AF.n[0] = (AF.n[0] & 0x7F) + (value << 7);
 	else throw exception("Value should always be 0 or 1");
 }
 
@@ -87,7 +87,7 @@ void Registers::setF_Z(const BYTE &value)
 void Registers::setF_N(const BYTE &value)
 {
 	if (value == 0x00 || value == 0x01)
-		AF.n[1] = (AF.n[1] & 0xBF) + (value << 6);
+		AF.n[0] = (AF.n[0] & 0xBF) + (value << 6);
 	else throw exception("Value should always be 0 or 1");
 }
 
@@ -95,7 +95,7 @@ void Registers::setF_N(const BYTE &value)
 void Registers::setF_H(const BYTE &value)
 {
 	if (value == 0x00 || value == 0x01)
-		AF.n[1] = (AF.n[1] & 0xDF) + (value << 5);
+		AF.n[0] = (AF.n[0] & 0xDF) + (value << 5);
 	else throw exception("Value should always be 0 or 1");
 }
 
@@ -103,27 +103,27 @@ void Registers::setF_H(const BYTE &value)
 void Registers::setF_C(const BYTE &value)
 {
 	if (value == 0x00 || value == 0x01)
-		AF.n[1] = (AF.n[1] & 0xEF) + (value << 4);
+		AF.n[0] = (AF.n[0] & 0xEF) + (value << 4);
 	else throw exception("Value should always be 0 or 1");
 }
 
 // Set higher 8 bits of BC
-void Registers::setB(const BYTE &value) { BC.n[0] = value; }
+void Registers::setB(const BYTE &value) { BC.n[1] = value; }
 
 // Set lower 8 bits of BC
-void Registers::setC(const BYTE &value) { BC.n[1] = value; }
+void Registers::setC(const BYTE &value) { BC.n[0] = value; }
 
 // Set higher 8 bits of DE
-void Registers::setD(const BYTE &value) { DE.n[0] = value; }
+void Registers::setD(const BYTE &value) { DE.n[1] = value; }
 
 // Set lower 8 bits of DE
-void Registers::setE(const BYTE &value) { DE.n[1] = value; }
+void Registers::setE(const BYTE &value) { DE.n[0] = value; }
 
 // Set higher 8 bits of HL
-void Registers::setH(const BYTE &value) { HL.n[0] = value; }
+void Registers::setH(const BYTE &value) { HL.n[1] = value; }
 
 // Set lower 8 bits of HL
-void Registers::setL(const BYTE &value) { HL.n[1] = value; }
+void Registers::setL(const BYTE &value) { HL.n[0] = value; }
 
 void Registers::setAF(const WORD &value) { AF.nn = value; }
 
@@ -135,9 +135,9 @@ void Registers::setHL(const WORD &value) { HL.nn = value; }
 
 void Registers::setSP(const WORD &value) { SP = value; }
 
-void Registers::addPC(const BYTE &value) { PC += value; }
+void Registers::addPC(const int &value) { PC += value; }
 
-void Registers::addSP(const BYTE &value) { SP += value; }
+void Registers::addSP(const int &value) { SP += value; }
 
 void Registers::setPC(const WORD &value) { PC = value; }
 

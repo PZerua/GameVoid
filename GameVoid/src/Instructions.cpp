@@ -140,15 +140,15 @@ void Instructions::INC_nn(const regID &nn)
 // n = A, B, C, D, E, H, L, (HL)
 void Instructions::INC_n(const regID &n)
 {
-	// Set carry in flag
-	_registers->setF_H(hasHalfCarry8(_registers->getReg(n), 1));
-
 	switch (n)
 	{
 	case mHL:
+		_registers->setF_H(hasHalfCarry8(_memory->read(_registers->getHL()), 1));
 		_memory->write(_registers->getHL(), _memory->read(_registers->getHL()) + 1);
 		break;
 	default:
+		// Set carry in flag
+		_registers->setF_H(hasHalfCarry8(_registers->getReg(n), 1));
 		_registers->setReg(n, _registers->getReg(n) + 1);
 		break;
 	}
@@ -257,7 +257,9 @@ void Instructions::LD_A_n(const regID &n)
 		break;
 	}
 
-	if (n != n16)
+	if (n == n8)
+		_registers->addPC(2);
+	else if (n != n16)
 		_registers->addPC(1);
 	else _registers->addPC(3);
 }
@@ -329,9 +331,9 @@ void Instructions::RRA()
 }
 
 // 0x20, 0x28, 0x30, 0x38
-void Instructions::JR_cc_n(const regID &id)
+void Instructions::JR_cc_n(const regID &n)
 {
-	switch (id)
+	switch (n)
 	{
 	case nZ:
 		if (_registers->getF_Z() == 0)
@@ -464,6 +466,26 @@ void Instructions::LD_r1_r2(const regID &r1, const regID &r2)
 		else _registers->setReg(r1, _memory->read(_registers->getReg(r2)));
 		break;
 	}
+	if (r1 == mHL)
+		_registers->addPC(2);
+	else _registers->addPC(1);
+}
+
+// 0x37
+void Instructions::SCF()
+{
+	_registers->setF_N(0);
+	_registers->setF_H(0);
+	_registers->setF_C(1);
+	_registers->addPC(1);
+}
+
+// 0x3F
+void Instructions::CCF()
+{
+	_registers->setF_N(0);
+	_registers->setF_H(0);
+	_registers->setF_C(!_registers->getF_C());
 	_registers->addPC(1);
 }
 
@@ -700,15 +722,136 @@ void Instructions::CP_n(const regID &n)
 }
 
 // 0xC0, 0xC8, 0xD0, 0xD8
-void Instructions::RET_cc(const regID &n)
+void Instructions::RET_cc(const regID &cc)
 {
+	switch (cc)
+	{
+	case nZ:
+		if (_registers->getF_Z() == 0)
+		{
+			_registers->setPC(_memory->read(_registers->getSP()));
+			_registers->addSP(1);
+			_registers->setPC((_registers->getPC() << 8) + _memory->read(_registers->getSP()));
+			_registers->addSP(1);
+		}
+		else _registers->addPC(1);
+		break;
+	case Z:
+		if (_registers->getF_Z() == 1)
+		{
+			_registers->setPC(_memory->read(_registers->getSP()));
+			_registers->addSP(1);
+			_registers->setPC((_registers->getPC() << 8) + _memory->read(_registers->getSP()));
+			_registers->addSP(1);
+		}
+		else _registers->addPC(1);
+		break;
+	case nC:
+		if (_registers->getF_C() == 0)
+		{
+			_registers->setPC(_memory->read(_registers->getSP()));
+			_registers->addSP(1);
+			_registers->setPC((_registers->getPC() << 8) + _memory->read(_registers->getSP()));
+			_registers->addSP(1);
+		}
+		else _registers->addPC(1);
+		break;
+	case sC:
+		if (_registers->getF_C() == 1)
+		{
+			_registers->setPC(_memory->read(_registers->getSP()));
+			_registers->addSP(1);
+			_registers->setPC((_registers->getPC() << 8) + _memory->read(_registers->getSP()));
+			_registers->addSP(1);
+		}
+		else _registers->addPC(1);
+		break;
+	default:
+		cout << "Wrong register identifier set" << endl;
+		break;
+	}
+}
 
+// 0xC1, 0xD1, 0xE1, 0xF1
+void Instructions::POP_nn(const regID &nn)
+{
+	switch (nn)
+	{
+	case bc:
+		_registers->setBC(_memory->read(_registers->getSP()));
+		_registers->addSP(1);
+		_registers->setBC((_registers->getBC() << 8) + _memory->read(_registers->getSP()));
+		_registers->addSP(1);
+		break;
+	case de:
+		_registers->setDE(_memory->read(_registers->getSP()));
+		_registers->addSP(1);
+		_registers->setDE((_registers->getDE() << 8) + _memory->read(_registers->getSP()));
+		_registers->addSP(1);
+		break;
+	case hl:
+		_registers->setHL(_memory->read(_registers->getSP()));
+		_registers->addSP(1);
+		_registers->setHL((_registers->getHL() << 8) + _memory->read(_registers->getSP()));
+		_registers->addSP(1);
+		break;
+	case af:
+		_registers->setAF(_memory->read(_registers->getSP()));
+		_registers->addSP(1);
+		_registers->setAF((_registers->getAF() << 8) + _memory->read(_registers->getSP()));
+		_registers->addSP(1);
+		break;
+	default:
+		cout << "Wrong register ID" << endl;
+		break;
+	}
+
+	_registers->addPC(1);
 }
 
 // 0xC3
 void Instructions::JP_nn()
 {
 	_registers->setPC(read16());
+}
+
+// 0xC2, 0xCA, 0xD2, 0xDA
+void Instructions::JP_cc_nn(const regID &cc)
+{
+	switch (cc)
+	{
+	case nZ:
+		if (_registers->getF_Z() == 0)
+		{
+			_registers->setPC(read16());
+		}
+		else _registers->addPC(3);
+		break;
+	case Z:
+		if (_registers->getF_Z() == 1)
+		{
+			_registers->setPC(read16());
+		}
+		else _registers->addPC(3);
+		break;
+	case nC:
+		if (_registers->getF_C() == 0)
+		{
+			_registers->setPC(read16());
+		}
+		else _registers->addPC(3);
+		break;
+	case sC:
+		if (_registers->getF_C() == 1)
+		{
+			_registers->setPC(read16());
+		}
+		else _registers->addPC(3);
+		break;
+	default:
+		cout << "Wrong register identifier set" << endl;
+		break;
+	}
 }
 
 // 0xC9
@@ -718,4 +861,81 @@ void Instructions::RET()
 	_registers->addSP(1);
 	_registers->setPC((_registers->getPC() << 8) + _memory->read(_registers->getSP()));
 	_registers->addSP(1);
+}
+
+// 0xC4, 0xCC, 0xD4, 0xDC
+void Instructions::CALL_cc_nn(const regID &cc)
+{
+	switch (cc)
+	{
+	case nZ:
+		if (_registers->getF_Z() == 0)
+		{
+			CALL_nn();
+		}
+		else _registers->addPC(3);
+		break;
+	case Z:
+		if (_registers->getF_Z() == 1)
+		{
+			CALL_nn();
+		}
+		else _registers->addPC(3);
+		break;
+	case nC:
+		if (_registers->getF_C() == 0)
+		{
+			CALL_nn();
+		}
+		else _registers->addPC(3);
+		break;
+	case sC:
+		if (_registers->getF_C() == 1)
+		{
+			CALL_nn();
+		}
+		else _registers->addPC(3);
+		break;
+	default:
+		cout << "Wrong register identifier set" << endl;
+		break;
+	}
+}
+
+// 0xCD
+void Instructions::CALL_nn()
+{
+	_registers->addPC(3);
+	_memory->write(_registers->getSP() - 1, _registers->getPC() & 0xFF00);
+	_memory->write(_registers->getSP() - 2, _registers->getPC() & 0x00FF);
+	_registers->setSP(_registers->getSP() - 2);
+	_registers->setPC(read16());
+}
+
+// 0xE0
+void Instructions::LDH_n_A()
+{
+	_memory->write(0xFF00 + read8(), _registers->getA());
+	_registers->addPC(2);
+}
+
+// 0xF0
+void Instructions::LDH_A_n()
+{
+	_registers->setA(_memory->read(0xFF00 + read8()));
+	_registers->addPC(2);
+}
+
+// 0xF3
+void Instructions::DI()
+{
+	// TODO
+	_registers->addPC(1);
+}
+
+// 0xFB
+void Instructions::EI()
+{
+	// TODO
+	_registers->addPC(1);
 }
