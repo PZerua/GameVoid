@@ -11,6 +11,7 @@ public:
 	CPU(Memory *memory);
 	~CPU();
 	void run();
+	void CB_prefix(Instructions *inst);
 
 private:
 	Registers _registers;

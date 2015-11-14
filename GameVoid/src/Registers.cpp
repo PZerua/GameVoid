@@ -13,7 +13,7 @@ Registers::~Registers()
 // Set initial values
 void Registers::reset()
 {
-	AF.nn = 0x11B0;
+	AF.nn = 0x01B0;
 	BC.nn = 0x0013;
 	DE.nn = 0x00D8;
 	HL.nn = 0x014D;

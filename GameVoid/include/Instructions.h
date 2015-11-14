@@ -66,6 +66,8 @@ public:
 	void EI();
 	void SCF();
 	void CCF();
+	void PUSH_nn(const regID &nn);
+	void RST_n(const BYTE &n);
 	
 private:
 	Memory *_memory;

@@ -311,7 +311,12 @@ void Instructions::RLA()
 // 0x18
 void Instructions::JR_n()
 {
-	_registers->addPC(read8());
+	// Signed value
+	char address;
+
+	address = read8();
+
+	_registers->addPC(2 + address);
 }
 
 // 0x1F
@@ -337,22 +342,22 @@ void Instructions::JR_cc_n(const regID &n)
 	{
 	case nZ:
 		if (_registers->getF_Z() == 0)
-			_registers->addPC(read8());
+			JR_n();
 		else _registers->addPC(2);
 		break;
 	case Z:
 		if (_registers->getF_Z() == 1)
-			_registers->addPC(read8());
+			JR_n();
 		else _registers->addPC(2);
 		break;
 	case nC:
 		if (_registers->getF_C() == 0)
-			_registers->addPC(read8());
+			JR_n();
 		else _registers->addPC(2);
 		break;
 	case sC:
 		if (_registers->getF_C() == 1)
-			_registers->addPC(read8());
+			JR_n();
 		else _registers->addPC(2);
 		break;
 	default:
@@ -900,6 +905,26 @@ void Instructions::CALL_cc_nn(const regID &cc)
 		cout << "Wrong register identifier set" << endl;
 		break;
 	}
+}
+
+// 0xC5, 0xD5, 0xE5, 0xF5
+void Instructions::PUSH_nn(const regID &nn)
+{
+	_registers->setSP(_registers->getSP() - 1);
+	_memory->write(_registers->getSP(), (_registers->getReg(nn) & 0xFF00) >> 8);
+	_registers->setSP(_registers->getSP() - 1);
+	_memory->write(_registers->getSP(), _registers->getReg(nn) & 0x00FF);
+	_registers->addPC(1);
+}
+
+// 0xC7, 0xCF, 0xD7, 0xDF, 0xE7, 0xEF, 0xF7, 0xFF
+void Instructions::RST_n(const BYTE &n)
+{
+	_registers->setSP(_registers->getSP() - 1);
+	_memory->write(_registers->getSP(), (_registers->getPC() & 0xFF00) >> 8);
+	_registers->setSP(_registers->getSP() - 1);
+	_memory->write(_registers->getSP(), _registers->getPC() & 0x00FF);
+	_registers->setPC(0x0000 + n);
 }
 
 // 0xCD

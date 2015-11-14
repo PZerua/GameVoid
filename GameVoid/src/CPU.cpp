@@ -219,38 +219,66 @@ void CPU::run()
 		case 0xC2:	_inst->JP_cc_nn(nZ); break;
 		case 0xC3:	_inst->JP_nn(); break;
 		case 0xC4:	_inst->CALL_cc_nn(nZ); break;
+		case 0xC5:	_inst->PUSH_nn(bc); break;
 		case 0xC6:	_inst->ADD_A_n(n8); break;
+		case 0xC7:	_inst->RST_n(0x00); break;
 		case 0xC8:	_inst->RET_cc(Z); break;
 		case 0xC9:	_inst->RET(); break;
 		case 0xCA:	_inst->JP_cc_nn(Z); break;
+		case 0xCB:	CB_prefix(_inst); break;
 		case 0xCC:	_inst->CALL_cc_nn(Z); break;
 		case 0xCD:	_inst->CALL_nn(); break;
 		case 0xCE:	_inst->ADC_A_n(n8); break;
+		case 0xCF:	_inst->RST_n(0x08); break;
 		case 0xD0:	_inst->RET_cc(nC); break;
 		case 0xD1:	_inst->POP_nn(de); break;
 		case 0xD2:	_inst->JP_cc_nn(nC); break;
 		case 0xD4:	_inst->CALL_cc_nn(nC); break;
+		case 0xD5:	_inst->PUSH_nn(de); break;
 		case 0xD6:	_inst->SUB_A_n(n8); break;
+		case 0xD7:	_inst->RST_n(0x10); break;
 		case 0xD8:	_inst->RET_cc(sC); break;
 		case 0xDA:	_inst->JP_cc_nn(sC); break;
 		case 0xDC:	_inst->CALL_cc_nn(sC); break;
 		case 0xDE:	_inst->SBC_A_n(n8); break;
+		case 0xDF:	_inst->RST_n(0x18); break;
 		case 0xE0:	_inst->LDH_n_A(); break;
 		case 0xE1:	_inst->POP_nn(hl); break;
+		case 0xE5:	_inst->PUSH_nn(hl); break;
+		case 0xE7:	_inst->RST_n(0x20); break;
 		case 0xEA:	_inst->LD_n_A(n16); break;
 		case 0xEE:	_inst->XOR_n(n8); break;
+		case 0xEF:	_inst->RST_n(0x28); break;
 		case 0xF0:	_inst->LDH_A_n(); break;
 		case 0xF1:	_inst->POP_nn(af); break;
 		case 0xF3:	_inst->DI(); break;
+		case 0xF5:	_inst->PUSH_nn(af); break;
 		case 0xF6:	_inst->OR_n(n8); break;
+		case 0xF7:	_inst->RST_n(0x30); break;
 		case 0xFA:	_inst->LD_A_n(n16); break;
 		case 0xFB:	_inst->EI(); break;
 		case 0xFE:	_inst->CP_n(n8); break;
+		case 0xFF:	_inst->RST_n(0x38); break;
 		default:
-			cout << hex << "Unknown or unimplemented instruction \""<< OPCODE << "\" at PC = " 
+			cout << hex << "Unimplemented instruction \""<< OPCODE << "\" at PC = " 
 				<< _registers.getPC() << dec << endl;
 			run = false;
 			break;
 		}
+	}
+}
+
+void CPU::CB_prefix(Instructions *inst)
+{
+	
+	_registers.addPC(1);
+	WORD OPCODE = _memory->read(_registers.getPC());
+
+	switch (OPCODE)
+	{
+	default:
+		cout << hex << "Unimplemented CB instruction \"" << OPCODE << "\" at PC = "
+			<< _registers.getPC() << dec << endl;
+		break;
 	}
 }
