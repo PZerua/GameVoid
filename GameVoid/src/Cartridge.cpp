@@ -1,15 +1,18 @@
 #include "Cartridge.h"
 
-Cartridge::Cartridge(const string &gamePath)
+Cartridge::Cartridge()
 {
-
 	_ROMsize = 0;
+	_RAMsize = 0;
+}
 
+void Cartridge::initGame(const string &gamePath)
+{
 	// With ios::ate, the initial position will be the end of the file
 	ifstream rom(gamePath, ios::binary | ios::ate);
 
 	// tellg() returns the actual position, since we are in the end of file, it returns the size
-	_ROMsize = (int) rom.tellg();
+	_ROMsize = (int)rom.tellg();
 
 	if (_ROMsize != -1)
 	{
@@ -19,10 +22,10 @@ Cartridge::Cartridge(const string &gamePath)
 		// Array of BYTEs containing the ROM
 		_ROMdata = new BYTE[_ROMsize];
 
-		rom.read((char *) _ROMdata, _ROMsize);
+		rom.read((char *)_ROMdata, _ROMsize);
 
 		// Read info from ROM
-		init();
+		loadHeader();
 	}
 	else cout << "Error reading rom" << endl;
 
@@ -36,7 +39,7 @@ Cartridge::~Cartridge()
 	delete[] _ROMdata;
 }
 
-void Cartridge::init()
+void Cartridge::loadHeader()
 {
 
 	// Get game title
@@ -121,7 +124,7 @@ void Cartridge::init()
 	case 0xFE:		// HuC3
 	case 0xFF:		// HuC1+RAM+BATTERY
 	default:
-		cout << "Unknown cartridge type or not implemented" << endl;
+		cout << "Unknown cartridge type or not implemented: " << hex << (int)cartType << dec << endl;
 		break;
 	}
 }

@@ -34,12 +34,11 @@ BYTE MBC1::read(const WORD &address)
 	// Read RAM Bank 0x00 to 0x03 
 	else if (address >= 0xA000 && address < 0xC000)
 	{
-		if (_RAMsize != 0 && _RAMenabled)
-		{
-			return _ROMdata[(0xA000 * _RAMbank) + (address - 0xA000)];
-		}
-		else throw exception("Trying to read uninitialized or null RAM");
+		if (_RAMsize == 0 || !_RAMenabled)
+			throw exception("Trying to read uninitialized or null RAM");
+		return _ROMdata[(0xA000 * _RAMbank) + (address - 0xA000)];
 	}
+	else throw exception("Wrong address");
 }
 
 void MBC1::write(const WORD &address, const BYTE &value)

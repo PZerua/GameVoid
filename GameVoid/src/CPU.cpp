@@ -1,13 +1,11 @@
 #include "CPU.h"
  
-CPU::CPU(Memory *memory)
+void CPU::init(Memory *memory)
 {
 	_memory = memory;
-}
-
-CPU::~CPU()
-{
-
+	initCyclesArrays();
+	IME = 0xFF;
+	_condTaken = false;
 }
 
 void CPU::run()
@@ -55,7 +53,7 @@ void CPU::run()
 		case 0x1D:	_inst->DEC_n(E); break;
 		case 0x1E:	_inst->LD_nn_n(E); break;
 		case 0x1F:	_inst->RRA(); break;
-		case 0x20:	_inst->JR_cc_n(nZ); break;
+		case 0x20:	_inst->JR_cc_n(nZ, _condTaken); break;
 		case 0x21:	_inst->LD_n_nn(hl); break;
 		case 0x22:	_inst->LD_HLI_A(); break;
 		case 0x23:	_inst->INC_nn(hl); break;
@@ -63,7 +61,7 @@ void CPU::run()
 		case 0x25:	_inst->DEC_n(H); break;
 		case 0x26:	_inst->LD_nn_n(H); break;
 		case 0x27:	_inst->DAA(); break;
-		case 0x28:	_inst->JR_cc_n(Z); break;
+		case 0x28:	_inst->JR_cc_n(Z, _condTaken); break;
 		case 0x29:	_inst->ADD_HL_n(hl); break;
 		case 0x2A:	_inst->LD_A_HLI(); break;
 		case 0x2B:	_inst->DEC_nn(hl); break;
@@ -71,7 +69,7 @@ void CPU::run()
 		case 0x2D:	_inst->DEC_n(L); break;
 		case 0x2E:	_inst->LD_nn_n(L); break;
 		case 0x2F:	_inst->CPL(); break;
-		case 0x30:	_inst->JR_cc_n(nC); break;
+		case 0x30:	_inst->JR_cc_n(nC, _condTaken); break;
 		case 0x31:	_inst->LD_n_nn(sp); break;
 		case 0x32:	_inst->LD_HLD_A(); break;
 		case 0x33:	_inst->INC_nn(sp); break;
@@ -79,7 +77,7 @@ void CPU::run()
 		case 0x35:	_inst->DEC_n(mHL); break;
 		case 0x36:	_inst->LD_r1_r2(mHL, n8); break;
 		case 0x37:	_inst->SCF(); break;
-		case 0x38:	_inst->JR_cc_n(sC); break;
+		case 0x38:	_inst->JR_cc_n(sC, _condTaken); break;
 		case 0x39:	_inst->ADD_HL_n(sp); break;
 		case 0x3B:	_inst->DEC_nn(sp); break;
 		case 0x3C:	_inst->INC_n(A); break;
@@ -214,49 +212,51 @@ void CPU::run()
 		case 0xBD:	_inst->CP_n(L); break;
 		case 0xBE:	_inst->CP_n(mHL); break;
 		case 0xBF:	_inst->CP_n(A); break;
-		case 0xC0:	_inst->RET_cc(nZ); break;
+		case 0xC0:	_inst->RET_cc(nZ, _condTaken); break;
 		case 0xC1:	_inst->POP_nn(bc); break;
-		case 0xC2:	_inst->JP_cc_nn(nZ); break;
+		case 0xC2:	_inst->JP_cc_nn(nZ, _condTaken); break;
 		case 0xC3:	_inst->JP_nn(); break;
-		case 0xC4:	_inst->CALL_cc_nn(nZ); break;
+		case 0xC4:	_inst->CALL_cc_nn(nZ, _condTaken); break;
 		case 0xC5:	_inst->PUSH_nn(bc); break;
 		case 0xC6:	_inst->ADD_A_n(n8); break;
 		case 0xC7:	_inst->RST_n(0x00); break;
-		case 0xC8:	_inst->RET_cc(Z); break;
+		case 0xC8:	_inst->RET_cc(Z, _condTaken); break;
 		case 0xC9:	_inst->RET(); break;
-		case 0xCA:	_inst->JP_cc_nn(Z); break;
+		case 0xCA:	_inst->JP_cc_nn(Z, _condTaken); break;
 		case 0xCB:	CB_prefix(_inst); break;
-		case 0xCC:	_inst->CALL_cc_nn(Z); break;
+		case 0xCC:	_inst->CALL_cc_nn(Z, _condTaken); break;
 		case 0xCD:	_inst->CALL_nn(); break;
 		case 0xCE:	_inst->ADC_A_n(n8); break;
 		case 0xCF:	_inst->RST_n(0x08); break;
-		case 0xD0:	_inst->RET_cc(nC); break;
+		case 0xD0:	_inst->RET_cc(nC, _condTaken); break;
 		case 0xD1:	_inst->POP_nn(de); break;
-		case 0xD2:	_inst->JP_cc_nn(nC); break;
-		case 0xD4:	_inst->CALL_cc_nn(nC); break;
+		case 0xD2:	_inst->JP_cc_nn(nC, _condTaken); break;
+		case 0xD4:	_inst->CALL_cc_nn(nC, _condTaken); break;
 		case 0xD5:	_inst->PUSH_nn(de); break;
 		case 0xD6:	_inst->SUB_A_n(n8); break;
 		case 0xD7:	_inst->RST_n(0x10); break;
-		case 0xD8:	_inst->RET_cc(sC); break;
-		case 0xDA:	_inst->JP_cc_nn(sC); break;
-		case 0xDC:	_inst->CALL_cc_nn(sC); break;
+		case 0xD8:	_inst->RET_cc(sC, _condTaken); break;
+		case 0xDA:	_inst->JP_cc_nn(sC, _condTaken); break;
+		case 0xDC:	_inst->CALL_cc_nn(sC, _condTaken); break;
 		case 0xDE:	_inst->SBC_A_n(n8); break;
 		case 0xDF:	_inst->RST_n(0x18); break;
 		case 0xE0:	_inst->LDH_n_A(); break;
 		case 0xE1:	_inst->POP_nn(hl); break;
 		case 0xE5:	_inst->PUSH_nn(hl); break;
 		case 0xE7:	_inst->RST_n(0x20); break;
+		case 0xE8:	_inst->ADD_SP_n(); break;
+		case 0xE9:	_inst->JP_HL(); break;
 		case 0xEA:	_inst->LD_n_A(n16); break;
 		case 0xEE:	_inst->XOR_n(n8); break;
 		case 0xEF:	_inst->RST_n(0x28); break;
 		case 0xF0:	_inst->LDH_A_n(); break;
 		case 0xF1:	_inst->POP_nn(af); break;
-		case 0xF3:	_inst->DI(); break;
+		case 0xF3:	_inst->DI(IME); break;
 		case 0xF5:	_inst->PUSH_nn(af); break;
 		case 0xF6:	_inst->OR_n(n8); break;
 		case 0xF7:	_inst->RST_n(0x30); break;
 		case 0xFA:	_inst->LD_A_n(n16); break;
-		case 0xFB:	_inst->EI(); break;
+		case 0xFB:	_inst->EI(IME); break;
 		case 0xFE:	_inst->CP_n(n8); break;
 		case 0xFF:	_inst->RST_n(0x38); break;
 		default:
@@ -281,4 +281,188 @@ void CPU::CB_prefix(Instructions *inst)
 			<< _registers.getPC() << dec << endl;
 		break;
 	}
+}
+
+void CPU::initCyclesArrays()
+{
+	for (int i = 0x00; i <= 0xFF; i++)
+	{
+		_instCycles[i] = 4;
+		_CBinstCycles[i] = 8;
+	}
+
+	// Instructions cycles
+	_instCycles[0x01] = 12;
+	_instCycles[0x02] = 8;
+	_instCycles[0x03] = 8;
+	_instCycles[0x06] = 8;
+	_instCycles[0x09] = 8;
+	_instCycles[0x0A] = 8;
+	_instCycles[0x0B] = 8;
+	_instCycles[0x0E] = 8;
+	_instCycles[0x11] = 12;
+	_instCycles[0x12] = 8;
+	_instCycles[0x13] = 8;
+	_instCycles[0x16] = 8;
+	_instCycles[0x18] = 12;
+	_instCycles[0x19] = 8;
+	_instCycles[0x1A] = 8;
+	_instCycles[0x1B] = 8;
+	_instCycles[0x1E] = 8;
+	_instCycles[0x20] = 8;
+	_instCycles[0x21] = 12;
+	_instCycles[0x22] = 8;
+	_instCycles[0x23] = 8;
+	_instCycles[0x26] = 8;
+	_instCycles[0x28] = 8;
+	_instCycles[0x29] = 8;
+	_instCycles[0x2A] = 8;
+	_instCycles[0x2B] = 8;
+	_instCycles[0x2E] = 8;
+	_instCycles[0x30] = 8;
+	_instCycles[0x31] = 12;
+	_instCycles[0x32] = 8;
+	_instCycles[0x33] = 8;
+	_instCycles[0x34] = 12;
+	_instCycles[0x35] = 12;
+	_instCycles[0x36] = 12;
+	_instCycles[0x38] = 8;
+	_instCycles[0x39] = 8;
+	_instCycles[0x3A] = 8;
+	_instCycles[0x3B] = 8;
+	_instCycles[0x3E] = 8;
+	_instCycles[0x46] = 8;
+	_instCycles[0x4E] = 8;
+	_instCycles[0x56] = 8;
+	_instCycles[0x5E] = 8;
+	_instCycles[0x66] = 8;
+	_instCycles[0x6E] = 8;
+	_instCycles[0x7E] = 8;
+	_instCycles[0x86] = 8;
+	_instCycles[0x8E] = 8;
+	_instCycles[0x96] = 8;
+	_instCycles[0x9E] = 8;
+	_instCycles[0xA6] = 8;
+	_instCycles[0xAE] = 8;
+	_instCycles[0xB6] = 8;
+	_instCycles[0xBE] = 8;
+	_instCycles[0xC0] = 8;
+	_instCycles[0xC1] = 12;
+	_instCycles[0xC2] = 12;
+	_instCycles[0xC3] = 16;
+	_instCycles[0xC4] = 12;
+	_instCycles[0xC5] = 16;
+	_instCycles[0xC6] = 8;
+	_instCycles[0xC8] = 8;
+	_instCycles[0xCE] = 8;
+	_instCycles[0xCF] = 16;
+	_instCycles[0xD0] = 8;
+	_instCycles[0xD1] = 12;
+	_instCycles[0xD2] = 12;
+	_instCycles[0xD4] = 12;
+	_instCycles[0xD5] = 16;
+	_instCycles[0xD6] = 8;
+	_instCycles[0xD7] = 16;
+	_instCycles[0xD8] = 8;
+	_instCycles[0xD9] = 16;
+	_instCycles[0xDA] = 12;
+	_instCycles[0xDC] = 12;
+	_instCycles[0xDE] = 8;
+	_instCycles[0xDF] = 16;
+	_instCycles[0xE6] = 8;
+	_instCycles[0xE0] = 12;
+	_instCycles[0xE1] = 12;
+	_instCycles[0xE2] = 8;
+	_instCycles[0xE5] = 16;
+	_instCycles[0xE6] = 8;
+	_instCycles[0xE7] = 16;
+	_instCycles[0xE8] = 16;
+	_instCycles[0xEA] = 16;
+	_instCycles[0xEE] = 8;
+	_instCycles[0xEF] = 16;
+	_instCycles[0xF0] = 12;
+	_instCycles[0xF1] = 12;
+	_instCycles[0xF2] = 8;
+	_instCycles[0xF5] = 16;
+	_instCycles[0xF6] = 8;
+	_instCycles[0xF7] = 16;
+	_instCycles[0xF8] = 12;
+	_instCycles[0xF9] = 8;
+	_instCycles[0xFA] = 16;
+	_instCycles[0xFE] = 8;
+	_instCycles[0xFF] = 16;
+
+	// CB prefix instructions cycles
+	_CBinstCycles[0x06] = 16;
+	_CBinstCycles[0x0E] = 16;
+	_CBinstCycles[0x16] = 16;
+	_CBinstCycles[0x1E] = 16;
+	_CBinstCycles[0x26] = 16;
+	_CBinstCycles[0x2E] = 16;
+	_CBinstCycles[0x36] = 16;
+	_CBinstCycles[0x3E] = 16;
+	_CBinstCycles[0x46] = 16;
+	_CBinstCycles[0x4E] = 16;
+	_CBinstCycles[0x56] = 16;
+	_CBinstCycles[0x5E] = 16;
+	_CBinstCycles[0x66] = 16;
+	_CBinstCycles[0x6E] = 16;
+	_CBinstCycles[0x76] = 16;
+	_CBinstCycles[0x7E] = 16;
+	_CBinstCycles[0x86] = 16;
+	_CBinstCycles[0x8E] = 16;
+	_CBinstCycles[0x96] = 16;
+	_CBinstCycles[0x9E] = 16;
+	_CBinstCycles[0xA6] = 16;
+	_CBinstCycles[0xAE] = 16;
+	_CBinstCycles[0xB6] = 16;
+	_CBinstCycles[0xBE] = 16;
+	_CBinstCycles[0xC6] = 16;
+	_CBinstCycles[0xCE] = 16;
+	_CBinstCycles[0xD6] = 16;
+	_CBinstCycles[0xDE] = 16;
+	_CBinstCycles[0xE6] = 16;
+	_CBinstCycles[0xEE] = 16;
+	_CBinstCycles[0xF6] = 16;
+	_CBinstCycles[0xFE] = 16;
+}
+
+void CPU::condCycles()
+{
+	_instCycles[0x20] = 12;
+	_instCycles[0x28] = 12;
+	_instCycles[0x30] = 12;
+	_instCycles[0x38] = 12;
+	_instCycles[0xC0] = 20;
+	_instCycles[0xC2] = 16;
+	_instCycles[0xC4] = 24;
+	_instCycles[0xC8] = 20;
+	_instCycles[0xCA] = 16;
+	_instCycles[0xCC] = 24;
+	_instCycles[0xD0] = 20;
+	_instCycles[0xD2] = 16;
+	_instCycles[0xD4] = 24;
+	_instCycles[0xD8] = 20;
+	_instCycles[0xDA] = 16;
+	_instCycles[0xDC] = 24;
+}
+
+void CPU::uncondCycles()
+{
+	_instCycles[0x20] = 8;
+	_instCycles[0x28] = 8;
+	_instCycles[0x30] = 8;
+	_instCycles[0x38] = 8;
+	_instCycles[0xC0] = 8;
+	_instCycles[0xC2] = 12;
+	_instCycles[0xC4] = 12;
+	_instCycles[0xC8] = 8;
+	_instCycles[0xCA] = 12;
+	_instCycles[0xCC] = 12;
+	_instCycles[0xD0] = 8;
+	_instCycles[0xD2] = 12;
+	_instCycles[0xD4] = 12;
+	_instCycles[0xD8] = 8;
+	_instCycles[0xDA] = 12;
+	_instCycles[0xDC] = 12;
 }

@@ -15,10 +15,11 @@
 class Cartridge
 {
 public:
-	Cartridge(const string &gamePath);
+	Cartridge();
 	~Cartridge();
-	void init();
+	void loadHeader();
 	MBC *_MBC;
+	void initGame(const string &gamePath);
 
 private:
 	BYTE *_ROMdata;

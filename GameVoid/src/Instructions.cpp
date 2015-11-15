@@ -336,29 +336,57 @@ void Instructions::RRA()
 }
 
 // 0x20, 0x28, 0x30, 0x38
-void Instructions::JR_cc_n(const regID &n)
+void Instructions::JR_cc_n(const regID &n, bool &condTaken)
 {
 	switch (n)
 	{
 	case nZ:
 		if (_registers->getF_Z() == 0)
+		{
 			JR_n();
-		else _registers->addPC(2);
+			condTaken = true;
+		}
+		else
+		{
+			_registers->addPC(2);
+			condTaken = false;
+		}
 		break;
 	case Z:
 		if (_registers->getF_Z() == 1)
+		{
 			JR_n();
-		else _registers->addPC(2);
+			condTaken = true;
+		}
+		else
+		{
+			_registers->addPC(2);
+			condTaken = false;
+		}
 		break;
 	case nC:
 		if (_registers->getF_C() == 0)
+		{
 			JR_n();
-		else _registers->addPC(2);
+			condTaken = true;
+		}
+		else
+		{
+			_registers->addPC(2);
+			condTaken = false;
+		}
 		break;
 	case sC:
 		if (_registers->getF_C() == 1)
+		{
 			JR_n();
-		else _registers->addPC(2);
+			condTaken = true;
+		}
+		else
+		{
+			_registers->addPC(2);
+			condTaken = false;
+		}
 		break;
 	default:
 		cout << "Wrong register identifier set" << endl;
@@ -727,7 +755,7 @@ void Instructions::CP_n(const regID &n)
 }
 
 // 0xC0, 0xC8, 0xD0, 0xD8
-void Instructions::RET_cc(const regID &cc)
+void Instructions::RET_cc(const regID &cc, bool &condTaken)
 {
 	switch (cc)
 	{
@@ -738,8 +766,13 @@ void Instructions::RET_cc(const regID &cc)
 			_registers->addSP(1);
 			_registers->setPC((_registers->getPC() << 8) + _memory->read(_registers->getSP()));
 			_registers->addSP(1);
+			condTaken = true;
 		}
-		else _registers->addPC(1);
+		else
+		{
+			_registers->addPC(1);
+			condTaken = false;
+		}
 		break;
 	case Z:
 		if (_registers->getF_Z() == 1)
@@ -748,8 +781,13 @@ void Instructions::RET_cc(const regID &cc)
 			_registers->addSP(1);
 			_registers->setPC((_registers->getPC() << 8) + _memory->read(_registers->getSP()));
 			_registers->addSP(1);
+			condTaken = true;
 		}
-		else _registers->addPC(1);
+		else
+		{
+			_registers->addPC(1);
+			condTaken = false;
+		}
 		break;
 	case nC:
 		if (_registers->getF_C() == 0)
@@ -758,8 +796,13 @@ void Instructions::RET_cc(const regID &cc)
 			_registers->addSP(1);
 			_registers->setPC((_registers->getPC() << 8) + _memory->read(_registers->getSP()));
 			_registers->addSP(1);
+			condTaken = true;
 		}
-		else _registers->addPC(1);
+		else 
+		{
+			_registers->addPC(1);
+			condTaken = false;
+		}
 		break;
 	case sC:
 		if (_registers->getF_C() == 1)
@@ -768,8 +811,13 @@ void Instructions::RET_cc(const regID &cc)
 			_registers->addSP(1);
 			_registers->setPC((_registers->getPC() << 8) + _memory->read(_registers->getSP()));
 			_registers->addSP(1);
+			condTaken = true;
 		}
-		else _registers->addPC(1);
+		else 
+		{
+			_registers->addPC(1);
+			condTaken = false;
+		}
 		break;
 	default:
 		cout << "Wrong register identifier set" << endl;
@@ -821,7 +869,7 @@ void Instructions::JP_nn()
 }
 
 // 0xC2, 0xCA, 0xD2, 0xDA
-void Instructions::JP_cc_nn(const regID &cc)
+void Instructions::JP_cc_nn(const regID &cc, bool &condTaken)
 {
 	switch (cc)
 	{
@@ -829,29 +877,49 @@ void Instructions::JP_cc_nn(const regID &cc)
 		if (_registers->getF_Z() == 0)
 		{
 			_registers->setPC(read16());
+			condTaken = true;
 		}
-		else _registers->addPC(3);
+		else
+		{
+			_registers->addPC(3);
+			condTaken = false;
+		}
 		break;
 	case Z:
 		if (_registers->getF_Z() == 1)
 		{
 			_registers->setPC(read16());
+			condTaken = true;
 		}
-		else _registers->addPC(3);
+		else
+		{
+			_registers->addPC(3);
+			condTaken = false;
+		}
 		break;
 	case nC:
 		if (_registers->getF_C() == 0)
 		{
 			_registers->setPC(read16());
+			condTaken = true;
 		}
-		else _registers->addPC(3);
+		else
+		{
+			_registers->addPC(3);
+			condTaken = false;
+		}
 		break;
 	case sC:
 		if (_registers->getF_C() == 1)
 		{
 			_registers->setPC(read16());
+			condTaken = true;
 		}
-		else _registers->addPC(3);
+		else
+		{
+			_registers->addPC(3);
+			condTaken = false;
+		}
 		break;
 	default:
 		cout << "Wrong register identifier set" << endl;
@@ -869,7 +937,7 @@ void Instructions::RET()
 }
 
 // 0xC4, 0xCC, 0xD4, 0xDC
-void Instructions::CALL_cc_nn(const regID &cc)
+void Instructions::CALL_cc_nn(const regID &cc, bool &condTaken)
 {
 	switch (cc)
 	{
@@ -877,29 +945,49 @@ void Instructions::CALL_cc_nn(const regID &cc)
 		if (_registers->getF_Z() == 0)
 		{
 			CALL_nn();
+			condTaken = true;
 		}
-		else _registers->addPC(3);
+		else
+		{
+			_registers->addPC(3);
+			condTaken = false;
+		}
 		break;
 	case Z:
 		if (_registers->getF_Z() == 1)
 		{
 			CALL_nn();
+			condTaken = true;
 		}
-		else _registers->addPC(3);
+		else
+		{
+			_registers->addPC(3);
+			condTaken = false;
+		}
 		break;
 	case nC:
 		if (_registers->getF_C() == 0)
 		{
 			CALL_nn();
+			condTaken = true;
 		}
-		else _registers->addPC(3);
+		else
+		{
+			_registers->addPC(3);
+			condTaken = false;
+		}
 		break;
 	case sC:
 		if (_registers->getF_C() == 1)
 		{
 			CALL_nn();
+			condTaken = true;
 		}
-		else _registers->addPC(3);
+		else
+		{
+			_registers->addPC(3);
+			condTaken = false;
+		}
 		break;
 	default:
 		cout << "Wrong register identifier set" << endl;
@@ -944,6 +1032,26 @@ void Instructions::LDH_n_A()
 	_registers->addPC(2);
 }
 
+// 0xE8
+void Instructions::ADD_SP_n()
+{
+	char signedNum = read8();
+
+	_registers->setF_Z(0);
+	_registers->setF_N(0);
+	_registers->setF_H(hasHalfCarry16(_registers->getSP(), signedNum));
+	_registers->setF_C(hasCarry16(_registers->getSP(), signedNum));
+	_registers->setSP(_registers->getSP() + signedNum);
+
+	_registers->addPC(2);
+}
+
+// 0xE9
+void Instructions::JP_HL()
+{
+	_registers->setPC(_registers->getHL());
+}
+
 // 0xF0
 void Instructions::LDH_A_n()
 {
@@ -952,15 +1060,15 @@ void Instructions::LDH_A_n()
 }
 
 // 0xF3
-void Instructions::DI()
+void Instructions::DI(BYTE &IME)
 {
-	// TODO
+	IME = 0x00;
 	_registers->addPC(1);
 }
 
 // 0xFB
-void Instructions::EI()
+void Instructions::EI(BYTE &IME)
 {
-	// TODO
+	IME = 0xFF;
 	_registers->addPC(1);
 }

@@ -46,8 +46,9 @@
 class Memory
 {
 public:
-	Memory(Cartridge *cartridge);
-	~Memory();
+	Memory() {}
+	~Memory() {}
+	void init(Cartridge *cartridge);
 	void reset();
 	BYTE read(const WORD &address);
 	void write(const WORD &address, const BYTE &value);

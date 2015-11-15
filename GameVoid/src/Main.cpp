@@ -1,18 +1,10 @@
-#include "Header.h"
-#include "Cartridge.h"
-#include "Memory.h"
-#include "CPU.h"
+#include "GameBoy.h"
 
 int main(int argc, char* argv[])
 {
-	Cartridge game("rom/SMLand.gb");
+	GameBoy _gameboy;
 
-	Memory memory(&game);
+	_gameboy.init();
 
-	CPU cpu(&memory);
-
-	cpu.run();
-
-	system("pause");
-
+	return 1;
 }

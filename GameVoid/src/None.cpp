@@ -22,10 +22,11 @@ BYTE None::read(const WORD &address)
 	// Read RAM data 
 	else if (address >= 0xA000 && address < 0xC000)
 	{
-		if (_RAMsize != 0 && _RAMenabled)
-			return _ROMdata[address];
-		else throw exception("Trying to read uninitialized or null RAM");
+		if (_RAMsize == 0 || !_RAMenabled)
+			throw exception("Trying to read uninitialized or null RAM");
+		return _ROMdata[address];
 	}
+	else throw exception("Wrong address");
 }
 
 void None::write(const WORD &address, const BYTE &value)
