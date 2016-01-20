@@ -30,57 +30,57 @@ BYTE Instructions::read8()
 bool Instructions::hasHalfCarry8(const int &a, const int &b)
 {
 	if ((((a & 0x000F) + (b & 0x000F)) & 0x10) == 0x10)
-		return 1;
-	else return 0;
+		return true;
+	else return false;
 }
 
 bool Instructions::hasCarry8(const int &a, const int &b)
 {
 	if ((((a & 0x00FF) + (b & 0x00FF)) & 0x100) == 0x100)
-		return 1;
-	else return 0;
+		return true;
+	else return false;
 }
 
 bool Instructions::hasHalfCarry16(const int &a, const int &b)
 {
 	if ((((a & 0x0FFF) + (b & 0x0FFF)) & 0x1000) == 0x1000)
-		return 1;
-	else return 0;
+		return true;
+	else return false;
 }
 
 bool Instructions::hasCarry16(const int &a, const int &b)
 {
 	if ((((a & 0xFFFF) + (b & 0xFFFF)) & 0x10000) == 0x10000)
-		return 1;
-	else return 0;
+		return true;
+	else return false;
 }
 
 bool Instructions::hasHalfBorrow8(const int &a, const int &b)
 {
 	if ((((a & 0x000F) - (b & 0x000F)) & 0x10) == 0x10)
-		return 1;
-	else return 0;
+		return true;
+	else return false;
 }
 
 bool Instructions::hasBorrow8(const int &a, const int &b)
 {
 	if ((((a & 0x00FF) - (b & 0x00FF)) & 0x100) == 0x100)
-		return 1;
-	else return 0;
+		return true;
+	else return false;
 }
 
 bool Instructions::hasHalfBorrow16(const int &a, const int &b)
 {
 	if ((((a & 0x0FFF) - (b & 0x0FFF)) & 0x1000) == 0x1000)
-		return 1;
-	else return 0;
+		return true;
+	else return false;
 }
 
 bool Instructions::hasBorrow16(const int &a, const int &b)
 {
 	if ((((a & 0xFFFF) - (b & 0xFFFF)) & 0x10000) == 0x10000)
-		return 1;
-	else return 0;
+		return true;
+	else return false;
 }
 
 // 0x00
@@ -99,7 +99,7 @@ void Instructions::LD_n_nn(const regID &n)
 	_registers->addPC(3);
 }
 
-// 0x02, 0x12, 0x47, 0x4F, 0x57, 0x5F, 0x67, 0x6F, 0x77. 0x7F, 0xEA
+// 0x02, 0x12, 0x47, 0x4F, 0x57, 0x5F, 0x67, 0x6F, 0x77, 0x7F, 0xEA
 // n = A, B, C, D, E, H, L, (BC), (DE), (HL), (nn, inm 16)
 void Instructions::LD_n_A(const regID &n)
 {
@@ -202,6 +202,7 @@ void Instructions::RLCA()
 	// Set flag values
 	_registers->setF_N(0);
 	_registers->setF_H(0);
+	_registers->setF_Z(0);
 
 	_registers->addPC(1);
 }
@@ -281,6 +282,7 @@ void Instructions::RRCA()
 	// Set flag values
 	_registers->setF_N(0);
 	_registers->setF_H(0);
+	_registers->setF_Z(0);
 
 	_registers->addPC(1);
 }
@@ -304,6 +306,7 @@ void Instructions::RLA()
 	// Set flag values
 	_registers->setF_N(0);
 	_registers->setF_H(0);
+	_registers->setF_Z(0);
 
 	_registers->addPC(1);
 }
@@ -331,6 +334,7 @@ void Instructions::RRA()
 	// Set flag values
 	_registers->setF_N(0);
 	_registers->setF_H(0);
+	_registers->setF_Z(0);
 
 	_registers->addPC(1);
 }
@@ -486,22 +490,20 @@ void Instructions::LD_HLD_A()
 // 0x75, 0x76, 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E
 void Instructions::LD_r1_r2(const regID &r1, const regID &r2)
 {
-	switch (r1)
+	if (r1 == mHL)
 	{
-	case mHL:
 		if (r2 != n8)
 			_memory->write(_registers->getHL(), (BYTE)_registers->getReg(r2));
 		else _memory->write(_registers->getHL(), read8());
-		break;
-	default:
+		_registers->addPC(2);
+	}
+	else
+	{
 		if (r2 != mHL)
 			_registers->setReg(r1, _registers->getReg(r2));
 		else _registers->setReg(r1, _memory->read(_registers->getReg(r2)));
-		break;
+		_registers->addPC(1);
 	}
-	if (r1 == mHL)
-		_registers->addPC(2);
-	else _registers->addPC(1);
 }
 
 // 0x37
@@ -735,18 +737,20 @@ void Instructions::CP_n(const regID &n)
 	case mHL:
 		_registers->setF_H(hasHalfBorrow8(_registers->getA(), _memory->read(_registers->getHL())));
 		_registers->setF_C(hasBorrow8(_registers->getA(), _memory->read(_registers->getHL())));
+		_registers->setF_Z((_registers->getA() - _memory->read(_registers->getHL())) == 0);
 		break;
 	case n8:
 		_registers->setF_H(hasHalfBorrow8(_registers->getA(), read8()));
 		_registers->setF_C(hasBorrow8(_registers->getA(), read8()));
+		_registers->setF_Z((_registers->getA() - read8()) == 0);
 		break;
 	default:
 		_registers->setF_H(hasHalfBorrow8(_registers->getA(), _registers->getReg(n)));
 		_registers->setF_C(hasBorrow8(_registers->getA(), _registers->getReg(n)));
+		_registers->setF_Z((_registers->getA() - _registers->getReg(n)) == 0);
 		break;
 	}
 	// Set flags
-	_registers->setF_Z(_registers->getA() == 0);
 	_registers->setF_N(1);
 
 	if (n != n8)
@@ -1018,9 +1022,8 @@ void Instructions::RST_n(const BYTE &n)
 // 0xCD
 void Instructions::CALL_nn()
 {
-	_registers->addPC(3);
-	_memory->write(_registers->getSP() - 1, _registers->getPC() & 0xFF00);
-	_memory->write(_registers->getSP() - 2, _registers->getPC() & 0x00FF);
+	_memory->write(_registers->getSP() - 1, ((_registers->getPC() + 3) & 0xFF00) >> 8);
+	_memory->write(_registers->getSP() - 2, (_registers->getPC() + 3) & 0x00FF);
 	_registers->setSP(_registers->getSP() - 2);
 	_registers->setPC(read16());
 }
@@ -1060,15 +1063,20 @@ void Instructions::LDH_A_n()
 }
 
 // 0xF3
-void Instructions::DI(BYTE &IME)
+void Instructions::DI(bool &IME)
 {
-	IME = 0x00;
+	IME = false;
 	_registers->addPC(1);
 }
 
 // 0xFB
-void Instructions::EI(BYTE &IME)
+void Instructions::EI(bool &IME)
 {
-	IME = 0xFF;
+	IME = true;
 	_registers->addPC(1);
+}
+
+Registers *Instructions::getRegisters()
+{
+	return _registers;
 }

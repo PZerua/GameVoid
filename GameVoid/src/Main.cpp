@@ -2,9 +2,11 @@
 
 int main(int argc, char* argv[])
 {
-	GameBoy _gameboy;
+	GameBoy *_gameboy = new GameBoy();
 
-	_gameboy.init();
+	_gameboy->update();
+
+	system("pause");
 
 	return 1;
 }

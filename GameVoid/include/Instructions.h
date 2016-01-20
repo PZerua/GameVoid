@@ -64,12 +64,14 @@ public:
 	void POP_nn(const regID &nn);
 	void CALL_nn();
 	void CALL_cc_nn(const regID &cc, bool &condTaken);
-	void DI(BYTE &IME);
-	void EI(BYTE &IME);
+	void DI(bool &IME);
+	void EI(bool &IME);
 	void SCF();
 	void CCF();
 	void PUSH_nn(const regID &nn);
 	void RST_n(const BYTE &n);
+
+	Registers *getRegisters();
 	
 private:
 	Memory *_memory;

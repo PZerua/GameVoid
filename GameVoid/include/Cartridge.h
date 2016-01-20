@@ -20,6 +20,7 @@ public:
 	void loadHeader();
 	MBC *_MBC;
 	void initGame(const string &gamePath);
+	BYTE *getData();
 
 private:
 	BYTE *_ROMdata;

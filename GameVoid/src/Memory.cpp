@@ -40,6 +40,8 @@ void Memory::write(const WORD &address, const BYTE &value)
 		// if we write to echoed RAM, value also appears in internal RAM
 		_MEMORY[address - 0x2000] = value;
 	}
+	else if (address == 0xFF04)
+		_MEMORY[0xFF04] = 0;
 
 	// Write to memory
 	_MEMORY[address] = value;
@@ -71,5 +73,9 @@ void Memory::reset()
 	_MEMORY[BGP]  = 0xFC;
 	_MEMORY[OBP0] = 0xFF;
 	_MEMORY[OBP1] = 0xFF;
+}
 
+void Memory::directModification(const WORD &address, const BYTE &value)
+{
+	_MEMORY[address] = value;
 }

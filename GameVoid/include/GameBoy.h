@@ -6,17 +6,19 @@
 #include "CPU.h"
 #include "Video.h"
 
+#define MAXCYCLES 69905
+
 class GameBoy
 {
 public:
 	GameBoy();
 	~GameBoy();
-	void init();
+	void update();
 
 private:
 	Cartridge _game;
 	Memory _memory;
-	Video _video;
+	//Video _video;
 	CPU _CPU;
 
 };

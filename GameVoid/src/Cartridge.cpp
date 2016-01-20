@@ -128,3 +128,8 @@ void Cartridge::loadHeader()
 		break;
 	}
 }
+
+BYTE *Cartridge::getData()
+{
+	return _ROMdata;
+}
