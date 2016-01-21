@@ -18,7 +18,7 @@ public:
 private:
 	Cartridge _game;
 	Memory _memory;
-	//Video _video;
+	Video _video;
 	CPU _CPU;
 
 };

@@ -40,9 +40,16 @@ void Memory::write(const WORD &address, const BYTE &value)
 		// if we write to echoed RAM, value also appears in internal RAM
 		_MEMORY[address - 0x2000] = value;
 	}
-	else if (address == 0xFF04)
+	// If we write to this registers, they are set to 0
+	else if (address == 0xFF04) 
 		_MEMORY[0xFF04] = 0;
-
+	else if (address == 0xFF44)
+		_MEMORY[0xFF44] = 0;
+	// DMA Transfer
+	else if (address == 0xFF46)
+	{
+		DMATransfer(value);
+	}
 	// Write to memory
 	_MEMORY[address] = value;
 }
@@ -78,4 +85,13 @@ void Memory::reset()
 void Memory::directModification(const WORD &address, const BYTE &value)
 {
 	_MEMORY[address] = value;
+}
+
+void Memory::DMATransfer(const BYTE &data)
+{
+	WORD address = data << 8; // source address is data * 100
+	for (int i = 0; i < 0xA0; i++)
+	{
+		write(0xFE00 + i, read(address + i));
+	}
 }

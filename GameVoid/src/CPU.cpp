@@ -18,7 +18,13 @@ int CPU::fetch()
 
 	BYTE OPCODE = _memory->read(_registers.getPC());
 
-	cout << hex << "PC: " << (int)_registers.getPC() << " | OPCODE: " << (int)OPCODE << endl;
+	//cout << hex << "PC: " << (int)_registers.getPC() << " | OPCODE: " << (int)OPCODE << endl;
+
+	//cout << hex << "PC: " << (int)_registers.getPC() << endl;
+
+	//cout << hex << (int)_inst->getRegisters()->getB() << endl;
+
+	//std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
 	switch (OPCODE)
 	{
@@ -243,7 +249,9 @@ int CPU::fetch()
 	case 0xDF:	_inst->RST_n(0x18); break;
 	case 0xE0:	_inst->LDH_n_A(); break;
 	case 0xE1:	_inst->POP_nn(hl); break;
+	case 0xE2:  _inst->LD_C_A(); break;
 	case 0xE5:	_inst->PUSH_nn(hl); break;
+	case 0xE6:	_inst->AND_n(n8);
 	case 0xE7:	_inst->RST_n(0x20); break;
 	case 0xE8:	_inst->ADD_SP_n(); break;
 	case 0xE9:	_inst->JP_HL(); break;
@@ -252,6 +260,7 @@ int CPU::fetch()
 	case 0xEF:	_inst->RST_n(0x28); break;
 	case 0xF0:	_inst->LDH_A_n(); break;
 	case 0xF1:	_inst->POP_nn(af); break;
+	case 0xF2:	_inst->LD_A_C(); break;
 	case 0xF3:	_inst->DI(IME); break;
 	case 0xF5:	_inst->PUSH_nn(af); break;
 	case 0xF6:	_inst->OR_n(n8); break;
@@ -259,7 +268,7 @@ int CPU::fetch()
 	case 0xFA:	_inst->LD_A_n(n16); break;
 	case 0xFB:	_inst->EI(IME); break;
 	case 0xFE:	_inst->CP_n(n8); break;
-	//case 0xFF:	_inst->RST_n(0x38); break;
+	case 0xFF:	_inst->RST_n(0x38); break;
 	default:
 		cout << hex << "Unimplemented instruction \""<< (int)OPCODE << "\" at PC = " 
 			<< _registers.getPC() << dec << endl;
@@ -527,11 +536,7 @@ int CPU::selectFrequency()
 
 bool CPU::isClockEnabled()
 {
-	BYTE TMA_info = _memory->read(TMA);
-	TMA_info = TMA_info & 0x04;
-	if (TMA_info == 0x04)
-		return true;
-	else return false;
+	return testBit(_memory->read(0xFF07), 2) ? true : false;
 }
 
 void CPU::divideRegister(const int &cycles)
@@ -562,9 +567,9 @@ void CPU::doInterrupts()
 		{
 			for (int i = 0; i < 5; i++)
 			{
-				if ((enabInt & (0x01 << i)) == (0x01 << i))
+				if (testBit(reqInt, i))
 				{
-					if ((reqInt & (0x01 << i)) == (0x01 << i))
+					if (testBit(enabInt, i))
 						serviceInterrupt(i);
 				}
 			}
@@ -576,7 +581,7 @@ void CPU::serviceInterrupt(const int &id)
 {
 	IME = false;
 	BYTE reqInt = _memory->read(0xFF0F);
-	reqInt = reqInt & ~(0x01 << id);
+	reqInt = bitReset(reqInt, id);
 	_memory->write(0xFF0F, reqInt);
 
 	_inst->getRegisters()->setSP(_inst->getRegisters()->getSP() - 1);

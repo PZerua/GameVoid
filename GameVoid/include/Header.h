@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <chrono>
+#include <thread>
 
 using namespace std;
 
@@ -65,6 +67,10 @@ typedef unsigned char BYTE;
 // Short has 2 Bytes width
 typedef unsigned short WORD;
 
+typedef signed char SIGNED_BYTE;
+
+typedef signed short SIGNED_WORD;
+
 enum Interrupt {
 	VBlank,
 	LCD,
@@ -72,3 +78,15 @@ enum Interrupt {
 	CLink,
 	JoyPad
 };
+
+enum COLOUR {
+	WHITE,
+	LIGHT_GREY,
+	DARK_GREY,
+	BLACK
+};
+
+BYTE bitSet(const BYTE &byte, const int &bit);
+BYTE bitReset(const BYTE &byte, const int &bit);
+bool testBit(const BYTE &byte, const int &bit);
+BYTE bitGetVal(const BYTE &byte, const int &bit);

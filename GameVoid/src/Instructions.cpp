@@ -154,7 +154,7 @@ void Instructions::INC_n(const regID &n)
 	}
 
 	// Set Z and N in flag
-	_registers->setF_Z(n == 0);
+	_registers->setF_Z(_registers->getReg(n) == 0);
 	_registers->setF_N(0);
 
 	_registers->addPC(1);
@@ -172,12 +172,12 @@ void Instructions::DEC_n(const regID &n)
 		_memory->write(_registers->getHL(), _memory->read(_registers->getHL()) - 1);
 		break;
 	default:
-		_registers->setReg(n, _registers->getReg(n) + 1);
+		_registers->setReg(n, _registers->getReg(n) - 1);
 		break;
 	}
 
 	// Set Z and N in flag
-	_registers->setF_Z(n == 0);
+	_registers->setF_Z(_registers->getReg(n) == 0);
 	_registers->setF_N(1);
 
 	_registers->addPC(1);
@@ -1012,6 +1012,7 @@ void Instructions::PUSH_nn(const regID &nn)
 // 0xC7, 0xCF, 0xD7, 0xDF, 0xE7, 0xEF, 0xF7, 0xFF
 void Instructions::RST_n(const BYTE &n)
 {
+	_registers->addPC(1);
 	_registers->setSP(_registers->getSP() - 1);
 	_memory->write(_registers->getSP(), (_registers->getPC() & 0xFF00) >> 8);
 	_registers->setSP(_registers->getSP() - 1);
@@ -1033,6 +1034,13 @@ void Instructions::LDH_n_A()
 {
 	_memory->write(0xFF00 + read8(), _registers->getA());
 	_registers->addPC(2);
+}
+
+// 0xE2
+void Instructions::LD_C_A()
+{
+	_memory->write(0xFF00 + _registers->getC(), _registers->getA());
+	_registers->addPC(1);
 }
 
 // 0xE8
@@ -1060,6 +1068,13 @@ void Instructions::LDH_A_n()
 {
 	_registers->setA(_memory->read(0xFF00 + read8()));
 	_registers->addPC(2);
+}
+
+// 0xF2
+void Instructions::LD_A_C()
+{
+	_registers->setA(_memory->read(0xFF00 + _registers->getC()));
+	_registers->addPC(1);
 }
 
 // 0xF3

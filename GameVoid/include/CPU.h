@@ -4,7 +4,6 @@
 #include "Memory.h"
 #include "Registers.h"
 #include "Instructions.h"
-#include "Video.h"
 
 class CPU
 {

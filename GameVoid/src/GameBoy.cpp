@@ -2,10 +2,9 @@
 
 GameBoy::GameBoy()
 {
-	_game.initGame("rom/tetris.gb"); //For testing
+	_game.initGame("rom/SMLand.gb"); //For testing
 	_memory.init(&_game);
-	//_video.loadSprite(&_memory);
-	//_video.renderSprite();
+	_video.init(&_memory);
 	_CPU.init(&_memory);
 }
 
@@ -30,9 +29,9 @@ void GameBoy::update()
 			}
 			cyclesThisUpdate += cycles;
 			_CPU.updateTimers(cycles);
-			// Graphics
+			_video.updateGraphics(cycles, _CPU);
 			_CPU.doInterrupts();
 		}
-		// Render
+		_video.render();
 	}
 }

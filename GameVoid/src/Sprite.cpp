@@ -22,7 +22,7 @@ void Sprite::loadSprite(Memory *memory, const WORD &startAddress)
 
 	for (int i = 0; i < 64; i++)
 	{
-		//readLine(_pixels, memory->getCartridge()->getData()[0x8180 + i * 2], memory->getCartridge()->getData()[0x8181 + i * 2], i);
+		readLine(_pixels, memory->read(0x8180), memory->read(0x8181 + i * 2), i);
 	}
 }
 

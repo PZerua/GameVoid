@@ -30,6 +30,8 @@ public:
 	void LD_HLD_A();
 	void LD_A_HLI();
 	void LD_r1_r2(const regID &r1, const regID &r2);
+	void LD_C_A();
+	void LD_A_C();
 	void LDH_n_A();
 	void LDH_A_n();
 	void ADD_HL_n(const regID &n);
