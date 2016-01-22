@@ -45,7 +45,6 @@
     <ClInclude Include="include\None.h" />
     <ClInclude Include="include\Registers.h" />
     <ClInclude Include="include\Sprite.h" />
-    <ClInclude Include="include\Utils.h" />
     <ClInclude Include="include\Video.h" />
     <ClInclude Include="include\Window.h" />
   </ItemGroup>

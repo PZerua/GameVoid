@@ -76,7 +76,6 @@ void Memory::reset()
 	_MEMORY[NR51] = 0xF3;
 	_MEMORY[NR52] = 0xF1;
 	_MEMORY[LCDC] = 0x91;
-	_MEMORY[LY]   = 0x90; // TODO: Find info
 	_MEMORY[BGP]  = 0xFC;
 	_MEMORY[OBP0] = 0xFF;
 	_MEMORY[OBP1] = 0xFF;

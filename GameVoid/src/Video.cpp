@@ -109,14 +109,14 @@ void Video::setLCDStatus(CPU &cpuTemp)
 
 	// just entered a new mode so request interupt
 	if (reqInt && (mode != currentmode))
-		cpuTemp.requestInterrupt(VBlank);
+		cpuTemp.requestInterrupt(LCD);
 
 	// check the conincidence flag
 	if (_memory->read(0xFF44) == _memory->read(0xFF45))
 	{
 		status = bitSet(status, 2);
 		if (testBit(status, 6))
-			cpuTemp.requestInterrupt(VBlank);
+			cpuTemp.requestInterrupt(LCD);
 	}
 	else
 	{
@@ -136,8 +136,8 @@ void Video::drawScanLine()
 	if (testBit(control, 0))
 		renderTiles();
 
-	/*if (testBit(control, 1))
-		renderSprites();*/
+	if (testBit(control, 1))
+		renderSprites();
 }
 
 void Video::renderTiles()
@@ -325,11 +325,110 @@ COLOUR Video::getColour(BYTE colourNum, WORD address)
 	return res;
 }
 
+void Video::renderSprites()
+{
+	bool use8x16 = false;
+	if (testBit(_memory->read(0xFF40), 2))
+		use8x16 = true;
+
+	for (int sprite = 0; sprite < 40; sprite++)
+	{
+		// sprite occupies 4 bytes in the sprite attributes table
+		BYTE index = sprite * 4;
+		BYTE yPos = _memory->read(0xFE00 + index) - 16;
+		BYTE xPos = _memory->read(0xFE00 + index + 1) - 8;
+		BYTE tileLocation = _memory->read(0xFE00 + index + 2);
+		BYTE attributes = _memory->read(0xFE00 + index + 3);
+
+		bool yFlip = testBit(attributes, 6);
+		bool xFlip = testBit(attributes, 5);
+
+		int scanline = _memory->read(0xFF44);
+
+		int ysize = 8;
+		if (use8x16)
+			ysize = 16;
+
+		// does this sprite intercept with the scanline?
+		if ((scanline >= yPos) && (scanline < (yPos + ysize)))
+		{
+			int line = scanline - yPos;
+
+			// read the sprite in backwards in the y axis
+			if (yFlip)
+			{
+				line -= ysize;
+				line *= -1;
+			}
+
+			line *= 2; // same as for tiles
+			WORD dataAddress = (0x8000 + (tileLocation * 16)) + line;
+			BYTE data1 = _memory->read(dataAddress);
+			BYTE data2 = _memory->read(dataAddress + 1);
+
+			// its easier to read in from right to left as pixel 0 is 
+			// bit 7 in the colour data, pixel 1 is bit 6 etc...
+			for (int tilePixel = 7; tilePixel >= 0; tilePixel--)
+			{
+				int colourbit = tilePixel;
+				// read the sprite in backwards for the x axis 
+				if (xFlip)
+				{
+					colourbit -= 7;
+					colourbit *= -1;
+				}
+
+				// the rest is the same as for tiles
+				int colourNum = bitGetVal(data2, colourbit);
+				colourNum <<= 1;
+				colourNum |= bitGetVal(data1, colourbit);
+
+				WORD colourAddress = testBit(attributes, 4) ? 0xFF49 : 0xFF48;
+				COLOUR col = getColour(colourNum, colourAddress);
+
+				// white is transparent for sprites.
+				if (col == WHITE)
+					continue;
+
+				int red = 0;
+				int green = 0;
+				int blue = 0;
+
+				switch (col)
+				{
+				case WHITE: red = 255; green = 255; blue = 255; break;
+				case LIGHT_GREY:red = 0xCC; green = 0xCC; blue = 0xCC; break;
+				case DARK_GREY:red = 0x77; green = 0x77; blue = 0x77; break;
+				}
+
+				int xPix = 0 - tilePixel;
+				xPix += 7;
+
+				int pixel = xPos + xPix;
+
+				// sanity check
+				if ((scanline<0) || (scanline>143) || (pixel<0) || (pixel>159))
+				{
+					continue;
+				}
+
+				_screenDATA[pixel][scanline][0] = red;
+				_screenDATA[pixel][scanline][1] = green;
+				_screenDATA[pixel][scanline][2] = blue;
+			}
+		}
+	}
+}
+
 void Video::render()
 {
 	SDL_RenderClear(Window::mRenderer);
 
-	SDL_UpdateTexture(BG_WD, NULL, _pixels, 144 * sizeof(Uint32));
+	/*_screenDATA[20][3][0] = 44;
+	_screenDATA[20][3][1] = 0;
+	_screenDATA[20][3][2] = 0;*/
+
+	SDL_UpdateTexture(BG_WD, NULL, _screenDATA, 160 * sizeof(BYTE));
 	SDL_RenderCopy(Window::mRenderer, BG_WD, NULL, NULL);
 
 	SDL_RenderPresent(Window::mRenderer);

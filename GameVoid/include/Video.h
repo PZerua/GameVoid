@@ -31,6 +31,6 @@ private:
 	SDL_Texture *_backgroundBuffer;
 	Uint32 *_pixels;
 	int _scanLineCounter;
-	Uint32 _screenDATA[160][144][3];
+	BYTE _screenDATA[160][144][3];
 	SDL_Texture *BG_WD;
 };

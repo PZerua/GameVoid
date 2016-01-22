@@ -25,9 +25,9 @@ BYTE MBC1::read(const WORD &address)
 	// Read ROM Bank 0x01 to 0x7f (up to 255)
 	else if (address >= 0x4000 && address < 0x8000)
 	{
-		if (_ROMbank == 0x00 || _ROMbank == 0x20 || 
+		/*if (_ROMbank == 0x00 || _ROMbank == 0x20 || 
 			_ROMbank == 0x40 || _ROMbank == 0x60)
-			_ROMbank++;
+			_ROMbank++;*/
 
 		return _ROMdata[(0x4000 * _ROMbank) + (address - 0x4000)];
 	}
@@ -60,7 +60,10 @@ void MBC1::write(const WORD &address, const BYTE &value)
 	// Select ROM Bank Number (only lower 5 bits)
 	else if (address >= 0x2000 && address < 0x4000)
 	{
-		_ROMbank = value & 0x1F + _ROMbank & 0xE0;
+		BYTE tempValue = value;
+		if ((value & 0x1F) == 0)
+			tempValue++;
+		_ROMbank = (tempValue & 0x1F) | (_ROMbank & 0x60);
 	}
 	// Select RAM Bank Number or upper bits of ROM Bank Number
 	else if (address >= 0x4000 && address < 0x6000)

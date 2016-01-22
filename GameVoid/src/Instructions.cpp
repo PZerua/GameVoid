@@ -219,7 +219,6 @@ void Instructions::LD_nn_SP()
 // 0x09, 0x19, 0x29, 0x39
 void Instructions::ADD_HL_n(const regID &n)
 {
-
 	// Set carries in flag
 	_registers->setF_C(hasCarry16(_registers->getHL(), _registers->getReg(n)));
 	_registers->setF_H(hasHalfCarry16(_registers->getHL(), _registers->getReg(n)));
@@ -501,7 +500,7 @@ void Instructions::LD_r1_r2(const regID &r1, const regID &r2)
 	{
 		if (r2 != mHL)
 			_registers->setReg(r1, _registers->getReg(r2));
-		else _registers->setReg(r1, _memory->read(_registers->getReg(r2)));
+		else _registers->setReg(r1, _memory->read(_registers->getHL()));
 		_registers->addPC(1);
 	}
 }
@@ -654,6 +653,7 @@ void Instructions::SBC_A_n(const regID &n)
 // 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xE6
 void Instructions::AND_n(const regID &n)
 {
+	int longit = 1;
 	switch (n)
 	{
 	case mHL:
@@ -661,6 +661,7 @@ void Instructions::AND_n(const regID &n)
 		break;
 	case n8:
 		_registers->setA(read8() & _registers->getA());
+		longit = 2;
 		break;
 	default:
 		_registers->setA(_registers->getReg(n) & _registers->getA());
@@ -672,9 +673,7 @@ void Instructions::AND_n(const regID &n)
 	_registers->setF_H(1);
 	_registers->setF_Z(_registers->getA() == 0);
 
-	if (n != n8)
-		_registers->addPC(1);
-	else _registers->addPC(2);
+	_registers->addPC(longit);
 }
 
 // 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF, 0xEE
@@ -934,10 +933,8 @@ void Instructions::JP_cc_nn(const regID &cc, bool &condTaken)
 // 0xC9
 void Instructions::RET()
 {
-	_registers->setPC(_memory->read(_registers->getSP()));
-	_registers->addSP(1);
-	_registers->setPC((_registers->getPC() << 8) + _memory->read(_registers->getSP()));
-	_registers->addSP(1);
+	_registers->setPC((_memory->read(_registers->getSP() + 1) << 8) | _memory->read(_registers->getSP()));
+	_registers->addSP(2);
 }
 
 // 0xC4, 0xCC, 0xD4, 0xDC
@@ -1094,4 +1091,27 @@ void Instructions::EI(bool &IME)
 Registers *Instructions::getRegisters()
 {
 	return _registers;
+}
+
+// CB 0x37
+void Instructions::SWAP_n(const regID &n)
+{
+	_registers->setReg(n, (_registers->getReg(n) << 4) | (_registers->getReg(n) >> 4));
+
+	_registers->setF_Z(_registers->getReg(n) == 0);
+	_registers->setF_N(0);
+	_registers->setF_H(0);
+	_registers->setF_C(0);
+
+	_registers->addPC(2);
+}
+
+// CB 0x7F
+void Instructions::BIT_b_r(const BYTE &b, const regID &r)
+{
+	_registers->setF_Z(((_registers->getReg(r) & (0x01 << b)) >> b) == 0);
+	_registers->setF_N(0);
+	_registers->setF_H(1);
+
+	_registers->addPC(2);
 }

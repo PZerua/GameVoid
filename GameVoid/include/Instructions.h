@@ -73,6 +73,9 @@ public:
 	void PUSH_nn(const regID &nn);
 	void RST_n(const BYTE &n);
 
+	void SWAP_n(const regID &n);
+	void BIT_b_r(const BYTE &b, const regID &r);
+
 	Registers *getRegisters();
 	
 private:

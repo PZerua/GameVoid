@@ -8,7 +8,7 @@ void CPU::init(Memory *memory)
 	_timeCounter = CLOCKSPEED/_timeFrequency;
 	_divideCounter = 0;
 	initCyclesArrays();
-	IME = false;
+	IME = true;
 }
 
 int CPU::fetch()
@@ -20,7 +20,7 @@ int CPU::fetch()
 
 	//cout << hex << "PC: " << (int)_registers.getPC() << " | OPCODE: " << (int)OPCODE << endl;
 
-	//cout << hex << "PC: " << (int)_registers.getPC() << endl;
+	//cout << hex << "LY: " << (int)_memory->read(0xFF44) << endl;
 
 	//cout << hex << (int)_inst->getRegisters()->getB() << endl;
 
@@ -251,7 +251,7 @@ int CPU::fetch()
 	case 0xE1:	_inst->POP_nn(hl); break;
 	case 0xE2:  _inst->LD_C_A(); break;
 	case 0xE5:	_inst->PUSH_nn(hl); break;
-	case 0xE6:	_inst->AND_n(n8);
+	case 0xE6:	_inst->AND_n(n8); break;
 	case 0xE7:	_inst->RST_n(0x20); break;
 	case 0xE8:	_inst->ADD_SP_n(); break;
 	case 0xE9:	_inst->JP_HL(); break;
@@ -268,7 +268,7 @@ int CPU::fetch()
 	case 0xFA:	_inst->LD_A_n(n16); break;
 	case 0xFB:	_inst->EI(IME); break;
 	case 0xFE:	_inst->CP_n(n8); break;
-	case 0xFF:	_inst->RST_n(0x38); break;
+	//case 0xFF:	_inst->RST_n(0x38); break;
 	default:
 		cout << hex << "Unimplemented instruction \""<< (int)OPCODE << "\" at PC = " 
 			<< _registers.getPC() << dec << endl;
@@ -294,12 +294,15 @@ int CPU::fetch()
 
 int CPU::CB_prefix(Instructions *inst)
 {
-	
 	_registers.addPC(1);
 	BYTE OPCODE = _memory->read(_registers.getPC());
 
 	switch (OPCODE)
 	{
+	case 0x37:	_inst->SWAP_n(A); break;
+	case 0x7F:	_inst->BIT_b_r(7, A); break;
+
+
 	default:
 		cout << hex << "Unimplemented CB instruction \"" << (int)OPCODE << "\" at PC = "
 			<< _registers.getPC() << dec << endl;
@@ -579,6 +582,7 @@ void CPU::doInterrupts()
 
 void CPU::serviceInterrupt(const int &id)
 {
+	cout << "Interrupt Serviced" << endl;
 	IME = false;
 	BYTE reqInt = _memory->read(0xFF0F);
 	reqInt = bitReset(reqInt, id);
