@@ -51,5 +51,5 @@ void None::write(const WORD &address, const BYTE &value)
 		if (_RAMsize != 0 && _RAMenabled)
 			_ROMdata[address] = value;
 	}
-	else cout << "Error: writing to a ROM without MBC" << endl;
+	//else cout << "Error: writing to a ROM without MBC" << endl;
 }

@@ -4,8 +4,7 @@ void CPU::init(Memory *memory)
 {
 	_memory = memory;
 	_inst = new Instructions(_memory, &_registers);
-	_timeFrequency = selectFrequency();
-	_timeCounter = CLOCKSPEED/_timeFrequency;
+	_timeCounter = 1024;
 	_divideCounter = 0;
 	initCyclesArrays();
 	IME = true;
@@ -18,13 +17,16 @@ int CPU::fetch()
 
 	BYTE OPCODE = _memory->read(_registers.getPC());
 
-	//cout << hex << "PC: " << (int)_registers.getPC() << " | OPCODE: " << (int)OPCODE << endl;
+	if (_registers.getPC() == 0x1b95)
+	{
+		cout << "DEBUGING TIME" << endl;
+	}
 
-	//cout << hex << "LY: " << (int)_memory->read(0xFF44) << endl;
-
-	//cout << hex << (int)_inst->getRegisters()->getB() << endl;
-
-	//std::this_thread::sleep_for(std::chrono::milliseconds(20));
+	/*cout << hex << "PC: " << (int)_registers.getPC() << " | OPCODE: " << (int)OPCODE << "\t";
+	cout << hex << "AF: " << (int)_registers.getAF() << " | BC: " << (int)_registers.getBC() << " | DE: " << (int)_registers.getDE() 
+		<< " | HL: " << (int)_registers.getHL() << " | SP: " << (int)_registers.getSP() << endl;
+		*/
+	//std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	switch (OPCODE)
 	{
@@ -86,6 +88,7 @@ int CPU::fetch()
 	case 0x37:	_inst->SCF(); break;
 	case 0x38:	_inst->JR_cc_n(sC, _condTaken); break;
 	case 0x39:	_inst->ADD_HL_n(sp); break;
+	case 0x3A:	_inst->LD_A_HLD(); break;
 	case 0x3B:	_inst->DEC_nn(sp); break;
 	case 0x3C:	_inst->INC_n(A); break;
 	case 0x3D:	_inst->DEC_n(A); break;
@@ -243,6 +246,7 @@ int CPU::fetch()
 	case 0xD6:	_inst->SUB_A_n(n8); break;
 	case 0xD7:	_inst->RST_n(0x10); break;
 	case 0xD8:	_inst->RET_cc(sC, _condTaken); break;
+	case 0xD9:	_inst->RETI(IME); break;
 	case 0xDA:	_inst->JP_cc_nn(sC, _condTaken); break;
 	case 0xDC:	_inst->CALL_cc_nn(sC, _condTaken); break;
 	case 0xDE:	_inst->SBC_A_n(n8); break;
@@ -265,10 +269,12 @@ int CPU::fetch()
 	case 0xF5:	_inst->PUSH_nn(af); break;
 	case 0xF6:	_inst->OR_n(n8); break;
 	case 0xF7:	_inst->RST_n(0x30); break;
+	case 0xF8:	_inst->LDHL_SP_n(); break;
+	case 0xF9:	_inst->LD_SP_HL(); break;
 	case 0xFA:	_inst->LD_A_n(n16); break;
 	case 0xFB:	_inst->EI(IME); break;
 	case 0xFE:	_inst->CP_n(n8); break;
-	//case 0xFF:	_inst->RST_n(0x38); break;
+	case 0xFF:	_inst->RST_n(0x38); break;
 	default:
 		cout << hex << "Unimplemented instruction \""<< (int)OPCODE << "\" at PC = " 
 			<< _registers.getPC() << dec << endl;
@@ -299,13 +305,183 @@ int CPU::CB_prefix(Instructions *inst)
 
 	switch (OPCODE)
 	{
+	case 0x00:	_inst->RLC(B); break;
+	case 0x01:	_inst->RLC(C); break;
+	case 0x02:	_inst->RLC(D); break;
+	case 0x03:	_inst->RLC(E); break;
+	case 0x04:	_inst->RLC(H); break;
+	case 0x05:	_inst->RLC(L); break;
+	case 0x06:	_inst->RLC(mHL); break;
+	case 0x07:	_inst->RLC(A); break;
+	case 0x08:	_inst->RRC(B); break;
+	case 0x09:	_inst->RRC(C); break;
+	case 0x0A:	_inst->RRC(D); break;
+	case 0x0B:	_inst->RRC(E); break;
+	case 0x0C:	_inst->RRC(H); break;
+	case 0x0D:	_inst->RRC(L); break;
+	case 0x0E:	_inst->RRC(mHL); break;
+	case 0x0F:	_inst->RRC(A); break;
+	case 0x10:	_inst->RL(B); break;
+	case 0x11:	_inst->RL(C); break;
+	case 0x12:	_inst->RL(D); break;
+	case 0x13:	_inst->RL(E); break;
+	case 0x14:	_inst->RL(H); break;
+	case 0x15:	_inst->RL(L); break;
+	case 0x16:	_inst->RL(mHL); break;
+	case 0x17:	_inst->RL(A); break;
+	case 0x18:	_inst->RR(B); break;
+	case 0x19:	_inst->RR(C); break;
+	case 0x1A:	_inst->RR(D); break;
+	case 0x1B:	_inst->RR(E); break;
+	case 0x1C:	_inst->RR(H); break;
+	case 0x1D:	_inst->RR(L); break;
+	case 0x1E:	_inst->RR(mHL); break;
+	case 0x1f:	_inst->RR(A); break;
+	case 0x20:	_inst->SLA(B); break;
+	case 0x21:	_inst->SLA(C); break;
+	case 0x22:	_inst->SLA(D); break;
+	case 0x23:	_inst->SLA(E); break;
+	case 0x24:	_inst->SLA(H); break;
+	case 0x25:	_inst->SLA(L); break;
+	case 0x26:	_inst->SLA(mHL); break;
+	case 0x27:	_inst->SLA(A); break;
+	case 0x28:	_inst->SRA(B); break;
+	case 0x29:	_inst->SRA(C); break;
+	case 0x2A:	_inst->SRA(D); break;
+	case 0x2B:	_inst->SRA(E); break;
+	case 0x2C:	_inst->SRA(H); break;
+	case 0x2D:	_inst->SRA(L); break;
+	case 0x2E:	_inst->SRA(mHL); break;
+	case 0x2F:	_inst->SRA(A); break;
+	case 0x30:	_inst->SWAP_n(B); break;
+	case 0x31:	_inst->SWAP_n(C); break;
+	case 0x32:	_inst->SWAP_n(D); break;
+	case 0x33:	_inst->SWAP_n(E); break;
+	case 0x34:	_inst->SWAP_n(H); break;
+	case 0x35:	_inst->SWAP_n(L); break;
+	case 0x36:	_inst->SWAP_n(mHL); break;
 	case 0x37:	_inst->SWAP_n(A); break;
+	case 0x38:	_inst->SRL(B); break;
+	case 0x39:	_inst->SRL(C); break;
+	case 0x3A:	_inst->SRL(D); break;
+	case 0x3B:	_inst->SRL(E); break;
+	case 0x3C:	_inst->SRL(H); break;
+	case 0x3D:	_inst->SRL(L); break;
+	case 0x3E:	_inst->SRL(mHL); break;
+	case 0x3F:	_inst->SRL(A); break;
+	case 0x40:	_inst->BIT_b_r(0, B); break;
+	case 0x41:	_inst->BIT_b_r(0, C); break;
+	case 0x42:	_inst->BIT_b_r(0, D); break;
+	case 0x43:	_inst->BIT_b_r(0, E); break;
+	case 0x44:	_inst->BIT_b_r(0, H); break;
+	case 0x45:	_inst->BIT_b_r(0, L); break;
+	case 0x46:	_inst->BIT_b_r(0, mHL); break;
+	case 0x47:	_inst->BIT_b_r(0, A); break;
+	case 0x48:	_inst->BIT_b_r(1, B); break;
+	case 0x49:	_inst->BIT_b_r(1, C); break;
+	case 0x4A:	_inst->BIT_b_r(1, D); break;
+	case 0x4B:	_inst->BIT_b_r(1, E); break;
+	case 0x4C:	_inst->BIT_b_r(1, H); break;
+	case 0x4D:	_inst->BIT_b_r(1, L); break;
+	case 0x4E:	_inst->BIT_b_r(1, mHL); break;
+	case 0x4F:	_inst->BIT_b_r(1, A); break;
+	case 0x50:	_inst->BIT_b_r(2, B); break;
+	case 0x51:	_inst->BIT_b_r(2, C); break;
+	case 0x52:	_inst->BIT_b_r(2, D); break;
+	case 0x53:	_inst->BIT_b_r(2, E); break;
+	case 0x54:	_inst->BIT_b_r(2, H); break;
+	case 0x55:	_inst->BIT_b_r(2, L); break;
+	case 0x56:	_inst->BIT_b_r(2, mHL); break;
+	case 0x57:	_inst->BIT_b_r(2, A); break;
+	case 0x58:	_inst->BIT_b_r(3, B); break;
+	case 0x59:	_inst->BIT_b_r(3, C); break;
+	case 0x5A:	_inst->BIT_b_r(3, D); break;
+	case 0x5B:	_inst->BIT_b_r(3, E); break;
+	case 0x5C:	_inst->BIT_b_r(3, H); break;
+	case 0x5D:	_inst->BIT_b_r(3, L); break;
+	case 0x5E:	_inst->BIT_b_r(3, mHL); break;
+	case 0x5F:	_inst->BIT_b_r(3, A); break;
+	case 0x60:	_inst->BIT_b_r(4, B); break;
+	case 0x61:	_inst->BIT_b_r(4, C); break;
+	case 0x66:	_inst->BIT_b_r(4, mHL); break;
+	case 0x67:	_inst->BIT_b_r(4, A); break;
+	case 0x68:	_inst->BIT_b_r(5, B); break;
+	case 0x69:	_inst->BIT_b_r(5, C); break;
+	case 0x6C:	_inst->BIT_b_r(5, H); break;
+	case 0x6E:	_inst->BIT_b_r(5, mHL); break;
+	case 0x6f:	_inst->BIT_b_r(5, A); break;
+	case 0x70:	_inst->BIT_b_r(6, B); break;
+	case 0x74:	_inst->BIT_b_r(6, H); break;
+	case 0x76:	_inst->BIT_b_r(6, mHL); break;
+	case 0x77:	_inst->BIT_b_r(6, A); break;
+	case 0x78:	_inst->BIT_b_r(7, B); break;
+	case 0x79:	_inst->BIT_b_r(7, C); break;
+	case 0x7A:	_inst->BIT_b_r(7, D); break;
+	case 0x7B:	_inst->BIT_b_r(7, E); break;
+	case 0x7C:	_inst->BIT_b_r(7, H); break;
+	case 0x7E:	_inst->BIT_b_r(7, mHL); break;
 	case 0x7F:	_inst->BIT_b_r(7, A); break;
-
+	case 0x7D:	_inst->BIT_b_r(7, L); break;
+	case 0x83:	_inst->RES_b_r(0, E); break;
+	case 0x86:	_inst->RES_b_r(0, mHL); break;
+	case 0x87:	_inst->RES_b_r(0, A); break;
+	case 0x8D:	_inst->RES_b_r(1, L); break;
+	case 0x8E:	_inst->RES_b_r(1, mHL); break;
+	case 0x8F:	_inst->RES_b_r(1, A); break;
+	case 0x92:	_inst->RES_b_r(2, D); break;
+	case 0x95:	_inst->RES_b_r(2, L); break;
+	case 0x96:	_inst->RES_b_r(2, mHL); break;
+	case 0x97:	_inst->RES_b_r(2, A); break;
+	case 0x9D:	_inst->RES_b_r(3, L); break;
+	case 0x9E:	_inst->RES_b_r(3, mHL); break;
+	case 0x9F:	_inst->RES_b_r(3, A); break;
+	case 0xA6:	_inst->RES_b_r(4, mHL); break;
+	case 0xA7:	_inst->RES_b_r(4, A); break;
+	case 0xAE:	_inst->RES_b_r(5, mHL); break;
+	case 0xAF:	_inst->RES_b_r(5, A); break;
+	case 0xB5:	_inst->RES_b_r(6, L); break;
+	case 0xB6:	_inst->RES_b_r(6, mHL); break;
+	case 0xB7:	_inst->RES_b_r(6, A); break;
+	case 0xBE:	_inst->RES_b_r(7, mHL); break;
+	case 0xBF:	_inst->RES_b_r(7, A); break;
+	case 0xC6:	_inst->SET_b_r(0, mHL); break;
+	case 0xc7:	_inst->SET_b_r(0, A); break;
+	case 0xCD:	_inst->SET_b_r(1, L); break;
+	case 0xCE:	_inst->SET_b_r(1, mHL); break;
+	case 0xCF:	_inst->SET_b_r(1, A); break;
+	case 0xD5:	_inst->SET_b_r(2, L); break;
+	case 0xD6:	_inst->SET_b_r(2, mHL); break;
+	case 0xD7:	_inst->SET_b_r(2, A); break;
+	case 0xD8:	_inst->SET_b_r(3, B); break;
+	case 0xD9:	_inst->SET_b_r(3, C); break;
+	case 0xDD:	_inst->SET_b_r(3, L); break;
+	case 0xDE:	_inst->SET_b_r(3, mHL); break;
+	case 0xE2:	_inst->SET_b_r(4, D); break;
+	case 0xE3:	_inst->SET_b_r(4, E); break;
+	case 0xE6:	_inst->SET_b_r(4, mHL); break;
+	case 0xE7:	_inst->SET_b_r(4, A); break;
+	case 0xEE:	_inst->SET_b_r(5, mHL); break;
+	case 0xF0:	_inst->SET_b_r(6, B); break;
+	case 0xF1:	_inst->SET_b_r(6, C); break;
+	case 0xF2:	_inst->SET_b_r(6, D); break;
+	case 0xF3:	_inst->SET_b_r(6, E); break;
+	case 0xF4:	_inst->SET_b_r(6, H); break;
+	case 0xF5:	_inst->SET_b_r(6, L); break;
+	case 0xF6:	_inst->SET_b_r(6, mHL); break;
+	case 0xF7:	_inst->SET_b_r(6, A); break;
+	case 0xF8:	_inst->SET_b_r(7, B); break;
+	case 0xF9:	_inst->SET_b_r(7, C); break;
+	case 0xFA:	_inst->SET_b_r(7, D); break;
+	case 0xFB:	_inst->SET_b_r(7, E); break;
+	case 0xFC:	_inst->SET_b_r(7, H); break;
+	case 0xFD:	_inst->SET_b_r(7, L); break;
+	case 0xFE:	_inst->SET_b_r(7, mHL); break;
+	case 0xFF:	_inst->SET_b_r(7, A); break;
 
 	default:
 		cout << hex << "Unimplemented CB instruction \"" << (int)OPCODE << "\" at PC = "
 			<< _registers.getPC() << dec << endl;
+		return -1;
 		break;
 	}
 	return _CBinstCycles[OPCODE];
@@ -495,68 +671,24 @@ void CPU::uncondCycles()
 	_instCycles[0xDC] = 12;
 }
 
-void CPU::updateTimers(const int &cycles)
-{
-	divideRegister(cycles);
-
-	int tempFreq = selectFrequency();
-
-	if (tempFreq != _timeFrequency)
-	{
-		_timeFrequency = tempFreq;
-		_timeCounter = CLOCKSPEED / _timeFrequency;
-	}
-		
-	if (isClockEnabled())
-	{
-		_timeCounter -= cycles;
-
-		if (_timeCounter <= 0)
-		{
-			if (_memory->read(TIMA) == 255)
-			{
-				_memory->write(TIMA, _memory->read(TMA));
-				requestInterrupt(Timer);
-			}
-			else _memory->write(TIMA, _memory->read(TIMA) + 1);
-		}
-	}
-}
-
-int CPU::selectFrequency()
-{
-	BYTE TMA_info = _memory->read(TMA);
-	TMA_info = TMA_info & 0x03;
-
-	switch (TMA_info)
-	{
-	case 0x00: return 4096;
-	case 0x01: return 262144;
-	case 0x02: return 65536;
-	case 0x03: return 16384;
-	}
-}
-
-bool CPU::isClockEnabled()
-{
-	return testBit(_memory->read(0xFF07), 2) ? true : false;
-}
-
-void CPU::divideRegister(const int &cycles)
-{
-	_divideCounter += cycles;
-	if (_divideCounter >= 255)
-	{
-		_divideCounter = 0;
-		_memory->directModification(0xFF04, _memory->read(0xFF04) + 1);
-	}
-}
-
 void CPU::requestInterrupt(const int &id)
 {
+	/*switch (id)
+	{
+	case VBlank: cout << "VBLANK requested" << endl; break;
+	case LCD: cout << "LCD requested" << endl; break;
+	case Timer: cout << "Timer requested" << endl; break;
+	case JoyPad: cout << "JoyPad requested" << endl; break;
+	default:
+		break;
+	}*/
+
 	BYTE reqInt = _memory->read(0xFF0F);
-	reqInt = reqInt & (0x01 << id);
+	//cout << "REQ_BEF: " << hex << (int)reqInt << endl;
+	reqInt = bitSet(reqInt, id);
 	_memory->write(0xFF0F, reqInt);
+	//cout << "REQ_AFT: " << hex << (int)reqInt << endl;
+	//cout << "ENAB: " << hex << (int)_memory->read(0xFFFF) << endl;
 }
 
 void CPU::doInterrupts()
@@ -566,7 +698,10 @@ void CPU::doInterrupts()
 		BYTE reqInt = _memory->read(0xFF0F);
 		BYTE enabInt = _memory->read(0xFFFF);
 
-		if (reqInt > 0)
+		//cout << "REQ: " << hex << (int)reqInt << endl;
+		//cout << "ENAB: " << hex << (int)enabInt << endl;
+
+		if (reqInt > 0x00)
 		{
 			for (int i = 0; i < 5; i++)
 			{
@@ -582,23 +717,90 @@ void CPU::doInterrupts()
 
 void CPU::serviceInterrupt(const int &id)
 {
-	cout << "Interrupt Serviced" << endl;
+	//cout << "Interrupt Serviced" << endl;
 	IME = false;
 	BYTE reqInt = _memory->read(0xFF0F);
 	reqInt = bitReset(reqInt, id);
 	_memory->write(0xFF0F, reqInt);
 
-	_inst->getRegisters()->setSP(_inst->getRegisters()->getSP() - 1);
-	_memory->write(_inst->getRegisters()->getSP(), (_inst->getRegisters()->getPC() & 0xFF00) >> 8);
-	_inst->getRegisters()->setSP(_inst->getRegisters()->getSP() - 1);
-	_memory->write(_inst->getRegisters()->getSP(), _inst->getRegisters()->getPC() & 0x00FF);
+	_registers.setSP(_registers.getSP() - 1);
+	_memory->write(_registers.getSP(), (_registers.getPC() & 0xFF00) >> 8);
+	_registers.setSP(_registers.getSP() - 1);
+	_memory->write(_registers.getSP(), _registers.getPC() & 0x00FF);
+
+	
+	/*switch (id)
+	{
+	case VBlank: cout << "VBLANK serviced" << endl; break;
+	case LCD: cout << "LCD serviced" << endl; break;
+	case Timer: cout << "Timer serviced" << endl; break;
+	case JoyPad: cout << "JoyPad Serviced" << endl; break;
+	default:
+		break;
+	}*/
 
 	switch (id)
 	{
-	case VBlank: _inst->getRegisters()->setPC(0x40); break;
-	case LCD: _inst->getRegisters()->setPC(0x48); break;
-	case Timer: _inst->getRegisters()->setPC(0x50); break;
+	case VBlank: _registers.setPC(0x40); break;
+	case LCD: _registers.setPC(0x48); break;
+	case Timer: _registers.setPC(0x50); break;
 	case CLink: break; // Cable Link
-	case JoyPad: _inst->getRegisters()->setPC(0x60); break;
+	case JoyPad: _registers.setPC(0x60); break;
+	}
+}
+
+
+void CPU::updateTimers(const int &cycles)
+{
+	//cout << hex << (int)_memory->read(TAC) << endl;
+	divideRegister(cycles);
+	if (isClockEnabled())
+	{
+		_timeCounter -= cycles;
+
+		if (_timeCounter <= 0)
+		{
+			setClockFreq();
+
+			if (_memory->read(TIMA) == 255)
+			{
+				_memory->write(TIMA, _memory->read(TMA));
+				requestInterrupt(Timer);
+			}
+			else _memory->write(TIMA, _memory->read(TIMA) + 1);
+		}
+	}
+}
+
+BYTE CPU::getClockFreq() const
+{
+	return _memory->read(TAC) & 0x3;
+}
+
+void CPU::setClockFreq()
+{
+	BYTE freq = getClockFreq();
+	switch (freq)
+	{
+	case 0: _timeCounter = 1024; break; // freq 4096
+	case 1: _timeCounter = 16; break; // freq 262144
+	case 2: _timeCounter = 64; break; // freq 65536
+	case 3: _timeCounter = 256; break; // freq 16382
+	}
+}
+
+bool CPU::isClockEnabled()
+{
+	//cout << hex << (int)_memory->read(TAC) << endl;
+	return testBit(_memory->read(TAC), 2) ? true : false;
+}
+
+void CPU::divideRegister(const int &cycles)
+{
+	_divideCounter += cycles;
+	if (_divideCounter >= 255)
+	{
+		_divideCounter = 0;
+		_memory->directModification(0xFF04, _memory->read(0xFF04) + 1);
 	}
 }

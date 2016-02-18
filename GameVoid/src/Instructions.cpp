@@ -143,18 +143,19 @@ void Instructions::INC_n(const regID &n)
 	switch (n)
 	{
 	case mHL:
-		_registers->setF_H(hasHalfCarry8(_memory->read(_registers->getHL()), 1));
+		_registers->setF_H(hasHalfCarry16(_memory->read(_registers->getHL()), 1));
 		_memory->write(_registers->getHL(), _memory->read(_registers->getHL()) + 1);
+		_registers->setF_Z(_memory->read(_registers->getHL()) == 0);
 		break;
 	default:
 		// Set carry in flag
 		_registers->setF_H(hasHalfCarry8(_registers->getReg(n), 1));
 		_registers->setReg(n, _registers->getReg(n) + 1);
+		_registers->setF_Z(_registers->getReg(n) == 0);
 		break;
 	}
 
-	// Set Z and N in flag
-	_registers->setF_Z(_registers->getReg(n) == 0);
+	// Set N in flag
 	_registers->setF_N(0);
 
 	_registers->addPC(1);
@@ -164,7 +165,9 @@ void Instructions::INC_n(const regID &n)
 void Instructions::DEC_n(const regID &n)
 {
 	// Set carry in flag
-	_registers->setF_H(hasHalfBorrow8(_registers->getReg(n), 1));
+	if (n != mHL) 
+		_registers->setF_H(hasHalfBorrow8(_registers->getReg(n), 1));
+	else _registers->setF_H(hasHalfBorrow8(_memory->read(_registers->getHL()), 1));
 
 	switch (n)
 	{
@@ -177,7 +180,9 @@ void Instructions::DEC_n(const regID &n)
 	}
 
 	// Set Z and N in flag
-	_registers->setF_Z(_registers->getReg(n) == 0);
+	if (n != mHL) 
+		_registers->setF_Z(_registers->getReg(n) == 0);
+	else _registers->setF_Z(_memory->read(_registers->getHL()) == 0);
 	_registers->setF_N(1);
 
 	_registers->addPC(1);
@@ -329,7 +334,7 @@ void Instructions::RRA()
 	// Set bit 0 as carry
 	_registers->setF_C(_registers->getA() & 0x01);
 	// Rotate
-	_registers->setA(((_registers->getA() >> 1) & 0xFE) + (prevC << 7));
+	_registers->setA(((_registers->getA() >> 1) & 0x7F) + (prevC << 7));
 	// Set flag values
 	_registers->setF_N(0);
 	_registers->setF_H(0);
@@ -492,9 +497,15 @@ void Instructions::LD_r1_r2(const regID &r1, const regID &r2)
 	if (r1 == mHL)
 	{
 		if (r2 != n8)
+		{
 			_memory->write(_registers->getHL(), (BYTE)_registers->getReg(r2));
-		else _memory->write(_registers->getHL(), read8());
-		_registers->addPC(2);
+			_registers->addPC(1);
+		}
+		else 
+		{
+			_memory->write(_registers->getHL(), read8());
+			_registers->addPC(2);
+		}
 	}
 	else
 	{
@@ -514,6 +525,17 @@ void Instructions::SCF()
 	_registers->addPC(1);
 }
 
+// 0x3A
+void Instructions::LD_A_HLD()
+{
+	// Loads HL address value into A
+	_registers->setA(_memory->read(_registers->getHL()));
+	// Increment HL
+	_registers->setHL(_registers->getHL() - 1);
+
+	_registers->addPC(1);
+}
+
 // 0x3F
 void Instructions::CCF()
 {
@@ -527,6 +549,7 @@ void Instructions::CCF()
 void Instructions::HALT()
 {
 	// TODO
+	//cout << "HALT USED" << endl;
 	_registers->addPC(1);
 }
 
@@ -717,6 +740,7 @@ void Instructions::OR_n(const regID &n)
 		_registers->setA(_registers->getReg(n) | _registers->getA());
 		break;
 	}
+
 	// Set Flags
 	_registers->setF_N(0);
 	_registers->setF_C(0);
@@ -765,10 +789,7 @@ void Instructions::RET_cc(const regID &cc, bool &condTaken)
 	case nZ:
 		if (_registers->getF_Z() == 0)
 		{
-			_registers->setPC(_memory->read(_registers->getSP()));
-			_registers->addSP(1);
-			_registers->setPC((_registers->getPC() << 8) + _memory->read(_registers->getSP()));
-			_registers->addSP(1);
+			RET();
 			condTaken = true;
 		}
 		else
@@ -780,10 +801,7 @@ void Instructions::RET_cc(const regID &cc, bool &condTaken)
 	case Z:
 		if (_registers->getF_Z() == 1)
 		{
-			_registers->setPC(_memory->read(_registers->getSP()));
-			_registers->addSP(1);
-			_registers->setPC((_registers->getPC() << 8) + _memory->read(_registers->getSP()));
-			_registers->addSP(1);
+			RET();
 			condTaken = true;
 		}
 		else
@@ -795,10 +813,7 @@ void Instructions::RET_cc(const regID &cc, bool &condTaken)
 	case nC:
 		if (_registers->getF_C() == 0)
 		{
-			_registers->setPC(_memory->read(_registers->getSP()));
-			_registers->addSP(1);
-			_registers->setPC((_registers->getPC() << 8) + _memory->read(_registers->getSP()));
-			_registers->addSP(1);
+			RET();
 			condTaken = true;
 		}
 		else 
@@ -810,10 +825,7 @@ void Instructions::RET_cc(const regID &cc, bool &condTaken)
 	case sC:
 		if (_registers->getF_C() == 1)
 		{
-			_registers->setPC(_memory->read(_registers->getSP()));
-			_registers->addSP(1);
-			_registers->setPC((_registers->getPC() << 8) + _memory->read(_registers->getSP()));
-			_registers->addSP(1);
+			RET();
 			condTaken = true;
 		}
 		else 
@@ -831,36 +843,8 @@ void Instructions::RET_cc(const regID &cc, bool &condTaken)
 // 0xC1, 0xD1, 0xE1, 0xF1
 void Instructions::POP_nn(const regID &nn)
 {
-	switch (nn)
-	{
-	case bc:
-		_registers->setBC(_memory->read(_registers->getSP()));
-		_registers->addSP(1);
-		_registers->setBC((_registers->getBC() << 8) + _memory->read(_registers->getSP()));
-		_registers->addSP(1);
-		break;
-	case de:
-		_registers->setDE(_memory->read(_registers->getSP()));
-		_registers->addSP(1);
-		_registers->setDE((_registers->getDE() << 8) + _memory->read(_registers->getSP()));
-		_registers->addSP(1);
-		break;
-	case hl:
-		_registers->setHL(_memory->read(_registers->getSP()));
-		_registers->addSP(1);
-		_registers->setHL((_registers->getHL() << 8) + _memory->read(_registers->getSP()));
-		_registers->addSP(1);
-		break;
-	case af:
-		_registers->setAF(_memory->read(_registers->getSP()));
-		_registers->addSP(1);
-		_registers->setAF((_registers->getAF() << 8) + _memory->read(_registers->getSP()));
-		_registers->addSP(1);
-		break;
-	default:
-		cout << "Wrong register ID" << endl;
-		break;
-	}
+	_registers->setReg(nn, (_memory->read(_registers->getSP() + 1) << 8) | _memory->read(_registers->getSP()));
+	_registers->addSP(2);
 
 	_registers->addPC(1);
 }
@@ -1026,6 +1010,13 @@ void Instructions::CALL_nn()
 	_registers->setPC(read16());
 }
 
+void Instructions::RETI(bool &IME)
+{
+	_registers->setPC((_memory->read(_registers->getSP() + 1) << 8) | _memory->read(_registers->getSP()));
+	_registers->addSP(2);
+	IME = true;
+}
+
 // 0xE0
 void Instructions::LDH_n_A()
 {
@@ -1088,30 +1079,215 @@ void Instructions::EI(bool &IME)
 	_registers->addPC(1);
 }
 
-Registers *Instructions::getRegisters()
+// 0xF8
+void Instructions::LDHL_SP_n()
 {
-	return _registers;
+	// Signed value
+	char value;
+
+	value = read8();
+	
+	_registers->setF_H(hasHalfCarry16(_registers->getSP(), value));
+	_registers->setF_C(hasCarry16(_registers->getSP(), value));
+
+	_registers->setSP(_registers->getSP() + value);
+	_registers->setHL(_registers->getSP());
+
+	_registers->addPC(2);
+}
+
+// 0xF9
+void Instructions::LD_SP_HL()
+{
+	_registers->setSP(_registers->getHL());
+	_registers->addPC(1);
+}
+
+
+void Instructions::RLC(const regID &n)
+{
+	// Set bit 7 as carry
+	if (n != mHL)
+		_registers->setF_C((_registers->getReg(n) & 0x80) >> 7);
+	else _registers->setF_C((_memory->read(_registers->getHL()) & 0x80) >> 7);
+	// Rotate
+	if (n != mHL)
+		_registers->setReg(n, ((_registers->getReg(n) << 1) & 0xFE) + _registers->getF_C());
+	else _memory->write(_registers->getHL(), ((_memory->read(_registers->getHL()) << 1) & 0xFE) + _registers->getF_C());
+	// Set flag values
+	_registers->setF_N(0);
+	_registers->setF_H(0);
+	_registers->setF_Z(0);
+
+	_registers->addPC(1);
+}
+
+
+void Instructions::RRC(const regID &n)
+{
+	// Set bit 0 as carry
+	if (n != mHL)
+		_registers->setF_C(_registers->getReg(n) & 0x01);
+	else _registers->setF_C(_memory->read(_registers->getHL()) & 0x01);
+	// Rotate
+	if (n != mHL)
+		_registers->setReg(n, ((_registers->getReg(n) >> 1) & 0x7F) + (_registers->getF_C() << 7));
+	else _memory->write(_registers->getHL(), ((_memory->read(_registers->getHL()) >> 1) & 0x7F) + (_registers->getF_C() << 7));
+	// Set flag values
+	_registers->setF_N(0);
+	_registers->setF_H(0);
+	_registers->setF_Z(0);
+
+	_registers->addPC(1);
+}
+
+void Instructions::RL(const regID &n)
+{
+	// Save previous carry
+	BYTE prevC = (_registers->getF() & 0x10) >> 4;
+	// Set bit 0 as carry
+	if (n != mHL)
+		_registers->setF_C(_registers->getReg(n) & 0x01);
+	else _registers->setF_C(_memory->read(_registers->getHL()) & 0x01);
+	// Rotate
+	if (n != mHL)
+		_registers->setReg(n, ((_registers->getReg(n) << 1) & 0xFE) + prevC);
+	else _memory->write(_registers->getHL(), ((_memory->read(_registers->getHL()) << 1) & 0xFE) + prevC);
+	// Set flag values
+	_registers->setF_N(0);
+	_registers->setF_H(0);
+	if (n != mHL)
+		_registers->setF_Z(_registers->getReg(n) == 0);
+	else _registers->setF_Z(_memory->read(_registers->getHL()) == 0);
+
+	_registers->addPC(1);
+}
+
+void Instructions::RR(const regID &n)
+{
+	// Save previous carry
+	BYTE prevC = (_registers->getF() & 0x10) >> 4;
+	// Set bit 0 as carry
+	if (n != mHL)
+		_registers->setF_C(_registers->getReg(n) & 0x01);
+	else _registers->setF_C(_memory->read(_registers->getHL()) & 0x01);
+	// Rotate
+	if (n != mHL)
+		_registers->setReg(n, ((_registers->getReg(n) >> 1) & 0x7F) + (prevC << 7));
+	else _memory->write(_registers->getHL(), ((_memory->read(_registers->getHL()) >> 1) & 0x7F) + (prevC << 7));
+	// Set flag values
+	_registers->setF_N(0);
+	_registers->setF_H(0);
+	if (n != mHL)
+		_registers->setF_Z(_registers->getReg(n) == 0);
+	else _registers->setF_Z(_memory->read(_registers->getHL()) == 0);
+
+	_registers->addPC(1);
+}
+
+void Instructions::SLA(const regID &n)
+{
+	// Set bit 7 as carry
+	if (n != mHL)
+		_registers->setF_C((_registers->getReg(n) & 0x80) >> 7);
+	else _registers->setF_C((_memory->read(_registers->getHL()) & 0x80) >> 7);
+	// Left shift
+	if (n != mHL) 
+		_registers->setReg(n, ((_registers->getReg(n) << 1) & 0xFE));
+	else _memory->write(_registers->getHL(), ((_memory->read(_registers->getHL()) << 1) & 0xFE));
+	// Set flag values
+	_registers->setF_N(0);
+	_registers->setF_H(0);
+	if (n != mHL)
+		_registers->setF_Z(_registers->getReg(n) == 0);
+	else _registers->setF_Z(_memory->read(_registers->getHL()) == 0);
+
+	_registers->addPC(1);
+}
+
+void Instructions::SRA(const regID &n)
+{
+	// Set bit 7 as carry
+	if (n != mHL)
+		_registers->setF_C((_registers->getReg(n) & 0x80) >> 7);
+	else _registers->setF_C((_memory->read(_registers->getHL()) & 0x80) >> 7);
+	// Left shift
+	if (n != mHL)
+		_registers->setReg(n , ((_registers->getReg(n) >> 1) & 0x7F));
+	else _memory->write(_registers->getHL(), ((_memory->read(_registers->getHL()) >> 1) & 0x7F));
+	// Set flag values
+	_registers->setF_N(0);
+	_registers->setF_H(0);
+	if (n != mHL)
+		_registers->setF_Z(_registers->getReg(n) == 0);
+	else _registers->setF_Z(_memory->read(_registers->getHL()) == 0);
+
+	_registers->addPC(1);
+}
+
+void Instructions::SRL(const regID &n)
+{
+	// Set bit 7 as carry
+	if (n != mHL)
+		_registers->setF_C((_registers->getReg(n) & 0x80) >> 7);
+	else _registers->setF_C((_memory->read(_registers->getHL()) & 0x80) >> 7);
+	// Left shift
+	if (n != mHL)
+		_registers->setA(((_registers->getReg(n) >> 1) & 0x7F));
+	else _registers->setA(((_memory->read(_registers->getHL()) >> 1) & 0x7F));
+	// Set flag values
+	_registers->setF_N(0);
+	_registers->setF_H(0);
+	if (n != mHL)
+		_registers->setF_Z(_registers->getReg(n) == 0);
+	else _registers->setF_Z(_memory->read(_registers->getHL()) == 0);
+
+	_registers->addPC(1);
 }
 
 // CB 0x37
 void Instructions::SWAP_n(const regID &n)
 {
-	_registers->setReg(n, (_registers->getReg(n) << 4) | (_registers->getReg(n) >> 4));
+	if (n != mHL)
+		_registers->setReg(n, (_registers->getReg(n) << 4) | (_registers->getReg(n) >> 4));
+	else _memory->write(_registers->getHL(), (_memory->read(_registers->getHL()) << 4) | (_registers->getHL() >> 4));
 
-	_registers->setF_Z(_registers->getReg(n) == 0);
+	if (n != mHL)
+		_registers->setF_Z(_registers->getReg(n) == 0);
+	else _registers->setF_Z(_memory->read(_registers->getHL()) == 0);
 	_registers->setF_N(0);
 	_registers->setF_H(0);
 	_registers->setF_C(0);
 
-	_registers->addPC(2);
+	_registers->addPC(1);
 }
 
 // CB 0x7F
 void Instructions::BIT_b_r(const BYTE &b, const regID &r)
 {
-	_registers->setF_Z(((_registers->getReg(r) & (0x01 << b)) >> b) == 0);
+	if (r != mHL)
+		_registers->setF_Z(((_registers->getReg(r) & (0x01 << b)) >> b) == 0);
+	else _registers->setF_Z(((_memory->read(_registers->getHL()) & (0x01 << b)) >> b) == 0);
 	_registers->setF_N(0);
 	_registers->setF_H(1);
 
-	_registers->addPC(2);
+	_registers->addPC(1);
+}
+
+void Instructions::SET_b_r(const BYTE &b, const regID &r)
+{
+	if (r != mHL)
+		_registers->setReg(r, _registers->getReg(r) | (0x01 << b));
+	else _memory->write(_registers->getHL(), _memory->read(_registers->getHL()) | (0x01 << b));
+
+	_registers->addPC(1);
+}
+
+void Instructions::RES_b_r(const BYTE &b, const regID &r)
+{
+	if (r != mHL)
+		_registers->setReg(r, _registers->getReg(r) & ~(0x01 << b));
+	else _memory->write(_registers->getHL(), _memory->read(_registers->getHL()) & ~(0x01 << b));
+
+	_registers->addPC(1);
 }

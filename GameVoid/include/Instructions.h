@@ -29,9 +29,12 @@ public:
 	void LD_HLI_A();
 	void LD_HLD_A();
 	void LD_A_HLI();
+	void LD_A_HLD();
 	void LD_r1_r2(const regID &r1, const regID &r2);
 	void LD_C_A();
 	void LD_A_C();
+	void LD_SP_HL();
+	void LDHL_SP_n();
 	void LDH_n_A();
 	void LDH_A_n();
 	void ADD_HL_n(const regID &n);
@@ -63,6 +66,7 @@ public:
 	void CP_n(const regID &n);
 	void RET_cc(const regID &cc, bool &condTaken);
 	void RET();
+	void RETI(bool &IME);
 	void POP_nn(const regID &nn);
 	void CALL_nn();
 	void CALL_cc_nn(const regID &cc, bool &condTaken);
@@ -73,11 +77,18 @@ public:
 	void PUSH_nn(const regID &nn);
 	void RST_n(const BYTE &n);
 
+	void RLC(const regID &n);
+	void RRC(const regID &n);
 	void SWAP_n(const regID &n);
 	void BIT_b_r(const BYTE &b, const regID &r);
+	void RES_b_r(const BYTE &b, const regID &r);
+	void SLA(const regID &n);
+	void SRA(const regID &n);
+	void SRL(const regID &n);
+	void SET_b_r(const BYTE &b, const regID &r);
+	void RR(const regID &n);
+	void RL(const regID &n);
 
-	Registers *getRegisters();
-	
 private:
 	Memory *_memory;
 	Registers *_registers;

@@ -1,12 +1,17 @@
 #include "Memory.h"
 
-void Memory::init(Cartridge *cartridge)
+void Memory::init(Cartridge *cartridge, Controller *controller)
 {
-	// Receibe Cartridge data
+	// Receive Cartridge data
 	_cartridge = cartridge;
+
+	_controller = controller;
 
 	// Init Memory
 	reset();
+
+	_timerTriger = false;
+	_timerData = 0;
 }
 
 BYTE Memory::read(const WORD &address)
@@ -30,19 +35,34 @@ void Memory::write(const WORD &address, const BYTE &value)
 	}
 	// In the following two cases we are writing to RAM
 	// The internal RAM is echoed from 0xE000 to 0xFE00
-	else if (address >= 0xC000 && address < 0xE000)
+	else if (address >= 0xC000 && address < 0xDE00)
 	{
+		_MEMORY[address] = value;
 		// If we write to internal RAM, value also appears in echoed RAM
 		_MEMORY[address + 0x2000] = value;
 	}
 	else if (address >= 0xE000 && address < 0xFE00)
 	{
 		// if we write to echoed RAM, value also appears in internal RAM
+		_MEMORY[address] = value;
 		_MEMORY[address - 0x2000] = value;
 	}
+	else if (address == 0xFF00)
+	{
+		_MEMORY[address] = value;
+		_MEMORY[address] = _controller->getJoypadState();
+	}
+	else if (address == 0xFF04)
+	{
+		_MEMORY[address] = 0;
+		_resetDiv = true;
+	}
 	// If we write to this registers, they are set to 0
-	else if (address == 0xFF04) 
-		_MEMORY[0xFF04] = 0;
+	else if (address == TAC)
+	{
+		_timerTriger = true;
+		_timerData = value;
+	}
 	else if (address == 0xFF44)
 		_MEMORY[0xFF44] = 0;
 	// DMA Transfer
@@ -51,7 +71,7 @@ void Memory::write(const WORD &address, const BYTE &value)
 		DMATransfer(value);
 	}
 	// Write to memory
-	_MEMORY[address] = value;
+	else _MEMORY[address] = value;
 }
 
 void Memory::reset()
@@ -79,6 +99,7 @@ void Memory::reset()
 	_MEMORY[BGP]  = 0xFC;
 	_MEMORY[OBP0] = 0xFF;
 	_MEMORY[OBP1] = 0xFF;
+	_MEMORY[TAC]  = 0xF8;
 }
 
 void Memory::directModification(const WORD &address, const BYTE &value)
@@ -93,4 +114,25 @@ void Memory::DMATransfer(const BYTE &data)
 	{
 		write(0xFE00 + i, read(address + i));
 	}
+}
+
+bool Memory::timerTriger()
+{
+	return _timerTriger;
+}
+
+void Memory::resetTimerTriger()
+{
+	_timerData = 0;
+	_timerTriger = false;;
+}
+
+BYTE Memory::getTimerData()
+{
+	return _timerData;
+}
+
+BYTE *Memory::getMemoryData()
+{
+	return _MEMORY;
 }

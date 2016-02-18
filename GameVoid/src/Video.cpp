@@ -5,6 +5,8 @@ Video::Video()
 	_window.init("GameVoid", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	_scanLineCounter = 456;
 	BG_WD = SDL_CreateTexture(Window::mRenderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 160, 144);
+	_screenDATA = new Uint32[160 * 144];
+	memset(_screenDATA, 255, 160 * 144 * sizeof(Uint32));
 }
 
 Video::~Video()
@@ -29,8 +31,8 @@ void Video::updateGraphics(const int &cycles, CPU &cpuTemp)
 	if (_scanLineCounter <= 0)
 	{
 		// time to move onto next scanline
-		_memory->directModification(0xFF44, _memory->read(0xFF44) + 1);
-		BYTE currentline = _memory->read(0xFF44);
+		_memory->directModification(LY, _memory->read(LY) + 1);
+		BYTE currentline = _memory->read(LY);
 
 		_scanLineCounter = 456;
 
@@ -40,7 +42,7 @@ void Video::updateGraphics(const int &cycles, CPU &cpuTemp)
 
 		// if gone past scanline 153 reset to 0
 		else if (currentline > 153)
-			_memory->directModification(0xFF44, 0x00);
+			_memory->directModification(LY, 0x00);
 
 		// draw the current scanline 
 		else if (currentline < 144)
@@ -55,14 +57,14 @@ void Video::setLCDStatus(CPU &cpuTemp)
 	{
 		// set the mode to 1 during lcd disabled and reset scanline
 		_scanLineCounter = 456;
-		_memory->directModification(0xFF44, 0x00);
+		_memory->directModification(LY, 0x00);
 		status &= 0xFC;
 		status = bitSet(status, 0);
 		_memory->write(0xFF41, status);
 		return;
 	}
 
-	BYTE currentline = _memory->read(0xFF44);
+	BYTE currentline = _memory->read(LY);
 	BYTE currentmode = status & 0x03;
 
 	BYTE mode = 0x00;
@@ -112,7 +114,7 @@ void Video::setLCDStatus(CPU &cpuTemp)
 		cpuTemp.requestInterrupt(LCD);
 
 	// check the conincidence flag
-	if (_memory->read(0xFF44) == _memory->read(0xFF45))
+	if (_memory->read(LY) == _memory->read(LYC))
 	{
 		status = bitSet(status, 2);
 		if (testBit(status, 6))
@@ -127,12 +129,12 @@ void Video::setLCDStatus(CPU &cpuTemp)
 
 bool Video::isLCDEnabled()
 {
-	return ((_memory->read(0xFF40) & 0x80) == 0x80);
+	return ((_memory->read(LCDC) & 0x80) == 0x80);
 }
 
 void Video::drawScanLine()
 {
-	BYTE control = _memory->read(0xFF40);
+	BYTE control = _memory->read(LCDC);
 	if (testBit(control, 0))
 		renderTiles();
 
@@ -147,24 +149,24 @@ void Video::renderTiles()
 	bool unsig = true;
 
 	// where to draw the visual area and the window
-	BYTE scrollY = _memory->read(0xFF42);
-	BYTE scrollX = _memory->read(0xFF43);
-	BYTE windowY = _memory->read(0xFF4A);
-	BYTE windowX = _memory->read(0xFF4B) - 7;
+	BYTE scrollY = _memory->read(SCY);
+	BYTE scrollX = _memory->read(SCX);
+	BYTE windowY = _memory->read(WY);
+	BYTE windowX = _memory->read(WX) - 7;
 
 	bool usingWindow = false;
 
 	// is the window enabled?
-	if (testBit(_memory->read(0xFF40), 5))
+	if (testBit(_memory->read(LCDC), 5))
 	{
 		// is the current scanline we're drawing 
 		// within the windows Y pos?,
-		if (windowY <= _memory->read(0xFF44))
+		if (windowY <= _memory->read(LY))
 			usingWindow = true;
 	}
 
 	// which tile data are we using? 
-	if (testBit(_memory->read(0xFF40), 4))
+	if (testBit(_memory->read(LCDC), 4))
 	{
 		tileData = 0x8000;
 	}
@@ -179,7 +181,7 @@ void Video::renderTiles()
 	// which background mem?
 	if (false == usingWindow)
 	{
-		if (testBit(_memory->read(0xFF40), 3))
+		if (testBit(_memory->read(LCDC), 3))
 			backgroundMemory = 0x9C00;
 		else
 			backgroundMemory = 0x9800;
@@ -187,7 +189,7 @@ void Video::renderTiles()
 	else
 	{
 		// which window memory?
-		if (testBit(_memory->read(0xFF40), 6))
+		if (testBit(_memory->read(LCDC), 6))
 			backgroundMemory = 0x9C00;
 		else
 			backgroundMemory = 0x9800;
@@ -198,9 +200,9 @@ void Video::renderTiles()
 	// yPos is used to calculate which of 32 vertical tiles the 
 	// current scanline is drawing
 	if (!usingWindow)
-		yPos = scrollY + _memory->read(0xFF44);
+		yPos = scrollY + _memory->read(LY);
 	else
-		yPos = _memory->read(0xFF44) - windowY;
+		yPos = _memory->read(LY) - windowY;
 
 	// which of the 8 vertical pixels of the current 
 	// tile is the scanline on?
@@ -264,7 +266,7 @@ void Video::renderTiles()
 
 		// now we have the colour id get the actual 
 		// colour from palette 0xFF47
-		COLOUR col = getColour(colourNum, 0xFF47);
+		COLOUR col = getColour(colourNum, BGP);
 		int red = 0;
 		int green = 0;
 		int blue = 0;
@@ -285,10 +287,7 @@ void Video::renderTiles()
 		{
 			continue;
 		}
-
-		_screenDATA[pixel][finaly][0] = red;
-		_screenDATA[pixel][finaly][1] = green;
-		_screenDATA[pixel][finaly][2] = blue;
+		_screenDATA[finaly * 160 + pixel] = (red << 16) + (green << 8) + blue;
 	}
 }
 
@@ -328,7 +327,7 @@ COLOUR Video::getColour(BYTE colourNum, WORD address)
 void Video::renderSprites()
 {
 	bool use8x16 = false;
-	if (testBit(_memory->read(0xFF40), 2))
+	if (testBit(_memory->read(LCDC), 2))
 		use8x16 = true;
 
 	for (int sprite = 0; sprite < 40; sprite++)
@@ -343,7 +342,7 @@ void Video::renderSprites()
 		bool yFlip = testBit(attributes, 6);
 		bool xFlip = testBit(attributes, 5);
 
-		int scanline = _memory->read(0xFF44);
+		int scanline = _memory->read(LY);
 
 		int ysize = 8;
 		if (use8x16)
@@ -412,9 +411,7 @@ void Video::renderSprites()
 					continue;
 				}
 
-				_screenDATA[pixel][scanline][0] = red;
-				_screenDATA[pixel][scanline][1] = green;
-				_screenDATA[pixel][scanline][2] = blue;
+				_screenDATA[scanline * 160 + pixel] = (red << 16) + (green << 8) + blue;
 			}
 		}
 	}
@@ -424,11 +421,11 @@ void Video::render()
 {
 	SDL_RenderClear(Window::mRenderer);
 
-	/*_screenDATA[20][3][0] = 44;
-	_screenDATA[20][3][1] = 0;
-	_screenDATA[20][3][2] = 0;*/
+	//_screenDATA[160 * 40 + 40] = 200;
+	//_screenDATA[160 * 40 + 41] = 65280;
+	//_screenDATA[160 * 40 + 40] = 44;
 
-	SDL_UpdateTexture(BG_WD, NULL, _screenDATA, 160 * sizeof(BYTE));
+	SDL_UpdateTexture(BG_WD, NULL, _screenDATA, 160 * sizeof(Uint32));
 	SDL_RenderCopy(Window::mRenderer, BG_WD, NULL, NULL);
 
 	SDL_RenderPresent(Window::mRenderer);

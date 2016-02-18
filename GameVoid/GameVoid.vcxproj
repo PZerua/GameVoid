@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Cartridge.cpp" />
+    <ClCompile Include="src\Controller.cpp" />
     <ClCompile Include="src\CPU.cpp" />
     <ClCompile Include="src\GameBoy.cpp" />
     <ClCompile Include="src\Instructions.cpp" />
@@ -35,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Cartridge.h" />
+    <ClInclude Include="include\Controller.h" />
     <ClInclude Include="include\CPU.h" />
     <ClInclude Include="include\GameBoy.h" />
     <ClInclude Include="include\Header.h" />

@@ -36,7 +36,7 @@ BYTE MBC1::read(const WORD &address)
 	{
 		if (_RAMsize == 0 || !_RAMenabled)
 			throw exception("Trying to read uninitialized or null RAM");
-		return _ROMdata[(0xA000 * _RAMbank) + (address - 0xA000)];
+		return _ROMdata[(0x2000 * _RAMbank) + (address - 0xA000)];
 	}
 	else throw exception("Wrong address");
 }

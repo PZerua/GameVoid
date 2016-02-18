@@ -16,13 +16,15 @@ public:
 	void initCyclesArrays();
 	void condCycles();
 	void uncondCycles();
-	void updateTimers(const int &cycles);
-	int selectFrequency();
-	bool isClockEnabled();
-	void divideRegister(const int &cycles);
 	void requestInterrupt(const int &id);
 	void doInterrupts();
 	void serviceInterrupt(const int &id);
+	BYTE getClockFreq() const;
+	void setClockFreq();
+	void updateTimers(const int &cycles);
+	bool isClockEnabled();
+	void divideRegister(const int &cycles);
+	int _divideCounter;
 
 private:
 	Registers _registers;
@@ -34,6 +36,5 @@ private:
 	bool IME;
 	bool _condTaken;
 	int _timeCounter;
-	int _divideCounter;
-	int _timeFrequency;
+	
 };

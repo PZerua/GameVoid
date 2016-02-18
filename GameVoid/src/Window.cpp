@@ -23,7 +23,7 @@ Window::Window()
 bool Window::init(string screenTitle, int xPos, int yPos)
 {
 	//Create window
-	mWindow = SDL_CreateWindow( screenTitle.c_str(), xPos, yPos, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+	mWindow = SDL_CreateWindow( screenTitle.c_str(), xPos, yPos, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
 	cout << "[GAME] Window created" << endl;
 	if( mWindow != NULL )

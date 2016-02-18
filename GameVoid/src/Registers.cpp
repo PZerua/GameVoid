@@ -55,7 +55,7 @@ const BYTE Registers::getE() { return DE.n[0]; }
 const BYTE Registers::getH() { return HL.n[1]; }
 
 // Get L from HL (lower 8 bits)
-const BYTE Registers::getL() { return AF.n[0]; }
+const BYTE Registers::getL() { return HL.n[0]; }
 
 const WORD Registers::getAF() { return AF.nn; }
 

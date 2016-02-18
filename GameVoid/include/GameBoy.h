@@ -5,6 +5,7 @@
 #include "Memory.h"
 #include "CPU.h"
 #include "Video.h"
+#include "Controller.h"
 
 #define MAXCYCLES 69905
 
@@ -20,5 +21,5 @@ private:
 	Memory _memory;
 	Video _video;
 	CPU _CPU;
-
+	Controller _controller;
 };
