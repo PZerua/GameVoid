@@ -13,12 +13,13 @@ Registers::~Registers()
 // Set initial values
 void Registers::reset()
 {
-	AF.nn = 0x01B0;
+	AF.nn = 0x11B0;
 	BC.nn = 0x0013;
 	DE.nn = 0x00D8;
 	HL.nn = 0x014D;
 	SP = 0xFFFE;
 	PC = 0x0100;
+	_haltEnabled = false;
 }
 
 // Get A from AF (higher 8 bits)
@@ -69,17 +70,11 @@ const WORD Registers::getPC() { return PC; }
 
 const WORD Registers::getSP() { return SP; }
 
-// Set higher 8 bits of AF
-void Registers::setA(const BYTE &value) { AF.n[1] = value; }
-
-// Set lower 8 bits of AF
-void Registers::setF(const BYTE &value) { AF.n[0] = value; }
-
 // Zero Flag
 void Registers::setF_Z(const BYTE &value)
 {
 	if ( value == 0x00 || value == 0x01)
-		AF.n[0] = (AF.n[0] & 0x7F) + (value << 7);
+		AF.n[0] = (AF.n[0] & 0x7F) | (value << 7);
 	else throw exception("Value should always be 0 or 1");
 }
 
@@ -87,7 +82,7 @@ void Registers::setF_Z(const BYTE &value)
 void Registers::setF_N(const BYTE &value)
 {
 	if (value == 0x00 || value == 0x01)
-		AF.n[0] = (AF.n[0] & 0xBF) + (value << 6);
+		AF.n[0] = (AF.n[0] & 0xBF) | (value << 6);
 	else throw exception("Value should always be 0 or 1");
 }
 
@@ -95,7 +90,7 @@ void Registers::setF_N(const BYTE &value)
 void Registers::setF_H(const BYTE &value)
 {
 	if (value == 0x00 || value == 0x01)
-		AF.n[0] = (AF.n[0] & 0xDF) + (value << 5);
+		AF.n[0] = (AF.n[0] & 0xDF) | (value << 5);
 	else throw exception("Value should always be 0 or 1");
 }
 
@@ -103,9 +98,15 @@ void Registers::setF_H(const BYTE &value)
 void Registers::setF_C(const BYTE &value)
 {
 	if (value == 0x00 || value == 0x01)
-		AF.n[0] = (AF.n[0] & 0xEF) + (value << 4);
+		AF.n[0] = (AF.n[0] & 0xEF) | (value << 4);
 	else throw exception("Value should always be 0 or 1");
 }
+
+// Set higher 8 bits of AF
+void Registers::setA(const BYTE &value) { AF.n[1] = value; }
+
+// Set lower 8 bits of AF
+void Registers::setF(const BYTE &value) { AF.n[0] = value & 0xF0; }
 
 // Set higher 8 bits of BC
 void Registers::setB(const BYTE &value) { BC.n[1] = value; }
@@ -125,7 +126,7 @@ void Registers::setH(const BYTE &value) { HL.n[1] = value; }
 // Set lower 8 bits of HL
 void Registers::setL(const BYTE &value) { HL.n[0] = value; }
 
-void Registers::setAF(const WORD &value) { AF.nn = value; }
+void Registers::setAF(const WORD &value) { AF.nn = value & 0xFFF0; }
 
 void Registers::setBC(const WORD &value) { BC.nn = value; }
 
@@ -185,4 +186,14 @@ const WORD Registers::getReg(const regID &id)
 		throw exception("GetReg error, unimplemented enum");
 		break;
 	}
+}
+
+void Registers::setHalt(const bool &value)
+{
+	_haltEnabled = value;
+}
+
+bool Registers::haltEnabled()
+{
+	return _haltEnabled;
 }

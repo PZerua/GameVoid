@@ -28,7 +28,6 @@ public:
 private:
 	Memory *_memory;
 	Sprite test;
-	SDL_Texture *_backgroundBuffer;
 	int _scanLineCounter;
 	Uint32 *_screenDATA;
 	SDL_Texture *BG_WD;

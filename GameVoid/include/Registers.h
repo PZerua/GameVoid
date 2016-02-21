@@ -61,6 +61,9 @@ public:
 	void setReg(const regID &id, const WORD &value);
 	const WORD getReg(const regID &id);
 
+	void setHalt(const bool &value);
+	bool haltEnabled();
+
 private:
 
 	union reg
@@ -77,4 +80,6 @@ private:
 	WORD SP;
 	// Program Counter
 	WORD PC;
+
+	bool _haltEnabled;
 };

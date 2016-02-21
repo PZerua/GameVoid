@@ -4,7 +4,7 @@ Video::Video()
 {
 	_window.init("GameVoid", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	_scanLineCounter = 456;
-	BG_WD = SDL_CreateTexture(Window::mRenderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, 160, 144);
+	BG_WD = SDL_CreateTexture(Window::mRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, 160, 144);
 	_screenDATA = new Uint32[160 * 144];
 	memset(_screenDATA, 255, 160 * 144 * sizeof(Uint32));
 }
@@ -287,7 +287,7 @@ void Video::renderTiles()
 		{
 			continue;
 		}
-		_screenDATA[finaly * 160 + pixel] = (red << 16) + (green << 8) + blue;
+		_screenDATA[finaly * 160 + pixel] = (red << 16) | (green << 8) | blue;
 	}
 }
 
@@ -409,6 +409,13 @@ void Video::renderSprites()
 				if ((scanline<0) || (scanline>143) || (pixel<0) || (pixel>159))
 				{
 					continue;
+				}
+
+				// check if pixel is hidden behind background
+				if (testBit(attributes, 7) == 1)
+				{
+					if (((_screenDATA[scanline * 160 + pixel] & 0xFF) != 0xFF) || ((_screenDATA[scanline * 160 + pixel] & 0xFF00) != 0xFF00) || ((_screenDATA[scanline * 160 + pixel] & 0xFF0000) != 0xFF0000))
+						continue;
 				}
 
 				_screenDATA[scanline * 160 + pixel] = (red << 16) + (green << 8) + blue;

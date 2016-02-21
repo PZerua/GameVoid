@@ -3,6 +3,7 @@
 MBC1::MBC1(BYTE *ROMdata, const unsigned &RAMsize)
 {
 	_ROMdata = ROMdata;
+	memset(_RAMdata, 0, RAMsize);
 	_RAMsize = RAMsize;
 	_RAMenabled = false;
 	_mode = 0;
@@ -27,7 +28,7 @@ BYTE MBC1::read(const WORD &address)
 	{
 		/*if (_ROMbank == 0x00 || _ROMbank == 0x20 || 
 			_ROMbank == 0x40 || _ROMbank == 0x60)
-			_ROMbank++;*/
+			_ROMbank++;*/ // TODO: investigate
 
 		return _ROMdata[(0x4000 * _ROMbank) + (address - 0x4000)];
 	}
@@ -35,10 +36,17 @@ BYTE MBC1::read(const WORD &address)
 	else if (address >= 0xA000 && address < 0xC000)
 	{
 		if (_RAMsize == 0 || !_RAMenabled)
+		{
+			cout << hex << "PC: " << (int)lastPC << " | OPCODE: " << (int)lastOPCODE << endl;
 			throw exception("Trying to read uninitialized or null RAM");
-		return _ROMdata[(0x2000 * _RAMbank) + (address - 0xA000)];
+		}	
+		return _RAMdata[(0x2000 * _RAMbank) + (address - 0xA000)];
 	}
-	else throw exception("Wrong address");
+	else
+	{
+		cout << hex << "PC: " << (int)lastPC << " | OPCODE: " << (int)lastOPCODE << endl;
+		throw exception("Wrong address");
+	}
 }
 
 void MBC1::write(const WORD &address, const BYTE &value)
@@ -69,9 +77,9 @@ void MBC1::write(const WORD &address, const BYTE &value)
 	else if (address >= 0x4000 && address < 0x6000)
 	{
 		if (_mode == ROMmode)
-			_ROMbank = (_ROMbank & 0x1F) + ((value & 0x02) << 5);
+			_ROMbank = (_ROMbank & 0x1F) | ((value & 0x03) << 5);
 		else if (_mode == RAMmode)
-			_RAMbank = value & 0x02;
+			_RAMbank = value & 0x03;
 	}
 	// Select ROM or RAM mode
 	else if (address >= 0x6000 && address < 0x8000)
@@ -86,7 +94,7 @@ void MBC1::write(const WORD &address, const BYTE &value)
 	{
 		if (_RAMsize != 0 && _RAMenabled)
 		{
-			_ROMdata[(0xA000 * _RAMbank) + (address - 0xA000)] = value;
+			_RAMdata[(0x2000 * _RAMbank) + (address - 0xA000)] = value;
 		}
 	}
 }

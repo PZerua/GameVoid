@@ -90,3 +90,6 @@ BYTE bitSet(const BYTE &byte, const int &bit);
 BYTE bitReset(const BYTE &byte, const int &bit);
 bool testBit(const BYTE &byte, const int &bit);
 BYTE bitGetVal(const BYTE &byte, const int &bit);
+
+static WORD lastPC;
+static BYTE lastOPCODE;

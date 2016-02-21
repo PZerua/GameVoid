@@ -11,4 +11,5 @@ public:
 	void write(const WORD &address, const BYTE &value);
 private:
 	BYTE *_ROMdata;
+	BYTE _RAMdata[0x8000];
 };

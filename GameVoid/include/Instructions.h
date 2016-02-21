@@ -77,17 +77,17 @@ public:
 	void PUSH_nn(const regID &nn);
 	void RST_n(const BYTE &n);
 
-	void RLC(const regID &n);
-	void RRC(const regID &n);
+	void RLC_n(const regID &n);
+	void RRC_n(const regID &n);
 	void SWAP_n(const regID &n);
 	void BIT_b_r(const BYTE &b, const regID &r);
 	void RES_b_r(const BYTE &b, const regID &r);
-	void SLA(const regID &n);
-	void SRA(const regID &n);
-	void SRL(const regID &n);
+	void SLA_n(const regID &n);
+	void SRA_n(const regID &n);
+	void SRL_n(const regID &n);
 	void SET_b_r(const BYTE &b, const regID &r);
-	void RR(const regID &n);
-	void RL(const regID &n);
+	void RR_n(const regID &n);
+	void RL_n(const regID &n);
 
 private:
 	Memory *_memory;
