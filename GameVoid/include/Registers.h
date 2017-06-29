@@ -37,31 +37,31 @@ public:
 	const WORD getPC();
 	const WORD getSP();
 
-	void setA(const BYTE &value);
-	void setF(const BYTE &value);
-	void setF_Z(const BYTE &value);
-	void setF_N(const BYTE &value);
-	void setF_H(const BYTE &value);
-	void setF_C(const BYTE &value);
-	void setB(const BYTE &value);
-	void setC(const BYTE &value);
-	void setD(const BYTE &value);
-	void setE(const BYTE &value);
-	void setH(const BYTE &value);
-	void setL(const BYTE &value);
-	void setAF(const WORD &value);
-	void setBC(const WORD &value);
-	void setDE(const WORD &value);
-	void setHL(const WORD &value);
-	void addPC(const int &value);
-	void addSP(const int &value);
-	void setSP(const WORD &value);
-	void setPC(const WORD &value);
+	void setA(BYTE value);
+	void setF(BYTE value);
+	void setF_Z(BYTE value);
+	void setF_N(BYTE value);
+	void setF_H(BYTE value);
+	void setF_C(BYTE value);
+	void setB(BYTE value);
+	void setC(BYTE value);
+	void setD(BYTE value);
+	void setE(BYTE value);
+	void setH(BYTE value);
+	void setL(BYTE value);
+	void setAF(WORD value);
+	void setBC(WORD value);
+	void setDE(WORD value);
+	void setHL(WORD value);
+	void addPC(int value);
+	void addSP(int value);
+	void setSP(WORD value);
+	void setPC(WORD value);
 
-	void setReg(const regID &id, const WORD &value);
-	const WORD getReg(const regID &id);
+	void setReg(regID id, WORD value);
+	const WORD getReg(regID id);
 
-	void setHalt(const bool &value);
+	void setHalt(bool value);
 	bool haltEnabled();
 
 private:

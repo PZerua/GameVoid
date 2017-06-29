@@ -86,10 +86,10 @@ enum COLOUR {
 	BLACK
 };
 
-BYTE bitSet(const BYTE &byte, const int &bit);
-BYTE bitReset(const BYTE &byte, const int &bit);
-bool testBit(const BYTE &byte, const int &bit);
-BYTE bitGetVal(const BYTE &byte, const int &bit);
+BYTE bitSet(BYTE byte, int bit);
+BYTE bitReset(BYTE byte, int bit);
+bool testBit(BYTE byte, int bit);
+BYTE bitGetVal(BYTE byte, int bit);
 
 static WORD lastPC;
 static BYTE lastOPCODE;

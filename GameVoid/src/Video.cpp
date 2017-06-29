@@ -19,7 +19,7 @@ void Video::init(Memory *memory)
 	_memory = memory;
 }
 
-void Video::updateGraphics(const int &cycles, CPU &cpuTemp)
+void Video::updateGraphics(int cycles, CPU &cpuTemp)
 {
 	setLCDStatus(cpuTemp);
 

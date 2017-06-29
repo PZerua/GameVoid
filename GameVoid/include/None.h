@@ -5,10 +5,10 @@
 class None : public MBC
 {
 public:
-	None(BYTE *ROMdata, const unsigned &RAMsize);
+	None(BYTE *ROMdata, unsigned RAMsize);
 	~None();
-	BYTE read(const WORD &address);
-	void write(const WORD &address, const BYTE &value);
+	BYTE read(WORD address);
+	void write(WORD address, BYTE value);
 private:
 	BYTE *_ROMdata;
 };

@@ -14,7 +14,7 @@ void Memory::init(Cartridge *cartridge, Controller *controller)
 	_timerData = 0;
 }
 
-BYTE Memory::read(const WORD &address)
+BYTE Memory::read(WORD address)
 {
 	// We are reading data from ROM or internal Cartridge RAM
 	if (address < 0x8000 || (address >= 0xA000 && address < 0xC000))
@@ -25,7 +25,7 @@ BYTE Memory::read(const WORD &address)
 	else return _MEMORY[address];
 }
 
-void Memory::write(const WORD &address, const BYTE &value)
+void Memory::write(WORD address, BYTE value)
 {
 	// We are writing data to ROM or internal Cartridge RAM
 	if (address < 0x8000 || (address >= 0xA000 && address < 0xC000))
@@ -102,12 +102,12 @@ void Memory::reset()
 	_MEMORY[TAC]  = 0xF8;
 }
 
-void Memory::directModification(const WORD &address, const BYTE &value)
+void Memory::directModification(WORD address, BYTE value)
 {
 	_MEMORY[address] = value;
 }
 
-void Memory::DMATransfer(const BYTE &data)
+void Memory::DMATransfer(BYTE data)
 {
 	WORD address = data << 8; // source address is data * 100
 	for (int i = 0; i < 0xA0; i++)

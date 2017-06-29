@@ -40,12 +40,10 @@ int CPU::fetch()
 		cout << hex << "AF: " << (int)_registers.getAF() << " | BC: " << (int)_registers.getBC() << " | DE: " << (int)_registers.getDE()
 			<< " | HL: " << (int)_registers.getHL() << " | SP: " << (int)_registers.getSP() << endl;
 		count++;
-		if (count == 40)
-		{
-			debug = false;
-			count = 0;
-		}
 	}
+
+	if ((int)_registers.getPC() == 0x381)
+		std::cout << "Here" << std::endl;
 	
 	if (!_registers.haltEnabled())
 	{
@@ -777,7 +775,7 @@ void CPU::uncondCycles()
 	_instCycles[0xDC] = 12;
 }
 
-void CPU::requestInterrupt(const int &id)
+void CPU::requestInterrupt(int id)
 {
 	/*switch (id)
 	{
@@ -824,7 +822,7 @@ void CPU::doInterrupts()
 	}
 }
 
-void CPU::serviceInterrupt(const int &id)
+void CPU::serviceInterrupt(int id)
 {
 	//cout << "Interrupt Serviced" << endl;
 	IME = false;
@@ -861,7 +859,7 @@ void CPU::serviceInterrupt(const int &id)
 }
 
 
-void CPU::updateTimers(const int &cycles)
+void CPU::updateTimers(int cycles)
 {
 	//cout << hex << (int)_memory->read(TAC) << endl;
 	divideRegister(cycles);
@@ -906,7 +904,7 @@ bool CPU::isClockEnabled()
 	return testBit(_memory->read(TAC), 2) ? true : false;
 }
 
-void CPU::divideRegister(const int &cycles)
+void CPU::divideRegister(int cycles)
 {
 	_divideCounter += cycles;
 	if (_divideCounter >= 255)

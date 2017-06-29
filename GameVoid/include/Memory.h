@@ -12,10 +12,10 @@ public:
 	~Memory() {}
 	void init(Cartridge *cartridge, Controller *controller);
 	void reset();
-	BYTE read(const WORD &address);
-	void write(const WORD &address, const BYTE &value);
-	void directModification(const WORD &address, const BYTE &value);
-	void DMATransfer(const BYTE &data);
+	BYTE read(WORD address);
+	void write(WORD address, BYTE value);
+	void directModification(WORD address, BYTE value);
+	void DMATransfer(BYTE data);
 	bool timerTriger();
 	void resetTimerTriger();
 	BYTE getTimerData();

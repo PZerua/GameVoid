@@ -1,6 +1,6 @@
 #include "MBC1.h"
 
-MBC1::MBC1(BYTE *ROMdata, const unsigned &RAMsize)
+MBC1::MBC1(BYTE *ROMdata, unsigned RAMsize)
 {
 	_ROMdata = ROMdata;
 	memset(_RAMdata, 0, RAMsize);
@@ -16,7 +16,7 @@ MBC1::~MBC1()
 
 }
 
-BYTE MBC1::read(const WORD &address)
+BYTE MBC1::read(WORD address)
 {
 	// Read ROM Bank 0
 	if (address >= 0x0000 && address < 0x4000)
@@ -49,7 +49,7 @@ BYTE MBC1::read(const WORD &address)
 	}
 }
 
-void MBC1::write(const WORD &address, const BYTE &value)
+void MBC1::write(WORD address, BYTE value)
 {
 	// Enable or disable RAM
 	if (address >= 0x0000 && address < 0x2000)

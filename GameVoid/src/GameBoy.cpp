@@ -2,7 +2,7 @@
 
 GameBoy::GameBoy()
 {
-	_game.initGame("rom/kwirk.gb"); //For testing
+	_game.initGame("rom/cpu.gb"); //For testing
 	_memory.init(&_game, &_controller);
 	_video.init(&_memory);
 	_CPU.init(&_memory);

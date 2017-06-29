@@ -71,7 +71,7 @@ const WORD Registers::getPC() { return PC; }
 const WORD Registers::getSP() { return SP; }
 
 // Zero Flag
-void Registers::setF_Z(const BYTE &value)
+void Registers::setF_Z(BYTE value)
 {
 	if ( value == 0x00 || value == 0x01)
 		AF.n[0] = (AF.n[0] & 0x7F) | (value << 7);
@@ -79,7 +79,7 @@ void Registers::setF_Z(const BYTE &value)
 }
 
 // Subtract Flag
-void Registers::setF_N(const BYTE &value)
+void Registers::setF_N(BYTE value)
 {
 	if (value == 0x00 || value == 0x01)
 		AF.n[0] = (AF.n[0] & 0xBF) | (value << 6);
@@ -87,7 +87,7 @@ void Registers::setF_N(const BYTE &value)
 }
 
 // Half Carry Flag
-void Registers::setF_H(const BYTE &value)
+void Registers::setF_H(BYTE value)
 {
 	if (value == 0x00 || value == 0x01)
 		AF.n[0] = (AF.n[0] & 0xDF) | (value << 5);
@@ -95,7 +95,7 @@ void Registers::setF_H(const BYTE &value)
 }
 
 // Carry Flag
-void Registers::setF_C(const BYTE &value)
+void Registers::setF_C(BYTE value)
 {
 	if (value == 0x00 || value == 0x01)
 		AF.n[0] = (AF.n[0] & 0xEF) | (value << 4);
@@ -103,46 +103,46 @@ void Registers::setF_C(const BYTE &value)
 }
 
 // Set higher 8 bits of AF
-void Registers::setA(const BYTE &value) { AF.n[1] = value; }
+void Registers::setA(BYTE value) { AF.n[1] = value; }
 
 // Set lower 8 bits of AF
-void Registers::setF(const BYTE &value) { AF.n[0] = value & 0xF0; }
+void Registers::setF(BYTE value) { AF.n[0] = value & 0xF0; }
 
 // Set higher 8 bits of BC
-void Registers::setB(const BYTE &value) { BC.n[1] = value; }
+void Registers::setB(BYTE value) { BC.n[1] = value; }
 
 // Set lower 8 bits of BC
-void Registers::setC(const BYTE &value) { BC.n[0] = value; }
+void Registers::setC(BYTE value) { BC.n[0] = value; }
 
 // Set higher 8 bits of DE
-void Registers::setD(const BYTE &value) { DE.n[1] = value; }
+void Registers::setD(BYTE value) { DE.n[1] = value; }
 
 // Set lower 8 bits of DE
-void Registers::setE(const BYTE &value) { DE.n[0] = value; }
+void Registers::setE(BYTE value) { DE.n[0] = value; }
 
 // Set higher 8 bits of HL
-void Registers::setH(const BYTE &value) { HL.n[1] = value; }
+void Registers::setH(BYTE value) { HL.n[1] = value; }
 
 // Set lower 8 bits of HL
-void Registers::setL(const BYTE &value) { HL.n[0] = value; }
+void Registers::setL(BYTE value) { HL.n[0] = value; }
 
-void Registers::setAF(const WORD &value) { AF.nn = value & 0xFFF0; }
+void Registers::setAF(WORD value) { AF.nn = value & 0xFFF0; }
 
-void Registers::setBC(const WORD &value) { BC.nn = value; }
+void Registers::setBC(WORD value) { BC.nn = value; }
 
-void Registers::setDE(const WORD &value) { DE.nn = value; }
+void Registers::setDE(WORD value) { DE.nn = value; }
 
-void Registers::setHL(const WORD &value) { HL.nn = value; }
+void Registers::setHL(WORD value) { HL.nn = value; }
 
-void Registers::setSP(const WORD &value) { SP = value; }
+void Registers::setSP(WORD value) { SP = value; }
 
-void Registers::addPC(const int &value) { PC += value; }
+void Registers::addPC(int value) { PC += value; }
 
-void Registers::addSP(const int &value) { SP += value; }
+void Registers::addSP(int value) { SP += value; }
 
-void Registers::setPC(const WORD &value) { PC = value; }
+void Registers::setPC(WORD value) { PC = value; }
 
-void Registers::setReg(const regID &id, const WORD &value)
+void Registers::setReg(regID id, WORD value)
 {
 	switch (id)
 	{
@@ -165,7 +165,7 @@ void Registers::setReg(const regID &id, const WORD &value)
 	}
 }
 
-const WORD Registers::getReg(const regID &id)
+const WORD Registers::getReg(regID id)
 {
 	switch (id)
 	{
@@ -188,7 +188,7 @@ const WORD Registers::getReg(const regID &id)
 	}
 }
 
-void Registers::setHalt(const bool &value)
+void Registers::setHalt(bool value)
 {
 	_haltEnabled = value;
 }

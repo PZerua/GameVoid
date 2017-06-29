@@ -10,7 +10,7 @@ Sprite::~Sprite()
 	delete[] _pixels;
 }
 
-void Sprite::loadSprite(Memory *memory, const WORD &startAddress)
+void Sprite::loadSprite(Memory *memory, WORD startAddress)
 {
 	BYTE y = memory->read(0xFE00);
 	BYTE x = memory->read(0xFE01);
@@ -32,7 +32,7 @@ void Sprite::render()
 	SDL_RenderCopy(Window::mRenderer, _sprite, NULL, NULL);
 }
 
-void Sprite::readLine(Uint32 *pixels, BYTE a, BYTE b, const int &pos)
+void Sprite::readLine(Uint32 *pixels, BYTE a, BYTE b, int pos)
 {
 	for (int i = 0; i < 8; i++)
 	{

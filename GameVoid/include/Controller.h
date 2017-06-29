@@ -10,9 +10,9 @@ public:
 	void init(BYTE *mem);
 	BYTE getJoypadState() const;
 	void checkControls(SDL_Event *event);
-	void keyPressed(const int &key);
+	void keyPressed(int key);
 	bool requestInterrupt();
-	void setRequestInterrupt(const bool &state);
+	void setRequestInterrupt(bool state);
 private:
 	BYTE _joypadState;
 	BYTE *memory;

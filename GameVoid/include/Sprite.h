@@ -10,9 +10,9 @@ class Sprite
 public:
 	Sprite();
 	~Sprite();
-	void loadSprite(Memory *memory, const WORD &startAddress);
+	void loadSprite(Memory *memory, WORD startAddress);
 	void render();
-	void readLine(Uint32 *pixels, BYTE a, BYTE b, const int &pos);
+	void readLine(Uint32 *pixels, BYTE a, BYTE b, int pos);
 
 private:
 	BYTE x;

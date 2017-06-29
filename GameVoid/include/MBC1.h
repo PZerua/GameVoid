@@ -5,10 +5,10 @@
 class MBC1 : public MBC
 {
 public:
-	MBC1(BYTE *ROMdata, const unsigned &RAMsize);
+	MBC1(BYTE *ROMdata, unsigned RAMsize);
 	~MBC1();
-	BYTE read(const WORD &address);
-	void write(const WORD &address, const BYTE &value);
+	BYTE read(WORD address);
+	void write(WORD address, BYTE value);
 private:
 	BYTE *_ROMdata;
 	BYTE _RAMdata[0x8000];

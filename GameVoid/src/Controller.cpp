@@ -41,7 +41,7 @@ BYTE Controller::getJoypadState() const
 	return res;
 }
 
-void Controller::keyPressed(const int &key)
+void Controller::keyPressed(int key)
 {
 	bool previouslyUnset = false;
 
@@ -148,7 +148,7 @@ bool Controller::requestInterrupt()
 	return _requestInterrupt;
 }
 
-void Controller::setRequestInterrupt(const bool &state)
+void Controller::setRequestInterrupt(bool state)
 {
 	_requestInterrupt = state;
 }

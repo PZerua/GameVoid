@@ -4,8 +4,8 @@
 class MBC
 {
 public:
-	virtual BYTE read(const WORD &address) = 0;
-	virtual void write(const WORD &adress, const BYTE &value) = 0;
+	virtual BYTE read(WORD address) = 0;
+	virtual void write(WORD adress, BYTE value) = 0;
 
 protected:
 	unsigned _RAMsize;

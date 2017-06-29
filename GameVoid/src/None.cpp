@@ -1,6 +1,6 @@
 #include "None.h"
 
-None::None(BYTE *ROMdata, const unsigned &RAMsize)
+None::None(BYTE *ROMdata, unsigned RAMsize)
 {
 	_ROMdata = ROMdata;
 	_RAMenabled = false;
@@ -12,7 +12,7 @@ None::~None()
 
 }
 
-BYTE None::read(const WORD &address)
+BYTE None::read(WORD address)
 {
 	// Read ROM data
 	if (address >= 0x0000 && address < 0x8000)
@@ -29,7 +29,7 @@ BYTE None::read(const WORD &address)
 	else throw exception("Wrong address");
 }
 
-void None::write(const WORD &address, const BYTE &value)
+void None::write(WORD address, BYTE value)
 {
 	// Enable or disable RAM
 	if (address >= 0x0000 && address < 0x2000)

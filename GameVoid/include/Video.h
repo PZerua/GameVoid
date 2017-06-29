@@ -15,7 +15,7 @@ public:
 	void init(Memory *memory);
 	void loadSprite(Memory *memory);
 	void renderSprite();
-	void updateGraphics(const int &cycles, CPU &cpuTemp);
+	void updateGraphics(int cycles, CPU &cpuTemp);
 	void setLCDStatus(CPU &cpuTemp);
 	bool isLCDEnabled();
 	void drawScanLine();

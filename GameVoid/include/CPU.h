@@ -16,14 +16,14 @@ public:
 	void initCyclesArrays();
 	void condCycles();
 	void uncondCycles();
-	void requestInterrupt(const int &id);
+	void requestInterrupt(int id);
 	void doInterrupts();
-	void serviceInterrupt(const int &id);
+	void serviceInterrupt(int id);
 	BYTE getClockFreq() const;
 	void setClockFreq();
-	void updateTimers(const int &cycles);
+	void updateTimers(int cycles);
 	bool isClockEnabled();
-	void divideRegister(const int &cycles);
+	void divideRegister(int cycles);
 	int _divideCounter;
 
 private:
