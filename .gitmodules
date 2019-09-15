@@ -1,0 +1,9 @@
+[submodule "libraries/stb"]
+	path = libraries/stb
+	url = https://github.com/nothings/stb
+[submodule "libraries/glew-cmake"]
+	path = libraries/glew-cmake
+	url = https://github.com/omniavinco/glew-cmake
+[submodule "libraries/glfw"]
+	path = libraries/glfw
+	url = https://github.com/glfw/glfw
