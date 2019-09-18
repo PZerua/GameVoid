@@ -9,21 +9,21 @@
 class Video
 {
 public:
-	Video();
-	~Video();
-	void init(Memory *memory);
-	void updateGraphics(int cycles, CPU &cpuTemp);
-	void setLCDStatus(CPU &cpuTemp);
-	bool isLCDEnabled();
-	void drawScanLine();
-	void renderTiles();
-	void renderSprites();
-	void render();
-	COLOUR getColour(BYTE colourNum, WORD address);
+    Video();
+    ~Video();
+    void init(Memory *memory);
+    void updateGraphics(int cycles, CPU &cpuTemp);
+    void setLCDStatus(CPU &cpuTemp);
+    bool isLCDEnabled();
+    void drawScanLine();
+    void renderTiles();
+    void renderSprites();
+    void render();
+    COLOUR getColour(BYTE colourNum, WORD address);
 
 private:
-	Memory *_memory;
-	int _scanLineCounter;
+    Memory *_memory;
+    int _scanLineCounter;
     GLubyte *_screenDATA;
 
     // Quad attributes
