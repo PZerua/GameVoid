@@ -1,4 +1,11 @@
 # GameVoid
 GameBoy emulator for learning.
 
-Visual Studio 2015 is needed to compile this project.
+Tested on Linux and Windows.
+
+# Controls
+A -> A in keyboard
+B -> S in keyboard
+Start -> Return key
+Select -> Space key
+Movement -> Arrow keys
