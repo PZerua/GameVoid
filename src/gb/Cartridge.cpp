@@ -1,5 +1,7 @@
 #include "Cartridge.h"
 
+#include <string>
+
 Cartridge::Cartridge()
 {
     _ROMsize = 0;
@@ -29,7 +31,7 @@ bool Cartridge::initGame(const string &gamePath)
     }
     else
     {
-        cout << "Error reading rom" << endl;
+        cout << "Error finding path or reading rom: " << gamePath << endl;
         return false;
     }
 
@@ -42,7 +44,9 @@ bool Cartridge::initGame(const string &gamePath)
 Cartridge::~Cartridge()
 {
     // Delete array in destructor
-    delete[] _ROMdata;
+    if (_ROMdata) {
+        delete[] _ROMdata;
+    }
 }
 
 void Cartridge::loadHeader()

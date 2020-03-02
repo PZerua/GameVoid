@@ -9,13 +9,13 @@ GameBoy::~GameBoy()
 
 }
 
-bool GameBoy::init()
+bool GameBoy::init(const std::string romPath)
 {
     if (!_window.init("GameVoid", 160, 144)) {
         return false;
     }
 
-    if (!_game.initGame("rom/zelda.gb")) {
+    if (!_game.initGame(romPath)) {
         return false;
     }
 
@@ -27,7 +27,7 @@ bool GameBoy::init()
     return true;
 }
 
-void GameBoy::update()
+void GameBoy::start()
 {
     input::Keyboard &input = input::Keyboard::getInstance();
 

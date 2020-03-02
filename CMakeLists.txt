@@ -36,8 +36,6 @@ include_directories("src/input")
 include_directories("src/gb")
 include_directories("libraries/stb")
 
-file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
-
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp src/utils/*.cpp src/graphics/*.cpp src/graphics/buffers/*.cpp src/input/*.cpp src/gb/*.cpp)
 file(GLOB_RECURSE HEADER_FILES src/*.h src/utils/*.h src/graphics/*.h src/graphics/buffers/*.h src/input/*.h src/gb/*.h)
 
@@ -45,6 +43,7 @@ GroupSources(src)
 
 add_executable(GameVoid ${SOURCE_FILES} ${HEADER_FILES})
 
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT GameVoid)
 set_property(TARGET GameVoid PROPERTY CXX_STANDARD 11)
 
 # glfw
