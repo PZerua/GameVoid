@@ -3,6 +3,40 @@
 #include "bitUtils.h"
 #include "debugutils.h"
 
+const char* vertexShader =  R"(#version 330 core
+
+layout(location = 0) in vec2 vertex;
+layout(location = 1) in vec2 uv;
+
+out vec2 uvs;
+
+void main()
+{
+    uvs = uv;
+
+    // Output position of the vertex
+    gl_Position = vec4(vertex, 0.0f, 1.0f);
+}
+
+)";
+
+const char* fragmentShader = R"(#version 330 core
+
+in vec2 uvs;
+out vec4 fragColor;
+
+uniform sampler2D fboTex;
+
+void main(void)
+{
+	vec2 uvFlip = uvs;
+	uvFlip.y = 1.0 - uvFlip.y;
+    vec4 fbo = texture(fboTex, uvFlip);
+    fragColor = fbo;
+}
+
+)";
+
 Video::Video()
 {
     _scanLineCounter = 456;
@@ -23,7 +57,7 @@ void Video::init(Memory *memory)
 {
     _memory = memory;
 
-    m_shader.init("quad");
+    m_shader.init(vertexShader, fragmentShader);
 
     // Generate texture
     glGenTextures(1, &m_textureId);

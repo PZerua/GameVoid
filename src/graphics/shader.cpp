@@ -10,23 +10,18 @@
 namespace gfx
 {
 
-Shader::Shader(const std::string &shaderName)
-{
-    init(shaderName);
-}
-
 Shader::~Shader()
 {
     glDeleteProgram(m_programId);
 }
 
-void Shader::init(const std::string &shaderName)
+void Shader::init(const char* vertexShader, const char* fragmentShader)
 {
     // Compile shaders
     GLuint vertex, fragment;
 
-    compileShader(vertex, GL_VERTEX_SHADER, utils::readFileString("shaders/" + shaderName + ".vert").c_str());
-    compileShader(fragment, GL_FRAGMENT_SHADER, utils::readFileString("shaders/" + shaderName + ".frag").c_str());
+    compileShader(vertex, GL_VERTEX_SHADER, vertexShader);
+    compileShader(fragment, GL_FRAGMENT_SHADER, fragmentShader);
 
     // Shader Program
     m_programId = glCreateProgram();

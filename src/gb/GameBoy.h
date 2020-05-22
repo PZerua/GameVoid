@@ -15,8 +15,8 @@ class GameBoy
 public:
     GameBoy();
     ~GameBoy();
-    bool init();
-    void update();
+    bool init(const std::string romPath);
+    void start();
 
 private:
     Cartridge _game;

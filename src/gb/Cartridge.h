@@ -24,7 +24,7 @@ public:
     BYTE *getData();
 
 private:
-    BYTE *_ROMdata;
+    BYTE *_ROMdata = nullptr;
     int _ROMsize;
     unsigned _RAMsize;
     bool _CGBfeatures;

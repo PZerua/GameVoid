@@ -20,10 +20,9 @@ private:
 public:
     // Builds the shader
     Shader() = default;
-    Shader(const std::string &shaderName);
     ~Shader();
 
-    void init(const std::string &shaderName);
+    void init(const char* vertexShader, const char* fragmentShader);
 
     // Get program ID
     inline GLuint getId() const { return m_programId; }

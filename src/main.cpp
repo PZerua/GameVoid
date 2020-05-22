@@ -2,15 +2,27 @@
 
 int main(int argc, char* argv[])
 {
-    GameBoy *_gameboy = new GameBoy();
-    if (!_gameboy->init()) {
+
+    if (argc == 1) {
+#ifdef __linux__
+        std::cout << "Usage: \nGameVoid <path to rom>" << std::endl;
+#elif _WIN32
+        std::cout << "Usage: \nGameVoid.exe <path to rom>" << std::endl;
+#endif
+        system("pause");
+        return 0;
+    }
+
+    char *romPath = argv[1];
+
+    GameBoy gameboy;
+    if (!gameboy.init(romPath)) {
         system("pause");
         return 1;
     }
 
-    _gameboy->update();
-    
-    system("pause");
+    gameboy.start();
 
+    system("pause");
     return 0;
 }
