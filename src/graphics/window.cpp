@@ -62,8 +62,6 @@ bool Window::init(const std::string &screenTitle, int window_width, int window_h
 
     glViewport(0, 0, m_width, m_height);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    //glEnable(GL_BLEND);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glfwSetWindowUserPointer(m_window, this);
 
@@ -129,7 +127,7 @@ void Window::toggleFullscreen()
 void windowResize(GLFWwindow *window, int width, int height)
 {
     Window *windowClass = (Window*)glfwGetWindowUserPointer(window);
-    //windowClass->setSize(width, height);
+    windowClass->setSize(width, height);
     glViewport(0, 0, width, height);
 }
 

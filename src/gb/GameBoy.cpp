@@ -11,7 +11,7 @@ GameBoy::~GameBoy()
 
 bool GameBoy::init()
 {
-    if (!_window.init("GameVoid", 160, 144)) {
+    if (!_window.init("GameVoid", 640, 576)) {
         return false;
     }
 

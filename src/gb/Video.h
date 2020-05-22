@@ -19,7 +19,7 @@ public:
     void renderTiles();
     void renderSprites();
     void render();
-    COLOUR getColour(BYTE colourNum, WORD address);
+    COLOUR getColor(BYTE colourNum, WORD address);
 
 private:
     Memory *_memory;

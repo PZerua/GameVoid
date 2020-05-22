@@ -6,20 +6,22 @@
 Video::Video()
 {
     _scanLineCounter = 456;
-    //BG_WD = SDL_CreateTexture(Window::mRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, 160, 144);
     _screenDATA = new GLubyte[160 * 144 * 3];
     memset(_screenDATA, 255, 160 * 144 * 3 * sizeof(GLubyte));
 }
 
 Video::~Video()
 {
+    glDeleteVertexArrays(1, &m_vao);
+    glDeleteBuffers(VBO_SIZE, m_vbos);
+    glDeleteTextures(1, &m_textureId);
 
+    delete[] _screenDATA;
 }
 
 void Video::init(Memory *memory)
 {
     _memory = memory;
-    utils::printGlErrors();
 
     m_shader.init("quad");
 
@@ -30,7 +32,6 @@ void Video::init(Memory *memory)
 
     // Create buffer for the texture
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, static_cast<int>(160), static_cast<int>(144), 0, GL_RGBA, GL_UNSIGNED_BYTE, _screenDATA);
-    utils::printGlErrors();
 
     // set texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -42,19 +43,17 @@ void Video::init(Memory *memory)
 
     // defining the data to draw
     GLfloat vertices[] = {
-        //  x,    y
-           -1.0f,  1.0f,  // top left
-           -1.0f, -1.0f,  // bottom left
-            1.0f, -1.0f,  // bottom right
-            1.0f,  1.0f   // top right
+       -1.0f,  1.0f,  // top left
+       -1.0f, -1.0f,  // bottom left
+        1.0f, -1.0f,  // bottom right
+        1.0f,  1.0f   // top right
     };
 
     GLfloat uvs[] = {
-        //  u,   v
-            0.0f, 1.0f,   // top left
-            0.0f, 0.0f,   // bottom left
-            1.0f, 0.0f,   // bottom right
-            1.0f, 1.0f    // top right
+        0.0f, 1.0f,   // top left
+        0.0f, 0.0f,   // bottom left
+        1.0f, 0.0f,   // bottom right
+        1.0f, 1.0f    // top right
     };
 
     GLushort indices[] = { 0, 1, 2, 3, 0, 2 };
@@ -332,7 +331,7 @@ void Video::renderTiles()
 
         // now we have the colour id get the actual 
         // colour from palette 0xFF47
-        COLOUR col = getColour(colourNum, BGP);
+        COLOUR col = getColor(colourNum, BGP);
         int red = 0;
         int green = 0;
         int blue = 0;
@@ -360,7 +359,7 @@ void Video::renderTiles()
     }
 }
 
-COLOUR Video::getColour(BYTE colourNum, WORD address)
+COLOUR Video::getColor(BYTE colourNum, WORD address)
 {
     COLOUR res = WHITE;
     BYTE palette = _memory->read(address);
@@ -452,7 +451,7 @@ void Video::renderSprites()
                 colourNum |= bitGetVal(data1, colourbit);
 
                 WORD colourAddress = testBit(attributes, 4) ? 0xFF49 : 0xFF48;
-                COLOUR col = getColour(colourNum, colourAddress);
+                COLOUR col = getColor(colourNum, colourAddress);
 
                 // white is transparent for sprites.
                 if (col == WHITE)
@@ -497,19 +496,9 @@ void Video::renderSprites()
 
 void Video::render()
 {
-    /*SDL_RenderClear(Window::mRenderer);
-
-    //_screenDATA[160 * 40 + 40] = 200;
-    //_screenDATA[160 * 40 + 41] = 65280;
-    //_screenDATA[160 * 40 + 40] = 44;
-
-    SDL_UpdateTexture(BG_WD, NULL, _screenDATA, 160 * sizeof(Uint32));
-    SDL_RenderCopy(Window::mRenderer, BG_WD, NULL, NULL);
-
-    SDL_RenderPresent(Window::mRenderer);*/
-
     glBindTexture(GL_TEXTURE_2D, m_textureId);
 
+    // Update fbo
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, static_cast<int>(160), static_cast<int>(144), GL_RGB, GL_UNSIGNED_BYTE, _screenDATA);
 
     // Bind Shader
@@ -524,5 +513,4 @@ void Video::render()
     glBindVertexArray(0);
 
     m_shader.disable();
-
 }
