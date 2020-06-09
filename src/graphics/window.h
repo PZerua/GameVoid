@@ -46,6 +46,7 @@ public:
     void setClearColorNormalized(float r, float g, float b);
     void setClearColor(int r, int g, int b);
     void toggleFullscreen();
+    void setWindowTitle(const std::string &name);
 
     void pollEvents();
     void swap();

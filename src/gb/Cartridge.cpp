@@ -2,6 +2,9 @@
 
 #include <string>
 
+#include "MBC1.h"
+#include "MBC3.h"
+
 Cartridge::Cartridge()
 {
     _ROMsize = 0;
@@ -110,6 +113,12 @@ void Cartridge::loadHeader()
         cout << "CARTRIDGE TYPE: " << hex << (int)cartType << " - MBC1" << dec << endl;
         _MBC = new MBC1(_ROMdata, _RAMsize);
         break;
+    case 0x11:        // MBC3
+    case 0x12:        // MBC3+RAM
+    case 0x13:        // MBC3+RAM+BATTERY
+        cout << "CARTRIDGE TYPE: " << hex << (int)cartType << " - MBC3" << dec << endl;
+        _MBC = new MBC3(_ROMdata, _RAMsize);
+        break;
     case 0x05:        // MBC2
     case 0x06:        // MBC2+BATTERY
     case 0x0B:        // MMM01
@@ -117,9 +126,6 @@ void Cartridge::loadHeader()
     case 0x0D:        // MMM01+RAM+BATTERY
     case 0x0F:        // MBC3+TIMER+BATTERY
     case 0x10:        // MBC3+TIMER+RAM+BATTERY
-    case 0x11:        // MBC3
-    case 0x12:        // MBC3+RAM
-    case 0x13:        // MBC3+RAM+BATTERY
     case 0x15:        // MBC4
     case 0x16:        // MBC4+RAM
     case 0x17:        // MBC4+RAM+BATTERY

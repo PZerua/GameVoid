@@ -1,5 +1,9 @@
 #include "GameBoy.h"
 
+#include <chrono>
+#include <sstream>
+#include <iomanip>
+
 GameBoy::GameBoy()
 {
 }
@@ -37,10 +41,13 @@ void GameBoy::start()
     {
         int cyclesThisUpdate = 0;
 
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
+        _window.pollEvents();
+        _controller.checkControls();
+
         while (cyclesThisUpdate < MAXCYCLES)
         {
-            _window.pollEvents();
-            _controller.checkControls();
             if (_controller.requestInterrupt())
             {
                 _CPU.requestInterrupt(4);
@@ -79,5 +86,12 @@ void GameBoy::start()
         _window.clear();
         _video.render();
         _window.swap();
+
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+        std::stringstream stream;
+        stream << std::fixed << std::setprecision(2) << 1000.0 / std::chrono::duration_cast<std::chrono::milliseconds> (end - begin).count();
+        _window.setWindowTitle("GameVoid " + stream.str());
+        //std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds> (end - begin).count() << "[ms]" << std::endl;
     }
 }

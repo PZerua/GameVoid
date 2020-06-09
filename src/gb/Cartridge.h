@@ -3,7 +3,6 @@
 #include "Header.h"
 #include "MBC.h"
 #include "None.h"
-#include "MBC1.h"
 
 #define HEADER_TITLE 0x134
 #define HEADER_CGB_FLAG 0x143

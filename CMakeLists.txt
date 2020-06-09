@@ -34,7 +34,6 @@ include_directories("src/graphics")
 include_directories("src/graphics/buffers")
 include_directories("src/input")
 include_directories("src/gb")
-include_directories("libraries/stb")
 
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp src/utils/*.cpp src/graphics/*.cpp src/graphics/buffers/*.cpp src/input/*.cpp src/gb/*.cpp)
 file(GLOB_RECURSE HEADER_FILES src/*.h src/utils/*.h src/graphics/*.h src/graphics/buffers/*.h src/input/*.h src/gb/*.h)

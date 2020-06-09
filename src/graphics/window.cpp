@@ -52,7 +52,7 @@ bool Window::init(const std::string &screenTitle, int window_width, int window_h
     // Setup callbacks
     glfwSetKeyCallback(m_window, input::onKeyChange);
     glfwSetWindowSizeCallback(m_window, windowResize);
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
 
     std::cout << "[CORE] OpenGL context created" << std::endl;
 
@@ -122,6 +122,11 @@ void Window::setClearColor(int r, int g, int b)
 void Window::toggleFullscreen()
 {
 
+}
+
+void Window::setWindowTitle(const std::string & name)
+{
+    glfwSetWindowTitle(m_window, name.c_str());
 }
 
 void windowResize(GLFWwindow *window, int width, int height)
