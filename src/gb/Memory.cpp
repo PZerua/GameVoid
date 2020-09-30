@@ -52,7 +52,7 @@ void Memory::write(WORD address, BYTE value)
         _MEMORY[address] = value;
         _MEMORY[address] = _controller->getJoypadState();
     }
-    else if (address == 0xFF04)
+    else if (address == DIV)
     {
         _MEMORY[address] = 0;
         _resetDiv = true;
@@ -124,7 +124,7 @@ bool Memory::timerTriger()
 void Memory::resetTimerTriger()
 {
     _timerData = 0;
-    _timerTriger = false;;
+    _timerTriger = false;
 }
 
 BYTE Memory::getTimerData()

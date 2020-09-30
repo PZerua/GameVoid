@@ -3,7 +3,7 @@
 int main(int argc, char* argv[])
 {
 
- /*   if (argc == 1) {
+    if (argc == 1) {
 #ifdef __linux__
         std::cout << "Usage: \nGameVoid <path to rom>" << std::endl;
 #elif _WIN32
@@ -12,10 +12,10 @@ int main(int argc, char* argv[])
         system("pause");
         return 0;
     }
-    */
+    
 
-    //char *romPath = argv[1];
-    char *romPath = "C:/Users/pachu/Desktop/rom/SML.gb";
+    char *romPath = argv[1];
+    //char *romPath = "C:/Users/pachu/Desktop/rom/cpu_instrs.gb";
 
     GameBoy gameboy;
     if (!gameboy.init(romPath)) {

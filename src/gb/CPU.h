@@ -8,33 +8,30 @@
 class CPU
 {
 public:
-    CPU() {}
-    ~CPU() {}
+    CPU() = default;
+    ~CPU() = default;
     void init(Memory *memory);
     int fetch();
     int CB_prefix(Instructions *inst);
     void initCyclesArrays();
     void condCycles();
     void uncondCycles();
-    void requestInterrupt(int id);
+    void requestInterrupt(Interrupt id);
     void doInterrupts();
-    void serviceInterrupt(int id);
+    void serviceInterrupt(Interrupt id);
     BYTE getClockFreq() const;
-    void setClockFreq();
     void updateTimers(int cycles);
     bool isClockEnabled();
-    void divideRegister(int cycles);
-    int _divideCounter;
+    int m_divideCounter;
 
 private:
-    Registers _registers;
-    Memory *_memory;
-    Instructions *_inst;
+    Registers       m_registers;
+    Memory*         m_memory;
+    Instructions*   m_inst;
 
-    short _instCycles[0x100];
-    short _CBinstCycles[0x100];
-    bool IME;
-    bool _condTaken;
-    int _timeCounter;
+    short   m_instCycles[0x100];
+    short   m_CBinstCycles[0x100];
+    bool    m_IME;  // Interrupt master enable
+    int     m_timeCounter;
     
 };

@@ -18,7 +18,7 @@ void Controller::init(BYTE *mem)
     memory = mem;
     bool keydown = false;
     bool keyup = false;
-    _requestInterrupt = false;
+    m_interruptRequested = false;
     _joypadState = 0xFF;
 }
 
@@ -78,7 +78,7 @@ void Controller::keyPressed(int key)
 
     // request interupt
     if (requestInterupt && !previouslyUnset)
-        _requestInterrupt = true;
+        m_interruptRequested = true;
 }
 
 void Controller::checkControls()
@@ -142,12 +142,12 @@ void Controller::checkControls()
     }
 }
 
-bool Controller::requestInterrupt()
+bool Controller::interruptRequested()
 {
-    return _requestInterrupt;
+    return m_interruptRequested;
 }
 
-void Controller::setRequestInterrupt(bool state)
+void Controller::setInterruptRequested(bool state)
 {
-    _requestInterrupt = state;
+    m_interruptRequested = state;
 }

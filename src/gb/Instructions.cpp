@@ -544,10 +544,13 @@ void Instructions::CCF()
 }
 
 // 0x76
-void Instructions::HALT()
+void Instructions::HALT(bool IME)
 {
+    if (!IME) {
+        _registers->addPC(1);
+    }
+
     _registers->setHalt(true);
-    _registers->addPC(1);
 }
 
 // 0x80, 0x81, 0x82, 0x83, 0x84, 0x85 0x86, 0x87, 0xC6

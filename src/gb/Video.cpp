@@ -118,9 +118,9 @@ void Video::init(Memory *memory)
     glBindVertexArray(0);
 }
 
-void Video::updateGraphics(int cycles, CPU &cpuTemp)
+void Video::updateGraphics(int cycles, CPU &cpu)
 {
-    setLCDStatus(cpuTemp);
+    setLCDStatus(cpu);
 
     if (isLCDEnabled())
         _scanLineCounter -= cycles;
@@ -129,15 +129,12 @@ void Video::updateGraphics(int cycles, CPU &cpuTemp)
 
     if (_scanLineCounter <= 0)
     {
-        // time to move onto next scanline
-        _memory->directModification(LY, _memory->read(LY) + 1);
         BYTE currentline = _memory->read(LY);
-
         _scanLineCounter = 456;
 
         // we have entered vertical blank period
         if (currentline == 144)
-            cpuTemp.requestInterrupt(VBlank);
+            cpu.requestInterrupt(VBlank);
 
         // if gone past scanline 153 reset to 0
         else if (currentline > 153)
@@ -146,12 +143,15 @@ void Video::updateGraphics(int cycles, CPU &cpuTemp)
         // draw the current scanline 
         else if (currentline < 144)
             drawScanLine();
+
+        // time to move onto next scanline
+        _memory->directModification(LY, _memory->read(LY) + 1);
     }
 }
 
 void Video::setLCDStatus(CPU &cpuTemp)
 {
-    BYTE status = _memory->read(0xFF41);
+    BYTE status = _memory->read(STAT);
     if (!isLCDEnabled())
     {
         // set the mode to 1 during lcd disabled and reset scanline
@@ -159,7 +159,7 @@ void Video::setLCDStatus(CPU &cpuTemp)
         _memory->directModification(LY, 0x00);
         status &= 0xFC;
         status = bitSet(status, 0);
-        _memory->write(0xFF41, status);
+        _memory->write(STAT, status);
         return;
     }
 
@@ -169,7 +169,7 @@ void Video::setLCDStatus(CPU &cpuTemp)
     BYTE mode = 0x00;
     bool reqInt = false;
 
-    // If is greater we are in VBLank period
+    // If greater we are in VBLank period
     if (currentline >= 144)
     {
         mode = 0x01;
@@ -223,7 +223,7 @@ void Video::setLCDStatus(CPU &cpuTemp)
     {
         status = bitReset(status, 2);
     }
-    _memory->write(0xFF41, status);
+    _memory->write(STAT, status);
 }
 
 bool Video::isLCDEnabled()
@@ -238,7 +238,7 @@ void Video::drawScanLine()
         renderTiles();
 
     if (testBit(control, 1))
-        renderSprites();
+       renderSprites();
 }
 
 void Video::renderTiles()
@@ -260,7 +260,7 @@ void Video::renderTiles()
     {
         // is the current scanline we're drawing 
         // within the windows Y pos?,
-        if (windowY <= _memory->read(LY))
+        if (windowY < _memory->read(LY))
             usingWindow = true;
     }
 
@@ -278,7 +278,7 @@ void Video::renderTiles()
     }
 
     // which background mem?
-    if (false == usingWindow)
+    if (!usingWindow)
     {
         if (testBit(_memory->read(LCDC), 3))
             backgroundMemory = 0x9C00;
@@ -373,12 +373,12 @@ void Video::renderTiles()
         // setup the RGB values
         switch (col)
         {
-        case WHITE:    red = 255; green = 255; blue = 255; break;
-        case LIGHT_GREY:red = 0xCC; green = 0xCC; blue = 0xCC; break;
-        case DARK_GREY:    red = 0x77; green = 0x77; blue = 0x77; break;
+        case WHITE:         red = 255; green = 255; blue = 255; break;
+        case LIGHT_GREY:    red = 0xCC; green = 0xCC; blue = 0xCC; break;
+        case DARK_GREY:     red = 0x77; green = 0x77; blue = 0x77; break;
         }
 
-        int finaly = _memory->read(0xFF44);
+        int finaly = _memory->read(LY);
 
         // safety check to make sure what im about 
         // to set is in the 160x144 bounds
@@ -497,9 +497,9 @@ void Video::renderSprites()
 
                 switch (col)
                 {
-                case WHITE: red = 255; green = 255; blue = 255; break;
-                case LIGHT_GREY:red = 0xCC; green = 0xCC; blue = 0xCC; break;
-                case DARK_GREY:red = 0x77; green = 0x77; blue = 0x77; break;
+                case WHITE:         red = 255; green = 255; blue = 255; break;
+                case LIGHT_GREY:    red = 0xCC; green = 0xCC; blue = 0xCC; break;
+                case DARK_GREY:     red = 0x77; green = 0x77; blue = 0x77; break;
                 }
 
                 int xPix = 0 - tilePixel;

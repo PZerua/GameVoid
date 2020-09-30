@@ -19,7 +19,7 @@ void Registers::reset()
     HL.nn = 0x014D;
     SP = 0xFFFE;
     PC = 0x0100;
-    _haltEnabled = false;
+    m_haltEnabled = false;
 }
 
 // Get A from AF (higher 8 bits)
@@ -190,10 +190,10 @@ const WORD Registers::getReg(regID id)
 
 void Registers::setHalt(bool value)
 {
-    _haltEnabled = value;
+    m_haltEnabled = value;
 }
 
 bool Registers::haltEnabled()
 {
-    return _haltEnabled;
+    return m_haltEnabled;
 }

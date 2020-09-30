@@ -81,5 +81,5 @@ private:
     // Program Counter
     WORD PC;
 
-    bool _haltEnabled;
+    bool m_haltEnabled;
 };

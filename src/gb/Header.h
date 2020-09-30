@@ -21,9 +21,14 @@ using namespace std;
 #define COLOR_GREEN_3 0x0f380f
 
 // Timer and Divider Registers
+#define DIV     0xFF04
 #define TIMA    0xFF05
-#define TMA        0xFF06
-#define TAC        0xFF07
+#define TMA     0xFF06
+#define TAC     0xFF07
+
+// Interrupt Flag
+#define IF      0xFF0F
+
 // Sound Registers
 #define NR10    0xFF10
 #define NR11    0xFF11
@@ -45,19 +50,20 @@ using namespace std;
 #define NR52    0xFF26
 // LCD Control Registers
 #define LCDC    0xFF40
-#define SCY        0xFF42
-#define SCX        0xFF43
-#define LY        0xFF44
-#define LYC        0xFF45
+#define STAT    0xFF41
+#define SCY     0xFF42
+#define SCX     0xFF43
+#define LY      0xFF44
+#define LYC     0xFF45
 // LCD Monochrome Palettes
-#define BGP        0xFF47
+#define BGP     0xFF47
 #define OBP0    0xFF48
 #define OBP1    0xFF49
 // LCD Position and Scrolling
-#define WY        0xFF4A
-#define WX        0xFF4B
+#define WY      0xFF4A
+#define WX      0xFF4B
 // Interrupt Register
-#define IE        0xFFFF
+#define IE      0xFFFF
 
 // In C++ char has 1 Byte width
 // It has to be unsigned because we need up to 255 values

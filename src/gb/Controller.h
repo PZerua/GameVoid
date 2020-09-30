@@ -10,10 +10,10 @@ public:
     BYTE getJoypadState() const;
     void checkControls();
     void keyPressed(int key);
-    bool requestInterrupt();
-    void setRequestInterrupt(bool state);
+    bool interruptRequested();
+    void setInterruptRequested(bool state);
 private:
     BYTE _joypadState;
     BYTE *memory;
-    bool _requestInterrupt;
+    bool m_interruptRequested;
 };

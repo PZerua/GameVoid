@@ -48,10 +48,10 @@ void GameBoy::start()
 
         while (cyclesThisUpdate < MAXCYCLES)
         {
-            if (_controller.requestInterrupt())
+            if (_controller.interruptRequested())
             {
-                _CPU.requestInterrupt(4);
-                _controller.setRequestInterrupt(false);
+                _CPU.requestInterrupt(Interrupt::JoyPad);
+                _controller.setInterruptRequested(false);
             }
             int cycles = _CPU.fetch();
             if (_memory.timerTriger())
@@ -63,13 +63,13 @@ void GameBoy::start()
 
                 if (currentfreq != newfreq)
                 {
-                    _CPU.setClockFreq();
+                    //_CPU.setClockFreq();
                 }
                 _memory.resetTimerTriger();
             }
             if (_memory._resetDiv)
             {
-                _CPU._divideCounter = 0;
+                _CPU.m_divideCounter = 0;
                 _memory._resetDiv = false;
             }
             if (cycles == -1)

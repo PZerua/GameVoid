@@ -57,7 +57,7 @@ public:
     void JP_cc_nn(regID cc, bool &condTaken);
     void DAA();
     void CPL();
-    void HALT();
+    void HALT(bool IME);
     void JP_nn();
     void JP_HL();
     void AND_n(regID n);
