@@ -1,4 +1,4 @@
-#include "bitUtils.h"
+#include "bit_utils.h"
 
 namespace utils
 {

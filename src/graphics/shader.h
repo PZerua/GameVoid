@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "../utils/fileutils.h"
+#include "../utils/file_utils.h"
 #include <GL/glew.h>
 
 namespace gfx

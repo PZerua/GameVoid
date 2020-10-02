@@ -2,8 +2,8 @@
 
 #include "io_registers.h"
 #include "interrupts.h"
-#include "utils/bitUtils.h"
-#include "utils/debugutils.h"
+#include "utils/bit_utils.h"
+#include "utils/debug_utils.h"
 #include "memory.h"
 
 using namespace utils;

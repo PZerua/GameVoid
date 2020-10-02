@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "io_registers.h"
-#include "utils/bitUtils.h"
+#include "utils/bit_utils.h"
 #include "memory.h"
 #include "instructions.h"
 

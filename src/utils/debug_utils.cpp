@@ -3,7 +3,7 @@
 * Released under MIT license. Read LICENSE for more details.
 */
 
-#include "debugutils.h"
+#include "debug_utils.h"
 #include <iostream>
 
 namespace utils

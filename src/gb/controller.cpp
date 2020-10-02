@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "utils/bitUtils.h"
+#include "utils/bit_utils.h"
 #include "input/input.h"
 
 using namespace utils;
