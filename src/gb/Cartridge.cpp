@@ -5,6 +5,7 @@
 
 #include <string>
 
+#include "mbc/none.h"
 #include "mbc/mbc1.h"
 #include "mbc/mbc3.h"
 
@@ -102,19 +103,19 @@ void Cartridge::loadHeader()
     case 0x08:        // ROM+RAM
     case 0x09:        // ROM+RAM+BATTERY
         cout << "CARTRIDGE TYPE: " << hex << (int)cartType << " - NO MBC" << dec << endl;
-        _MBC = new None(m_ROMdata, m_RAMsize);
+        m_MBC = new None(m_ROMdata, m_RAMsize);
         break;
     case 0x01:        // MBC1
     case 0x02:        // MBC1+RAM
     case 0x03:        // MBC1+RAM+BATTERY
         cout << "CARTRIDGE TYPE: " << hex << (int)cartType << " - MBC1" << dec << endl;
-        _MBC = new MBC1(m_ROMdata, m_RAMsize);
+        m_MBC = new MBC1(m_ROMdata, m_RAMsize);
         break;
     case 0x11:        // MBC3
     case 0x12:        // MBC3+RAM
     case 0x13:        // MBC3+RAM+BATTERY
         cout << "CARTRIDGE TYPE: " << hex << (int)cartType << " - MBC3" << dec << endl;
-        _MBC = new MBC3(m_ROMdata, m_RAMsize);
+        m_MBC = new MBC3(m_ROMdata, m_RAMsize);
         break;
     case 0x05:        // MBC2
     case 0x06:        // MBC2+BATTERY

@@ -3,8 +3,9 @@
 #include "data_types.h"
 #include "graphics/shader.h"
 #include "graphics/window.h"
-#include "memory.h"
 #include "cpu.h"
+
+class Memory;
 
 class Video
 {
@@ -31,9 +32,9 @@ public:
 
 private:
 
-    Memory*  m_memory;
-    int      m_scanLineCounter;
-    GLubyte* m_screenDATA;
+    Memory*  m_memory = nullptr;
+    int      m_scanLineCounter = 456;
+    GLubyte* m_screenDATA = nullptr;
 
     // Quad attributes
     enum { VBO_VERTICES, VBO_UVS, VBO_INDICES, VBO_SIZE };
@@ -43,5 +44,5 @@ private:
     // Opengl handlers
     GLuint m_vao = 0;
     GLuint m_textureId = 0;
-    GLuint m_vbos[VBO_SIZE];
+    GLuint m_vbos[VBO_SIZE] = {};
 };

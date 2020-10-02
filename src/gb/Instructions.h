@@ -2,7 +2,8 @@
 
 #include "data_types.h"
 #include "cpu_registers.h"
-#include "memory.h"
+
+class Memory;
 
 class Instructions
 {
@@ -89,6 +90,6 @@ public:
     void RL_n(regID n);
 
 private:
-    Memory*     m_memory;
-    Registers*  m_registers;
+    Memory*     m_memory = nullptr;
+    Registers*  m_registers = nullptr;
 };

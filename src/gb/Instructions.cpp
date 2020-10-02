@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "memory.h"
+
 using namespace std;
 
 Instructions::Instructions(Memory *memory, Registers *registers)

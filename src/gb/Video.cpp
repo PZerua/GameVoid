@@ -4,6 +4,7 @@
 #include "interrupts.h"
 #include "utils/bitUtils.h"
 #include "utils/debugutils.h"
+#include "memory.h"
 
 using namespace utils;
 
@@ -43,7 +44,6 @@ void main(void)
 
 Video::Video()
 {
-    m_scanLineCounter = 456;
     m_screenDATA = new GLubyte[160 * 144 * 3];
     memset(m_screenDATA, 255, 160 * 144 * 3 * sizeof(GLubyte));
 }

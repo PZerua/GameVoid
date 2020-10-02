@@ -3,8 +3,8 @@
 #include <string>
 
 #include "data_types.h"
-#include "mbc/mbc.h"
-#include "mbc/none.h"
+
+class MBC;
 
 #define HEADER_TITLE        0x134
 #define HEADER_CGB_FLAG     0x143
@@ -22,9 +22,10 @@ public:
     void  loadHeader();
     bool  initGame(const std::string &gamePath);
     BYTE* getData();
-    MBC*  _MBC;
+    MBC*  getMBC() { return m_MBC; }
 
 private:
+    MBC*        m_MBC = nullptr;
     BYTE*       m_ROMdata = nullptr;
     int         m_ROMsize = 0;
     unsigned    m_RAMsize = 0;

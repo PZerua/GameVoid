@@ -1,10 +1,11 @@
 #pragma once
 
 #include "data_types.h"
-#include "cartridge.h"
-#include "controller.h"
 
 #define MEM_SIZE 65536
+
+class Cartridge;
+class Controller;
 
 class Memory
 {
@@ -25,8 +26,8 @@ public:
 
 private:
     BYTE        m_memory[MEM_SIZE];
-    Cartridge*  m_cartridge;
-    bool        m_timerTriger;
-    BYTE        m_timerData;
-    Controller* m_controller;
+    Cartridge*  m_cartridge = nullptr;
+    bool        m_timerTriger = false;
+    BYTE        m_timerData = 0;
+    Controller* m_controller = nullptr;
 };

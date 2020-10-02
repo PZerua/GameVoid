@@ -63,7 +63,7 @@ void GameBoy::start()
             }
             if (m_memory._resetDiv)
             {
-                m_cpu.m_divideCounter = 0;
+                m_cpu.setDivideCounter(0);
                 m_memory._resetDiv = false;
             }
             if (cycles == -1)

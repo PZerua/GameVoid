@@ -1,19 +1,17 @@
 #include "memory.h"
 
 #include "io_registers.h"
+#include "cartridge.h"
+#include "controller.h"
+#include "mbc/mbc.h"
 
 void Memory::init(Cartridge *cartridge, Controller *controller)
 {
-    // Receive Cartridge data
     m_cartridge = cartridge;
-
     m_controller = controller;
 
     // Init Memory
     reset();
-
-    m_timerTriger = false;
-    m_timerData = 0;
 }
 
 BYTE Memory::read(WORD address)
@@ -21,7 +19,7 @@ BYTE Memory::read(WORD address)
     // We are reading data from ROM or internal Cartridge RAM
     if (address < 0x8000 || (address >= 0xA000 && address < 0xC000))
     {
-        return m_cartridge->_MBC->read(address);
+        return m_cartridge->getMBC()->read(address);
     }
     // If It's not part of ROM, we read from memory
     else return m_memory[address];
@@ -32,7 +30,7 @@ void Memory::write(WORD address, BYTE value)
     // We are writing data to ROM or internal Cartridge RAM
     if (address < 0x8000 || (address >= 0xA000 && address < 0xC000))
     {
-        m_cartridge->_MBC->write(address, value);
+        m_cartridge->getMBC()->write(address, value);
         return;
     }
     // In the following two cases we are writing to RAM

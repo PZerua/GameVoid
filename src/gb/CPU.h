@@ -1,9 +1,10 @@
 #pragma once
 
 #include "interrupts.h"
-#include "memory.h"
 #include "cpu_registers.h"
-#include "instructions.h"
+
+class Memory;
+class Instructions;
 
 class CPU
 {
@@ -23,18 +24,19 @@ public:
     int getClockFreq() const;
     void updateTimers(int cycles);
     bool isClockEnabled();
-    int m_divideCounter;
+    void setDivideCounter(int value) { m_divideCounter = value; }
+    int getDivideCounter() { return m_divideCounter; }
 
 private:
 
     Registers       m_registers;
     Memory*         m_memory = nullptr;
-    Instructions*   m_inst;
+    Instructions*   m_inst = nullptr;
 
     short   m_instCycles[0x100];
     short   m_CBinstCycles[0x100];
-    bool    m_IME;  // Interrupt master enable
-    int     m_timeCounter;
+    bool    m_IME = true;  // Interrupt master enable
+    int     m_timeCounter = 0;
+    int     m_divideCounter = 0;
     bool    m_haltEnabled = false;
-
 };

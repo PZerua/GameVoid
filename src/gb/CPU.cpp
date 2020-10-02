@@ -4,6 +4,8 @@
 
 #include "io_registers.h"
 #include "utils/bitUtils.h"
+#include "memory.h"
+#include "instructions.h"
 
 using namespace std;
 using namespace utils;
@@ -12,10 +14,7 @@ void CPU::init(Memory *memory)
 {
     m_memory = memory;
     m_inst = new Instructions(m_memory, &m_registers);
-    m_timeCounter = 0;
-    m_divideCounter = 0;
     initCyclesArrays();
-    m_IME = true;
 }
 
 int CPU::fetch()

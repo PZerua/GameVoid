@@ -9,5 +9,5 @@ public:
     BYTE read(WORD address);
     void write(WORD address, BYTE value);
 private:
-    BYTE* m_ROMdata;
+    BYTE* m_ROMdata = nullptr;
 };

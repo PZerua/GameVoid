@@ -6,14 +6,14 @@ class Controller
 {
 public:
     Controller() = default;
-    void init(BYTE *mem);
+    void init(BYTE *memory);
     BYTE getJoypadState() const;
     void checkControls();
     void keyPressed(int key);
     bool interruptRequested();
     void setInterruptRequested(bool state);
 private:
-    BYTE  m_joypadState;
-    BYTE* m_memory;
-    bool  m_interruptRequested;
+    BYTE  m_joypadState = 0xFF;
+    BYTE* m_memory = nullptr;
+    bool  m_interruptRequested = false;
 };

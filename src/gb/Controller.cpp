@@ -1,17 +1,15 @@
 #include "controller.h"
 
+#include <iostream>
+
 #include "utils/bitUtils.h"
 #include "input/input.h"
 
 using namespace utils;
 
-void Controller::init(BYTE *mem)
+void Controller::init(BYTE *memory)
 {
-    m_memory = mem;
-    bool keydown = false;
-    bool keyup = false;
-    m_interruptRequested = false;
-    m_joypadState = 0xFF;
+    m_memory = memory;
 }
 
 BYTE Controller::getJoypadState() const
