@@ -2,4 +2,5 @@
 /Debug/*
 /Release/*
 .vs/*
+.vscode/*
 x64/*

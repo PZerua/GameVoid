@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Header.h"
-#include "Memory.h"
-#include "Registers.h"
-#include "Instructions.h"
+#include "header.h"
+#include "memory.h"
+#include "registers.h"
+#include "instructions.h"
 
 class CPU
 {
@@ -19,7 +19,7 @@ public:
     void requestInterrupt(Interrupt id);
     void doInterrupts();
     void serviceInterrupt(Interrupt id);
-    BYTE getClockFreq() const;
+    int getClockFreq() const;
     void updateTimers(int cycles);
     bool isClockEnabled();
     int m_divideCounter;

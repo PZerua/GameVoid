@@ -1,6 +1,8 @@
-#include "CPU.h"
+#include "cpu.h"
  
-#include "bitUtils.h"
+#include "utils/bitUtils.h"
+
+using namespace utils;
 
 void CPU::init(Memory *memory)
 {
@@ -154,7 +156,7 @@ int CPU::fetch()
         case 0x73:    m_inst->LD_r1_r2(mHL, E); break;
         case 0x74:    m_inst->LD_r1_r2(mHL, H); break;
         case 0x75:    m_inst->LD_r1_r2(mHL, L); break;
-        case 0x76:    m_inst->HALT(); break;
+        case 0x76:    m_inst->HALT(m_IME); break;
         case 0x77:    m_inst->LD_n_A(mHL); break;
         case 0x78:    m_inst->LD_A_n(B); break;
         case 0x79:    m_inst->LD_A_n(C); break;
@@ -851,7 +853,7 @@ void CPU::updateTimers(int cycles)
         return;
     }
     
-    BYTE freq = getClockFreq();
+    int freq = getClockFreq();
 
     m_timeCounter += cycles;
 
@@ -866,7 +868,7 @@ void CPU::updateTimers(int cycles)
     }
 }
 
-BYTE CPU::getClockFreq() const
+int CPU::getClockFreq() const
 {
     BYTE freq = m_memory->read(TAC) & 0x3;
     switch (freq) {
@@ -875,6 +877,8 @@ BYTE CPU::getClockFreq() const
     case 2: return 16;     // freq 65536
     case 3: return 64;     // freq 16382
     }
+
+    return 0;
 }
 
 bool CPU::isClockEnabled()

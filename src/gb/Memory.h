@@ -1,7 +1,7 @@
 #pragma once
-#include "Header.h"
-#include "Cartridge.h"
-#include "Controller.h"
+#include "header.h"
+#include "cartridge.h"
+#include "controller.h"
 
 #define MEM_SIZE 65536
 
@@ -23,9 +23,9 @@ public:
     BYTE *getMemoryData();
 
 private:
-    BYTE _MEMORY[MEM_SIZE];
-    Cartridge *_cartridge;
-    bool _timerTriger;
-    BYTE _timerData;
-    Controller *_controller;
+    BYTE        m_memory[MEM_SIZE];
+    Cartridge*  m_cartridge;
+    bool        m_timerTriger;
+    BYTE        m_timerData;
+    Controller* m_controller;
 };

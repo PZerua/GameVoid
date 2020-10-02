@@ -1,5 +1,5 @@
 /**
-* (c) 2017 Pablo Luis García. All rights reserved.
+* (c) 2017 Pablo Luis Garcï¿½a. All rights reserved.
 * Released under MIT license. Read LICENSE for more details.
 */
 
@@ -17,15 +17,6 @@ void windowResize(GLFWwindow *window, int width, int height);
 
 class Window
 {
-private:
-    // Window dimensions
-    int m_width;
-    int m_height;
-
-    // Window attributes
-    bool m_isFullscreen;
-
-    GLFWwindow* m_window;
 
 public:
     // Intializes internals
@@ -52,6 +43,15 @@ public:
     void swap();
     void clear() const;
 
+private:
+    // Window dimensions
+    int m_width;
+    int m_height;
+
+    // Window attributes
+    bool m_isFullscreen;
+
+    GLFWwindow* m_window;
 };
 
 } // namespace gfx

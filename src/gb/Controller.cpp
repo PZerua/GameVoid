@@ -1,7 +1,9 @@
-#include "Controller.h"
+#include "controller.h"
 
-#include "bitUtils.h"
-#include "input.h"
+#include "utils/bitUtils.h"
+#include "input/input.h"
+
+using namespace utils;
 
 Controller::Controller()
 {
@@ -15,29 +17,29 @@ Controller::~Controller()
 
 void Controller::init(BYTE *mem)
 {
-    memory = mem;
+    m_memory = mem;
     bool keydown = false;
     bool keyup = false;
     m_interruptRequested = false;
-    _joypadState = 0xFF;
+    m_joypadState = 0xFF;
 }
 
 BYTE Controller::getJoypadState() const
 {
-    BYTE res = memory[0xFF00];
+    BYTE res = m_memory[0xFF00];
     // flip all the bits
     res ^= 0xFF;
 
     // are we interested in the standard buttons?
     if (!testBit(res, 4))
     {
-        BYTE topJoypad = _joypadState >> 4;
+        BYTE topJoypad = m_joypadState >> 4;
         topJoypad |= 0xF0; // turn the top 4 bits on
         res &= topJoypad; // show what buttons are pressed
     }
     else if (!testBit(res, 5))//directional buttons
     {
-        BYTE bottomJoypad = _joypadState & 0xF;
+        BYTE bottomJoypad = m_joypadState & 0xF;
         bottomJoypad |= 0xF0;
         res &= bottomJoypad;
     }
@@ -49,11 +51,11 @@ void Controller::keyPressed(int key)
     bool previouslyUnset = false;
 
     // if setting from 1 to 0 we may have to request an interupt
-    if (testBit(_joypadState, key) == false)
+    if (testBit(m_joypadState, key) == false)
         previouslyUnset = true;
 
     // remember if a keypressed its bit is 0 not 1
-    _joypadState = bitReset(_joypadState, key);
+    m_joypadState = bitReset(m_joypadState, key);
 
     // button pressed
     bool button = true;
@@ -64,7 +66,7 @@ void Controller::keyPressed(int key)
     else // directional button pressed
         button = false;
 
-    BYTE keyReq = memory[0xFF00];
+    BYTE keyReq = m_memory[0xFF00];
     bool requestInterupt = false;
 
     // only request interupt if the button just pressed is
@@ -89,56 +91,56 @@ void Controller::checkControls()
         keyPressed(4);
     }
     else {
-        _joypadState = bitSet(_joypadState, 4);
+        m_joypadState = bitSet(m_joypadState, 4);
     }
 
     if (input.isPressed(GLFW_KEY_S)) {
         keyPressed(5);
     }
     else {
-        _joypadState = bitSet(_joypadState, 5);
+        m_joypadState = bitSet(m_joypadState, 5);
     }
 
     if (input.isPressed(GLFW_KEY_ENTER)) {
         keyPressed(7);
     }
     else {
-        _joypadState = bitSet(_joypadState, 7);
+        m_joypadState = bitSet(m_joypadState, 7);
     }
 
     if (input.isPressed(GLFW_KEY_SPACE)) {
         keyPressed(6);
     }
     else {
-        _joypadState = bitSet(_joypadState, 6);
+        m_joypadState = bitSet(m_joypadState, 6);
     }
 
     if (input.isPressed(GLFW_KEY_RIGHT)) {
         keyPressed(0);
     }
     else {
-        _joypadState = bitSet(_joypadState, 0);
+        m_joypadState = bitSet(m_joypadState, 0);
     }
 
     if (input.isPressed(GLFW_KEY_LEFT)) {
         keyPressed(1);
     }
     else {
-        _joypadState = bitSet(_joypadState, 1);
+        m_joypadState = bitSet(m_joypadState, 1);
     }
 
     if (input.isPressed(GLFW_KEY_UP)) {
         keyPressed(2);
     }
     else {
-        _joypadState = bitSet(_joypadState, 2);
+        m_joypadState = bitSet(m_joypadState, 2);
     }
 
     if (input.isPressed(GLFW_KEY_DOWN)) {
         keyPressed(3);
     }
     else {
-        _joypadState = bitSet(_joypadState, 3);
+        m_joypadState = bitSet(m_joypadState, 3);
     }
 }
 

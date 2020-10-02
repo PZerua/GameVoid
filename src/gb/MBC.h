@@ -1,5 +1,5 @@
 #pragma once
-#include "Header.h"
+#include "header.h"
 
 class MBC
 {
@@ -8,11 +8,11 @@ public:
     virtual void write(WORD adress, BYTE value) = 0;
 
 protected:
-    unsigned _RAMsize;
-    bool _RAMenabled;
-    bool _mode;
-    unsigned _ROMbank;
-    unsigned _RAMbank;
+    unsigned    m_RAMsize;
+    bool        m_RAMenabled;
+    bool        m_mode;
+    unsigned    m_ROMbank;
+    unsigned    m_RAMbank;
 
     enum {
         ROMmode,

@@ -1,9 +1,9 @@
-#include "Cartridge.h"
+#include "cartridge.h"
 
 #include <string>
 
-#include "MBC1.h"
-#include "MBC3.h"
+#include "mbc1.h"
+#include "mbc3.h"
 
 Cartridge::Cartridge()
 {

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Header.h"
-#include "Window.h"
-#include "Memory.h"
-#include "CPU.h"
-#include "shader.h"
+#include "header.h"
+#include "graphics/shader.h"
+#include "graphics/window.h"
+#include "memory.h"
+#include "cpu.h"
 
 class Video
 {
@@ -22,9 +22,9 @@ public:
     COLOUR getColor(BYTE colourNum, WORD address);
 
 private:
-    Memory *_memory;
-    int _scanLineCounter;
-    GLubyte *_screenDATA;
+    Memory*  m_memory;
+    int      m_scanLineCounter;
+    GLubyte* m_screenDATA;
 
     // Quad attributes
     enum { VBO_VERTICES, VBO_UVS, VBO_INDICES, VBO_SIZE };

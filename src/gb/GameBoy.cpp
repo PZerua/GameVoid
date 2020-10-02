@@ -1,4 +1,4 @@
-#include "GameBoy.h"
+#include "gameboy.h"
 
 #include <chrono>
 #include <sstream>
@@ -15,18 +15,18 @@ GameBoy::~GameBoy()
 
 bool GameBoy::init(const std::string romPath)
 {
-    if (!_window.init("GameVoid", 640, 576)) {
+    if (!m_window.init("GameVoid", 640, 576)) {
         return false;
     }
 
-    if (!_game.initGame(romPath)) {
+    if (!m_game.initGame(romPath)) {
         return false;
     }
 
-    _memory.init(&_game, &_controller);
-    _video.init(&_memory);
-    _CPU.init(&_memory);
-    _controller.init(_memory.getMemoryData());
+    m_memory.init(&m_game, &m_controller);
+    m_video.init(&m_memory);
+    m_cpu.init(&m_memory);
+    m_controller.init(m_memory.getMemoryData());
 
     return true;
 }
@@ -37,40 +37,40 @@ void GameBoy::start()
 
     bool run = true;
 
-    while (run && !input.isPressed(GLFW_KEY_ESCAPE))
+    while (run && !input.isPressed(GLFW_KEY_ESCAPE) && !m_window.isClosed())
     {
         int cyclesThisUpdate = 0;
 
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-        _window.pollEvents();
-        _controller.checkControls();
+        m_window.pollEvents();
+        m_controller.checkControls();
 
         while (cyclesThisUpdate < MAXCYCLES)
         {
-            if (_controller.interruptRequested())
+            if (m_controller.interruptRequested())
             {
-                _CPU.requestInterrupt(Interrupt::JoyPad);
-                _controller.setInterruptRequested(false);
+                m_cpu.requestInterrupt(Interrupt::JoyPad);
+                m_controller.setInterruptRequested(false);
             }
-            int cycles = _CPU.fetch();
-            if (_memory.timerTriger())
+            int cycles = m_cpu.fetch();
+            if (m_memory.timerTriger())
             {
-                BYTE currentfreq = _CPU.getClockFreq();
-                BYTE data = _memory.getTimerData();
-                _memory.directModification(TAC, data);
-                BYTE newfreq = _CPU.getClockFreq();
+                BYTE currentfreq = m_cpu.getClockFreq();
+                BYTE data = m_memory.getTimerData();
+                m_memory.directModification(TAC, data);
+                BYTE newfreq = m_cpu.getClockFreq();
 
                 if (currentfreq != newfreq)
                 {
                     //_CPU.setClockFreq();
                 }
-                _memory.resetTimerTriger();
+                m_memory.resetTimerTriger();
             }
-            if (_memory._resetDiv)
+            if (m_memory._resetDiv)
             {
-                _CPU.m_divideCounter = 0;
-                _memory._resetDiv = false;
+                m_cpu.m_divideCounter = 0;
+                m_memory._resetDiv = false;
             }
             if (cycles == -1)
             {
@@ -78,20 +78,20 @@ void GameBoy::start()
                 break;
             }
             cyclesThisUpdate += cycles;
-            _CPU.updateTimers(cycles);
-            _video.updateGraphics(cycles, _CPU);
-            _CPU.doInterrupts();
+            m_cpu.updateTimers(cycles);
+            m_video.updateGraphics(cycles, m_cpu);
+            m_cpu.doInterrupts();
         }
 
-        _window.clear();
-        _video.render();
-        _window.swap();
+        m_window.clear();
+        m_video.render();
+        m_window.swap();
 
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
         std::stringstream stream;
         stream << std::fixed << std::setprecision(2) << 1000.0 / std::chrono::duration_cast<std::chrono::milliseconds> (end - begin).count();
-        _window.setWindowTitle("GameVoid " + stream.str());
+        m_window.setWindowTitle("GameVoid " + stream.str());
         //std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds> (end - begin).count() << "[ms]" << std::endl;
     }
 }

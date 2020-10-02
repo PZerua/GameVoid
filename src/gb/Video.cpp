@@ -1,7 +1,9 @@
 #include "Video.h"
 
-#include "bitUtils.h"
-#include "debugutils.h"
+#include "utils/bitUtils.h"
+#include "utils/debugutils.h"
+
+using namespace utils;
 
 const char* vertexShader =  R"(#version 330 core
 
@@ -39,9 +41,9 @@ void main(void)
 
 Video::Video()
 {
-    _scanLineCounter = 456;
-    _screenDATA = new GLubyte[160 * 144 * 3];
-    memset(_screenDATA, 255, 160 * 144 * 3 * sizeof(GLubyte));
+    m_scanLineCounter = 456;
+    m_screenDATA = new GLubyte[160 * 144 * 3];
+    memset(m_screenDATA, 255, 160 * 144 * 3 * sizeof(GLubyte));
 }
 
 Video::~Video()
@@ -50,12 +52,12 @@ Video::~Video()
     glDeleteBuffers(VBO_SIZE, m_vbos);
     glDeleteTextures(1, &m_textureId);
 
-    delete[] _screenDATA;
+    delete[] m_screenDATA;
 }
 
 void Video::init(Memory *memory)
 {
-    _memory = memory;
+    m_memory = memory;
 
     m_shader.init(vertexShader, fragmentShader);
 
@@ -65,7 +67,7 @@ void Video::init(Memory *memory)
     glBindTexture(GL_TEXTURE_2D, m_textureId);
 
     // Create buffer for the texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, static_cast<int>(160), static_cast<int>(144), 0, GL_RGBA, GL_UNSIGNED_BYTE, _screenDATA);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, static_cast<int>(160), static_cast<int>(144), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_screenDATA);
 
     // set texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -123,14 +125,14 @@ void Video::updateGraphics(int cycles, CPU &cpu)
     setLCDStatus(cpu);
 
     if (isLCDEnabled())
-        _scanLineCounter -= cycles;
+        m_scanLineCounter -= cycles;
     else
         return;
 
-    if (_scanLineCounter <= 0)
+    if (m_scanLineCounter <= 0)
     {
-        BYTE currentline = _memory->read(LY);
-        _scanLineCounter = 456;
+        BYTE currentline = m_memory->read(LY);
+        m_scanLineCounter = 456;
 
         // we have entered vertical blank period
         if (currentline == 144)
@@ -138,32 +140,32 @@ void Video::updateGraphics(int cycles, CPU &cpu)
 
         // if gone past scanline 153 reset to 0
         else if (currentline > 153)
-            _memory->directModification(LY, 0x00);
+            m_memory->directModification(LY, 0x00);
 
         // draw the current scanline 
         else if (currentline < 144)
             drawScanLine();
 
         // time to move onto next scanline
-        _memory->directModification(LY, _memory->read(LY) + 1);
+        m_memory->directModification(LY, m_memory->read(LY) + 1);
     }
 }
 
 void Video::setLCDStatus(CPU &cpuTemp)
 {
-    BYTE status = _memory->read(STAT);
+    BYTE status = m_memory->read(STAT);
     if (!isLCDEnabled())
     {
         // set the mode to 1 during lcd disabled and reset scanline
-        _scanLineCounter = 456;
-        _memory->directModification(LY, 0x00);
+        m_scanLineCounter = 456;
+        m_memory->directModification(LY, 0x00);
         status &= 0xFC;
         status = bitSet(status, 0);
-        _memory->write(STAT, status);
+        m_memory->write(STAT, status);
         return;
     }
 
-    BYTE currentline = _memory->read(LY);
+    BYTE currentline = m_memory->read(LY);
     BYTE currentmode = status & 0x03;
 
     BYTE mode = 0x00;
@@ -184,7 +186,7 @@ void Video::setLCDStatus(CPU &cpuTemp)
         int mode3bounds = mode2bounds - 172;
 
         // mode 2
-        if (_scanLineCounter >= mode2bounds)
+        if (m_scanLineCounter >= mode2bounds)
         {
             mode = 0x02;
             status = bitSet(status, 1);
@@ -192,7 +194,7 @@ void Video::setLCDStatus(CPU &cpuTemp)
             reqInt = testBit(status, 5);
         }
         // mode 3
-        else if (_scanLineCounter >= mode3bounds)
+        else if (m_scanLineCounter >= mode3bounds)
         {
             mode = 0x03;
             status = bitSet(status, 1);
@@ -213,7 +215,7 @@ void Video::setLCDStatus(CPU &cpuTemp)
         cpuTemp.requestInterrupt(LCD);
 
     // check the conincidence flag
-    if (_memory->read(LY) == _memory->read(LYC))
+    if (m_memory->read(LY) == m_memory->read(LYC))
     {
         status = bitSet(status, 2);
         if (testBit(status, 6))
@@ -223,17 +225,17 @@ void Video::setLCDStatus(CPU &cpuTemp)
     {
         status = bitReset(status, 2);
     }
-    _memory->write(STAT, status);
+    m_memory->write(STAT, status);
 }
 
 bool Video::isLCDEnabled()
 {
-    return ((_memory->read(LCDC) & 0x80) == 0x80);
+    return ((m_memory->read(LCDC) & 0x80) == 0x80);
 }
 
 void Video::drawScanLine()
 {
-    BYTE control = _memory->read(LCDC);
+    BYTE control = m_memory->read(LCDC);
     if (testBit(control, 0))
         renderTiles();
 
@@ -248,24 +250,24 @@ void Video::renderTiles()
     bool unsig = true;
 
     // where to draw the visual area and the window
-    BYTE scrollY = _memory->read(SCY);
-    BYTE scrollX = _memory->read(SCX);
-    BYTE windowY = _memory->read(WY);
-    BYTE windowX = _memory->read(WX) - 7;
+    BYTE scrollY = m_memory->read(SCY);
+    BYTE scrollX = m_memory->read(SCX);
+    BYTE windowY = m_memory->read(WY);
+    BYTE windowX = m_memory->read(WX) - 7;
 
     bool usingWindow = false;
 
     // is the window enabled?
-    if (testBit(_memory->read(LCDC), 5))
+    if (testBit(m_memory->read(LCDC), 5))
     {
         // is the current scanline we're drawing 
         // within the windows Y pos?,
-        if (windowY < _memory->read(LY))
+        if (windowY < m_memory->read(LY))
             usingWindow = true;
     }
 
     // which tile data are we using? 
-    if (testBit(_memory->read(LCDC), 4))
+    if (testBit(m_memory->read(LCDC), 4))
     {
         tileData = 0x8000;
     }
@@ -280,7 +282,7 @@ void Video::renderTiles()
     // which background mem?
     if (!usingWindow)
     {
-        if (testBit(_memory->read(LCDC), 3))
+        if (testBit(m_memory->read(LCDC), 3))
             backgroundMemory = 0x9C00;
         else
             backgroundMemory = 0x9800;
@@ -288,7 +290,7 @@ void Video::renderTiles()
     else
     {
         // which window memory?
-        if (testBit(_memory->read(LCDC), 6))
+        if (testBit(m_memory->read(LCDC), 6))
             backgroundMemory = 0x9C00;
         else
             backgroundMemory = 0x9800;
@@ -299,9 +301,9 @@ void Video::renderTiles()
     // yPos is used to calculate which of 32 vertical tiles the 
     // current scanline is drawing
     if (!usingWindow)
-        yPos = scrollY + _memory->read(LY);
+        yPos = scrollY + m_memory->read(LY);
     else
-        yPos = _memory->read(LY) - windowY;
+        yPos = m_memory->read(LY) - windowY;
 
     // which of the 8 vertical pixels of the current 
     // tile is the scanline on?
@@ -330,9 +332,9 @@ void Video::renderTiles()
         // or unsigned
         WORD tileAddrss = backgroundMemory + tileRow + tileCol;
         if (unsig)
-            tileNum = (BYTE)_memory->read(tileAddrss);
+            tileNum = (BYTE)m_memory->read(tileAddrss);
         else
-            tileNum = (SIGNED_BYTE)_memory->read(tileAddrss);
+            tileNum = (SIGNED_BYTE)m_memory->read(tileAddrss);
 
         // deduce where this tile identifier is in memory. Remember i 
         // shown this algorithm earlier
@@ -348,8 +350,8 @@ void Video::renderTiles()
         // from in memory
         BYTE line = yPos % 8;
         line *= 2; // each vertical line takes up two bytes of memory
-        BYTE data1 = _memory->read(tileLocation + line);
-        BYTE data2 = _memory->read(tileLocation + line + 1);
+        BYTE data1 = m_memory->read(tileLocation + line);
+        BYTE data2 = m_memory->read(tileLocation + line + 1);
 
         // pixel 0 in the tile is it 7 of data 1 and data2.
         // Pixel 1 is bit 6 etc..
@@ -378,7 +380,7 @@ void Video::renderTiles()
         case DARK_GREY:     red = 0x77; green = 0x77; blue = 0x77; break;
         }
 
-        int finaly = _memory->read(LY);
+        int finaly = m_memory->read(LY);
 
         // safety check to make sure what im about 
         // to set is in the 160x144 bounds
@@ -387,16 +389,16 @@ void Video::renderTiles()
             continue;
         }
 
-        _screenDATA[finaly * 160 * 3 + (pixel * 3)] = red;
-        _screenDATA[finaly * 160 * 3 + (pixel * 3) + 1] = green;
-        _screenDATA[finaly * 160 * 3 + (pixel * 3) + 2] = blue;
+        m_screenDATA[finaly * 160 * 3 + (pixel * 3)] = red;
+        m_screenDATA[finaly * 160 * 3 + (pixel * 3) + 1] = green;
+        m_screenDATA[finaly * 160 * 3 + (pixel * 3) + 2] = blue;
     }
 }
 
 COLOUR Video::getColor(BYTE colourNum, WORD address)
 {
     COLOUR res = WHITE;
-    BYTE palette = _memory->read(address);
+    BYTE palette = m_memory->read(address);
     int hi = 0;
     int lo = 0;
 
@@ -429,22 +431,22 @@ COLOUR Video::getColor(BYTE colourNum, WORD address)
 void Video::renderSprites()
 {
     bool use8x16 = false;
-    if (testBit(_memory->read(LCDC), 2))
+    if (testBit(m_memory->read(LCDC), 2))
         use8x16 = true;
 
     for (int sprite = 0; sprite < 40; sprite++)
     {
         // sprite occupies 4 bytes in the sprite attributes table
         BYTE index = sprite * 4;
-        BYTE yPos = _memory->read(0xFE00 + index) - 16;
-        BYTE xPos = _memory->read(0xFE00 + index + 1) - 8;
-        BYTE tileLocation = _memory->read(0xFE00 + index + 2);
-        BYTE attributes = _memory->read(0xFE00 + index + 3);
+        BYTE yPos = m_memory->read(0xFE00 + index) - 16;
+        BYTE xPos = m_memory->read(0xFE00 + index + 1) - 8;
+        BYTE tileLocation = m_memory->read(0xFE00 + index + 2);
+        BYTE attributes = m_memory->read(0xFE00 + index + 3);
 
         bool yFlip = testBit(attributes, 6);
         bool xFlip = testBit(attributes, 5);
 
-        int scanline = _memory->read(LY);
+        int scanline = m_memory->read(LY);
 
         int ysize = 8;
         if (use8x16)
@@ -464,8 +466,8 @@ void Video::renderSprites()
 
             line *= 2; // same as for tiles
             WORD dataAddress = (0x8000 + (tileLocation * 16)) + line;
-            BYTE data1 = _memory->read(dataAddress);
-            BYTE data2 = _memory->read(dataAddress + 1);
+            BYTE data1 = m_memory->read(dataAddress);
+            BYTE data2 = m_memory->read(dataAddress + 1);
 
             // its easier to read in from right to left as pixel 0 is 
             // bit 7 in the colour data, pixel 1 is bit 6 etc...
@@ -516,13 +518,13 @@ void Video::renderSprites()
                 // check if pixel is hidden behind background
                 if (testBit(attributes, 7) == 1)
                 {
-                    if (((_screenDATA[scanline * 160 + pixel]) != 0xFF) || ((_screenDATA[scanline * 160 + pixel + 1] & 0xFF) != 0xFF) || ((_screenDATA[scanline * 160 + pixel + 2] & 0xFF) != 0xFF))
+                    if (((m_screenDATA[scanline * 160 + pixel]) != 0xFF) || ((m_screenDATA[scanline * 160 + pixel + 1] & 0xFF) != 0xFF) || ((m_screenDATA[scanline * 160 + pixel + 2] & 0xFF) != 0xFF))
                         continue;
                 }
 
-                _screenDATA[scanline * 160 * 3 + (pixel * 3)] = red;
-                _screenDATA[scanline * 160 * 3 + (pixel * 3) + 1] = green;
-                _screenDATA[scanline * 160 * 3 + (pixel * 3) + 2] = blue;
+                m_screenDATA[scanline * 160 * 3 + (pixel * 3)] = red;
+                m_screenDATA[scanline * 160 * 3 + (pixel * 3) + 1] = green;
+                m_screenDATA[scanline * 160 * 3 + (pixel * 3) + 2] = blue;
             }
         }
     }
@@ -533,7 +535,7 @@ void Video::render()
     glBindTexture(GL_TEXTURE_2D, m_textureId);
 
     // Update fbo
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, static_cast<int>(160), static_cast<int>(144), GL_RGB, GL_UNSIGNED_BYTE, _screenDATA);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, static_cast<int>(160), static_cast<int>(144), GL_RGB, GL_UNSIGNED_BYTE, m_screenDATA);
 
     // Bind Shader
     m_shader.enable();

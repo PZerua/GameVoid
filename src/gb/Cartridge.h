@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Header.h"
-#include "MBC.h"
-#include "None.h"
+#include "header.h"
+#include "mbc.h"
+#include "none.h"
 
 #define HEADER_TITLE 0x134
 #define HEADER_CGB_FLAG 0x143

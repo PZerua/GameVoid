@@ -1,5 +1,5 @@
 /**
-* (c) 2017 Pablo Luis García. All rights reserved.
+* (c) 2017 Pablo Luis Garcï¿½a. All rights reserved.
 * Released under MIT license. Read LICENSE for more details.
 */
 
@@ -13,9 +13,6 @@ namespace gfx
 
 class Shader
 {
-private:
-    // Program ID
-    GLuint m_programId;
 
 public:
     // Builds the shader
@@ -42,6 +39,9 @@ private:
     void compileShader(GLuint &shader, GLenum shaderType, const char *shaderCode);
     void printShaderErrors(GLuint shader) const;
     void printProgramErrors(GLuint shader) const;
+
+    // Program ID
+    GLuint m_programId = 0;
 };
 
 } // namespace gfx

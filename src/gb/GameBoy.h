@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Header.h"
-#include "Cartridge.h"
-#include "Memory.h"
-#include "CPU.h"
-#include "Video.h"
-#include "Controller.h"
+#include "header.h"
+#include "cartridge.h"
+#include "memory.h"
+#include "cpu.h"
+#include "video.h"
+#include "controller.h"
 #include "graphics/window.h"
 
 constexpr auto MAXCYCLES = 69905;
@@ -19,10 +19,10 @@ public:
     void start();
 
 private:
-    Cartridge _game;
-    Memory _memory;
-    Video _video;
-    CPU _CPU;
-    Controller _controller;
-    gfx::Window _window;
+    Cartridge m_game;
+    Memory m_memory;
+    Video m_video;
+    CPU m_cpu;
+    Controller m_controller;
+    gfx::Window m_window;
 };

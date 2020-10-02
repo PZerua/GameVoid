@@ -1,5 +1,6 @@
 #pragma once
-#include "Header.h"
+
+#include "header.h"
 
 class Controller
 {
@@ -13,7 +14,7 @@ public:
     bool interruptRequested();
     void setInterruptRequested(bool state);
 private:
-    BYTE _joypadState;
-    BYTE *memory;
-    bool m_interruptRequested;
+    BYTE  m_joypadState;
+    BYTE* m_memory;
+    bool  m_interruptRequested;
 };

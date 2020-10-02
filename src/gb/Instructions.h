@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Header.h"
-#include "Registers.h"
-#include "Memory.h"
+#include "header.h"
+#include "registers.h"
+#include "memory.h"
 
 class Instructions
 {
@@ -90,6 +90,6 @@ public:
     void RL_n(regID n);
 
 private:
-    Memory *_memory;
-    Registers *_registers;
+    Memory*     m_memory;
+    Registers*  m_registers;
 };

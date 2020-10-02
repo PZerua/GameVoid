@@ -1,6 +1,6 @@
 #pragma once
-#include "Header.h"
-#include "MBC.h"
+#include "header.h"
+#include "mbc.h"
 
 class None : public MBC
 {
@@ -10,5 +10,5 @@ public:
     BYTE read(WORD address);
     void write(WORD address, BYTE value);
 private:
-    BYTE *_ROMdata;
+    BYTE* m_ROMdata;
 };

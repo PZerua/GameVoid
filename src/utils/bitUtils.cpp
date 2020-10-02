@@ -1,5 +1,8 @@
 #include "bitUtils.h"
 
+namespace utils
+{
+
 BYTE bitSet(BYTE byte, int bit)
 {
     BYTE tempByte = byte | (0x01 << bit);
@@ -22,3 +25,5 @@ BYTE bitGetVal(BYTE byte, int bit)
     BYTE tempByte = (byte & (0x01 << bit)) >> bit;
     return tempByte;
 }
+
+} // namespace utils

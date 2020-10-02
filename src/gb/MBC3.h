@@ -1,8 +1,8 @@
 #pragma once
 
 #pragma once
-#include "Header.h"
-#include "MBC.h"
+#include "header.h"
+#include "mbc.h"
 
 class MBC3 : public MBC
 {
@@ -12,6 +12,6 @@ public:
 	BYTE read(WORD address);
 	void write(WORD address, BYTE value);
 private:
-	BYTE *_ROMdata;
-	BYTE _RAMdata[0x8000];
+	BYTE* m_ROMdata;
+	BYTE  m_RAMdata[0x8000];
 };

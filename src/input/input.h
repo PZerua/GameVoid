@@ -1,15 +1,11 @@
-/**
-* (c) 2017 Pablo Luis García. All rights reserved.
-* Released under MIT license. Read LICENSE for more details.
-*/
-
 #pragma once
 #include <GLFW/glfw3.h>
 
 namespace input 
 {
-    // Callbacks definition
-    void onKeyChange(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+// Callbacks definition
+void onKeyChange(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 class Keyboard
 {

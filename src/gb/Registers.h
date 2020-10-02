@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Header.h"
+#include "header.h"
 
 enum regID
 {
@@ -10,7 +10,7 @@ enum regID
     nZ, Z, nC, sC
 };
 
-class Registers
+struct Registers
 {
 public:
     Registers();
