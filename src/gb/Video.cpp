@@ -1,5 +1,7 @@
 #include "Video.h"
 
+#include "io_registers.h"
+#include "interrupts.h"
 #include "utils/bitUtils.h"
 #include "utils/debugutils.h"
 
@@ -326,7 +328,7 @@ void Video::renderTiles()
 
         // which of the 32 horizontal tiles does this xPos fall within?
         WORD tileCol = (xPos / 8);
-        SIGNED_WORD tileNum;
+        SWORD tileNum;
 
         // get the tile identity number. Remember it can be signed
         // or unsigned
@@ -334,7 +336,7 @@ void Video::renderTiles()
         if (unsig)
             tileNum = (BYTE)m_memory->read(tileAddrss);
         else
-            tileNum = (SIGNED_BYTE)m_memory->read(tileAddrss);
+            tileNum = (SBYTE)m_memory->read(tileAddrss);
 
         // deduce where this tile identifier is in memory. Remember i 
         // shown this algorithm earlier
@@ -375,7 +377,7 @@ void Video::renderTiles()
         // setup the RGB values
         switch (col)
         {
-        case WHITE:         red = 255; green = 255; blue = 255; break;
+        case WHITE:         red = 0xFF; green = 0xFF; blue = 0xFF; break;
         case LIGHT_GREY:    red = 0xCC; green = 0xCC; blue = 0xCC; break;
         case DARK_GREY:     red = 0x77; green = 0x77; blue = 0x77; break;
         }
@@ -395,7 +397,7 @@ void Video::renderTiles()
     }
 }
 
-COLOUR Video::getColor(BYTE colourNum, WORD address)
+Video::COLOUR Video::getColor(BYTE colourNum, WORD address)
 {
     COLOUR res = WHITE;
     BYTE palette = m_memory->read(address);
@@ -499,7 +501,7 @@ void Video::renderSprites()
 
                 switch (col)
                 {
-                case WHITE:         red = 255; green = 255; blue = 255; break;
+                case WHITE:         red = 0xFF; green = 0xFF; blue = 0xFF; break;
                 case LIGHT_GREY:    red = 0xCC; green = 0xCC; blue = 0xCC; break;
                 case DARK_GREY:     red = 0x77; green = 0x77; blue = 0x77; break;
                 }

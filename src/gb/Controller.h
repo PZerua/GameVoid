@@ -1,12 +1,11 @@
 #pragma once
 
-#include "header.h"
+#include "data_types.h"
 
 class Controller
 {
 public:
-    Controller();
-    ~Controller();
+    Controller() = default;
     void init(BYTE *mem);
     BYTE getJoypadState() const;
     void checkControls();

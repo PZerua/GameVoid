@@ -1,6 +1,5 @@
 #pragma once
 
-#include "header.h"
 #include "cartridge.h"
 #include "memory.h"
 #include "cpu.h"
@@ -13,8 +12,7 @@ constexpr auto MAXCYCLES = 69905;
 class GameBoy
 {
 public:
-    GameBoy();
-    ~GameBoy();
+    GameBoy() = default;
     bool init(const std::string romPath);
     void start();
 

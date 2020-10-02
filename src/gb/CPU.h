@@ -1,15 +1,16 @@
 #pragma once
 
-#include "header.h"
+#include "interrupts.h"
 #include "memory.h"
-#include "registers.h"
+#include "cpu_registers.h"
 #include "instructions.h"
 
 class CPU
 {
+
 public:
+
     CPU() = default;
-    ~CPU() = default;
     void init(Memory *memory);
     int fetch();
     int CB_prefix(Instructions *inst);
@@ -25,13 +26,15 @@ public:
     int m_divideCounter;
 
 private:
+
     Registers       m_registers;
-    Memory*         m_memory;
+    Memory*         m_memory = nullptr;
     Instructions*   m_inst;
 
     short   m_instCycles[0x100];
     short   m_CBinstCycles[0x100];
     bool    m_IME;  // Interrupt master enable
     int     m_timeCounter;
-    
+    bool    m_haltEnabled = false;
+
 };

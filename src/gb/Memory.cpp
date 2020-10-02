@@ -1,5 +1,7 @@
 #include "memory.h"
 
+#include "io_registers.h"
+
 void Memory::init(Cartridge *cartridge, Controller *controller)
 {
     // Receive Cartridge data

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "header.h"
+#include "data_types.h"
 
 enum regID
 {
@@ -13,8 +13,7 @@ enum regID
 struct Registers
 {
 public:
-    Registers();
-    ~Registers();
+    Registers() = default;
 
     void reset();
 
@@ -61,9 +60,6 @@ public:
     void setReg(regID id, WORD value);
     const WORD getReg(regID id);
 
-    void setHalt(bool value);
-    bool haltEnabled();
-
 private:
 
     union reg
@@ -72,14 +68,12 @@ private:
         BYTE n[2];
     };
 
-    reg AF;
-    reg BC;
-    reg DE;
-    reg HL;
+    reg AF = { 0x11B0 };
+    reg BC = { 0x0013 };
+    reg DE = { 0x00D8 };
+    reg HL = { 0x014D };
     // Stack Pointer
-    WORD SP;
+    WORD SP = 0xFFFE;
     // Program Counter
-    WORD PC;
-
-    bool m_haltEnabled;
+    WORD PC = 0x0100;
 };

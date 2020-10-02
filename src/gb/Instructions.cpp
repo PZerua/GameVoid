@@ -1,14 +1,13 @@
 #include "instructions.h"
 
+#include <iostream>
+
+using namespace std;
+
 Instructions::Instructions(Memory *memory, Registers *registers)
 {
     m_memory = memory;
     m_registers = registers;
-}
-
-Instructions::~Instructions()
-{
-
 }
 
 // Read immediate 16 bits value
@@ -549,8 +548,6 @@ void Instructions::HALT(bool IME)
     if (!IME) {
         m_registers->addPC(1);
     }
-
-    m_registers->setHalt(true);
 }
 
 // 0x80, 0x81, 0x82, 0x83, 0x84, 0x85 0x86, 0x87, 0xC6

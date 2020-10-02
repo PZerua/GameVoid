@@ -5,16 +5,6 @@
 
 using namespace utils;
 
-Controller::Controller()
-{
-
-}
-
-Controller::~Controller()
-{
-
-}
-
 void Controller::init(BYTE *mem)
 {
     m_memory = mem;

@@ -1,16 +1,13 @@
 #include "none.h"
 
-None::None(BYTE *ROMdata, unsigned RAMsize)
-{
-    m_ROMdata = ROMdata;
-    m_RAMenabled = false;
-    m_RAMsize = RAMsize;
-}
+#include <iostream>
 
-None::~None()
-{
+using namespace std;
 
-}
+None::None(BYTE *ROMdata, unsigned RAMsize) :
+    m_ROMdata(ROMdata),
+    MBC(RAMsize)
+{}
 
 BYTE None::read(WORD address)
 {

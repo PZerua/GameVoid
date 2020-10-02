@@ -4,14 +4,8 @@
 #include <sstream>
 #include <iomanip>
 
-GameBoy::GameBoy()
-{
-}
-
-GameBoy::~GameBoy()
-{
-
-}
+#include "io_registers.h"
+#include "interrupts.h"
 
 bool GameBoy::init(const std::string romPath)
 {

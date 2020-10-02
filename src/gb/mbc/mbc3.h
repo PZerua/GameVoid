@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma once
-#include "header.h"
 #include "mbc.h"
 
 class MBC3 : public MBC
@@ -13,5 +11,5 @@ public:
 	void write(WORD address, BYTE value);
 private:
 	BYTE* m_ROMdata;
-	BYTE  m_RAMdata[0x8000];
+	BYTE  m_RAMdata[0x8000] = {};
 };

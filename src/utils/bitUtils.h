@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gb/header.h"
+#include "gb/data_types.h"
 
 namespace utils
 {

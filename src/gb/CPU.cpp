@@ -1,7 +1,11 @@
 #include "cpu.h"
  
+#include <iostream>
+
+#include "io_registers.h"
 #include "utils/bitUtils.h"
 
+using namespace std;
 using namespace utils;
 
 void CPU::init(Memory *memory)
@@ -25,16 +29,13 @@ int CPU::fetch()
 
     if (debug) 
     {
-        lastPC = m_registers.getPC();
-        lastOPCODE = OPCODE;
-
         cout << hex << "PC: " << (int)m_registers.getPC() << " | OPCODE: " << (int)OPCODE << "\t";
         cout << hex << "AF: " << (int)m_registers.getAF() << " | BC: " << (int)m_registers.getBC() << " | DE: " << (int)m_registers.getDE()
             << " | HL: " << (int)m_registers.getHL() << " | SP: " << (int)m_registers.getSP() << endl;
         count++;
     }
     
-    if (!m_registers.haltEnabled())
+    if (!m_haltEnabled)
     {
         switch (OPCODE)
         {
@@ -156,7 +157,7 @@ int CPU::fetch()
         case 0x73:    m_inst->LD_r1_r2(mHL, E); break;
         case 0x74:    m_inst->LD_r1_r2(mHL, H); break;
         case 0x75:    m_inst->LD_r1_r2(mHL, L); break;
-        case 0x76:    m_inst->HALT(m_IME); break;
+        case 0x76:    m_inst->HALT(m_IME); m_haltEnabled = true; break;
         case 0x77:    m_inst->LD_n_A(mHL); break;
         case 0x78:    m_inst->LD_A_n(B); break;
         case 0x79:    m_inst->LD_A_n(C); break;
@@ -777,7 +778,7 @@ void CPU::requestInterrupt(Interrupt id)
     m_memory->write(IF, reqInt);
 
     if (testBit(m_memory->read(IE), id)) {
-        m_registers.setHalt(false);
+        m_haltEnabled = false;
     }
     //cout << "REQ_AFT: " << hex << (int)reqInt << endl;
     //cout << "ENAB: " << hex << (int)_memory->read(0xFFFF) << endl;
@@ -828,7 +829,7 @@ void CPU::serviceInterrupt(Interrupt id)
         break;
     }*/
 
-    m_registers.setHalt(false);
+    m_haltEnabled = false;
 
     switch (id) {
     case VBlank: m_registers.setPC(0x40); break;

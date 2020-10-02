@@ -1,20 +1,13 @@
 #include "mbc1.h"
 
-MBC1::MBC1(BYTE *ROMdata, unsigned RAMsize)
-{
-    m_ROMdata = ROMdata;
-    memset(m_RAMdata, 0, RAMsize);
-    m_RAMsize = RAMsize;
-    m_RAMenabled = false;
-    m_mode = 0;
-    m_ROMbank = 1;
-    m_RAMbank = 0;
-}
+#include <iostream>
 
-MBC1::~MBC1()
-{
+using namespace std;
 
-}
+MBC1::MBC1(BYTE *ROMdata, unsigned RAMsize) :
+    m_ROMdata(ROMdata),
+    MBC(RAMsize)
+{}
 
 BYTE MBC1::read(WORD address)
 {
@@ -37,14 +30,14 @@ BYTE MBC1::read(WORD address)
     {
         if (m_RAMsize == 0 || !m_RAMenabled)
         {
-            cout << hex << "PC: " << (int)lastPC << " | OPCODE: " << (int)lastOPCODE << endl;
+            // cout << hex << "PC: " << (int)lastPC << " | OPCODE: " << (int)lastOPCODE << endl;
             throw exception("Trying to read uninitialized or null RAM");
         }    
         return m_RAMdata[(0x2000 * m_RAMbank) + (address - 0xA000)];
     }
     else
     {
-        cout << hex << "PC: " << (int)lastPC << " | OPCODE: " << (int)lastOPCODE << endl;
+        // cout << hex << "PC: " << (int)lastPC << " | OPCODE: " << (int)lastOPCODE << endl;
         throw exception("Wrong address");
     }
 }

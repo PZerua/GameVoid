@@ -1,5 +1,6 @@
 #pragma once
-#include "header.h"
+
+#include "data_types.h"
 #include "cartridge.h"
 #include "controller.h"
 

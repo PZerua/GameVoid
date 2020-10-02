@@ -1,25 +1,5 @@
 #pragma once
 
-#include <iostream>
-#include <fstream>
-#include <chrono>
-#include <thread>
-
-using namespace std;
-
-// Window sizes
-#define SCREEN_WIDTH 160
-#define SCREEN_HEIGHT 144
-
-// Clock frequency
-#define CLOCKSPEED 4194304
-
-// GameBoy color palette
-#define COLOR_GREEN_0 0x9cbd0f
-#define COLOR_GREEN_1 0x8cad0f
-#define COLOR_GREEN_2 0x306230
-#define COLOR_GREEN_3 0x0f380f
-
 // Timer and Divider Registers
 #define DIV     0xFF04
 #define TIMA    0xFF05
@@ -64,33 +44,3 @@ using namespace std;
 #define WX      0xFF4B
 // Interrupt Register
 #define IE      0xFFFF
-
-// In C++ char has 1 Byte width
-// It has to be unsigned because we need up to 255 values
-// In signed types 1 bit is used to denote sign
-typedef unsigned char BYTE;
-
-// Short has 2 Bytes width
-typedef unsigned short WORD;
-
-typedef signed char SIGNED_BYTE;
-
-typedef signed short SIGNED_WORD;
-
-enum Interrupt {
-    VBlank,
-    LCD,
-    Timer,
-    CLink,
-    JoyPad
-};
-
-enum COLOUR {
-    WHITE,
-    LIGHT_GREY,
-    DARK_GREY,
-    BLACK
-};
-
-static WORD lastPC;
-static BYTE lastOPCODE;

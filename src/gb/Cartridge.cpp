@@ -1,14 +1,21 @@
 #include "cartridge.h"
 
+#include <iostream>
+#include <fstream>
+
 #include <string>
 
-#include "mbc1.h"
-#include "mbc3.h"
+#include "mbc/mbc1.h"
+#include "mbc/mbc3.h"
 
-Cartridge::Cartridge()
+using namespace std;
+
+Cartridge::~Cartridge()
 {
-    _ROMsize = 0;
-    _RAMsize = 0;
+    // Delete array in destructor
+    if (m_ROMdata) {
+        delete[] m_ROMdata;
+    }
 }
 
 bool Cartridge::initGame(const string &gamePath)
@@ -17,23 +24,20 @@ bool Cartridge::initGame(const string &gamePath)
     ifstream rom(gamePath, ios::binary | ios::ate);
 
     // tellg() returns the actual position, since we are in the end of file, it returns the size
-    _ROMsize = (int)rom.tellg();
+    m_ROMsize = (int)rom.tellg();
 
-    if (_ROMsize != -1)
-    {
+    if (m_ROMsize != -1) {
         // Points to the beginning of the ifle
         rom.seekg(0, ios::beg);
 
         // Array of BYTEs containing the ROM
-        _ROMdata = new BYTE[_ROMsize];
+        m_ROMdata = new BYTE[m_ROMsize];
 
-        rom.read((char *)_ROMdata, _ROMsize);
+        rom.read((char *)m_ROMdata, m_ROMsize);
 
         // Read info from ROM
         loadHeader();
-    }
-    else
-    {
+    } else {
         cout << "Error finding path or reading rom: " << gamePath << endl;
         return false;
     }
@@ -43,61 +47,54 @@ bool Cartridge::initGame(const string &gamePath)
     return true;
 }
 
-
-Cartridge::~Cartridge()
-{
-    // Delete array in destructor
-    if (_ROMdata) {
-        delete[] _ROMdata;
-    }
-}
-
 void Cartridge::loadHeader()
 {
 
     // Get game title
-    memcpy(_title, &_ROMdata[HEADER_TITLE], 17);
-    _title[16] = '\0';
-    cout << "GAME TITLE: " << _title << endl;
+    memcpy(m_title, &m_ROMdata[HEADER_TITLE], 17);
+    m_title[16] = '\0';
+    cout << "GAME TITLE: " << m_title << endl;
 
     // We check if the size of ROM was properly calculated
     int tempSize = 0;
 
     // From ROM Header documentation: size = 32KB << N
-    tempSize = 32768 << _ROMdata[HEADER_ROM_SIZE];
+    tempSize = 32768 << m_ROMdata[HEADER_ROM_SIZE];
 
-    if (tempSize != _ROMsize)
+    if (tempSize != m_ROMsize) {
         cout << "Error reading ROM size" << endl;
-    else cout << "GAME SIZE: " << _ROMsize << " KB" << endl;
+    } else { 
+        cout << "GAME SIZE: " << m_ROMsize << " KB" << endl; 
+    }
 
     // Read RAM size info
-    switch (_ROMdata[HEADER_RAM_SIZE])
+    switch (m_ROMdata[HEADER_RAM_SIZE])
     {
     case 0x00:
-        _RAMsize = 0; // 0 KB
+        m_RAMsize = 0; // 0 KB
         break;
     case 0x01:
-        _RAMsize = 2024; // 2 KB
+        m_RAMsize = 2024; // 2 KB
         break;
     case 0x02:
-        _RAMsize = 8192; // 8 KB
+        m_RAMsize = 8192; // 8 KB
         break;
     case 0x03:
-        _RAMsize = 32768; // 32 KB, 4 banks of 8 KB each
+        m_RAMsize = 32768; // 32 KB, 4 banks of 8 KB each
         break;
     case 0x04:
-        _RAMsize = 131072; // 128 KB, 16 banks of 8 KB each
+        m_RAMsize = 131072; // 128 KB, 16 banks of 8 KB each
         break;
     case 0x05:
-        _RAMsize = 65536; // 64 KB, 8 banks of 8 KB each
+        m_RAMsize = 65536; // 64 KB, 8 banks of 8 KB each
         break;
     default:
         cout << "Error reading RAM size" << endl;
         break;
     }
-    cout << "RAM SIZE: " << _RAMsize << " KB" << endl;
+    cout << "RAM SIZE: " << m_RAMsize << " KB" << endl;
 
-    BYTE cartType = _ROMdata[HEADER_CART_TYPE];
+    BYTE cartType = m_ROMdata[HEADER_CART_TYPE];
     // Read Cartridge type info
     switch (cartType)
     {
@@ -105,19 +102,19 @@ void Cartridge::loadHeader()
     case 0x08:        // ROM+RAM
     case 0x09:        // ROM+RAM+BATTERY
         cout << "CARTRIDGE TYPE: " << hex << (int)cartType << " - NO MBC" << dec << endl;
-        _MBC = new None(_ROMdata, _RAMsize);
+        _MBC = new None(m_ROMdata, m_RAMsize);
         break;
     case 0x01:        // MBC1
     case 0x02:        // MBC1+RAM
     case 0x03:        // MBC1+RAM+BATTERY
         cout << "CARTRIDGE TYPE: " << hex << (int)cartType << " - MBC1" << dec << endl;
-        _MBC = new MBC1(_ROMdata, _RAMsize);
+        _MBC = new MBC1(m_ROMdata, m_RAMsize);
         break;
     case 0x11:        // MBC3
     case 0x12:        // MBC3+RAM
     case 0x13:        // MBC3+RAM+BATTERY
         cout << "CARTRIDGE TYPE: " << hex << (int)cartType << " - MBC3" << dec << endl;
-        _MBC = new MBC3(_ROMdata, _RAMsize);
+        _MBC = new MBC3(m_ROMdata, m_RAMsize);
         break;
     case 0x05:        // MBC2
     case 0x06:        // MBC2+BATTERY
@@ -147,5 +144,5 @@ void Cartridge::loadHeader()
 
 BYTE *Cartridge::getData()
 {
-    return _ROMdata;
+    return m_ROMdata;
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "header.h"
+#include "data_types.h"
 #include "graphics/shader.h"
 #include "graphics/window.h"
 #include "memory.h"
@@ -9,6 +9,14 @@
 class Video
 {
 public:
+
+    enum COLOUR {
+        WHITE,
+        LIGHT_GREY,
+        DARK_GREY,
+        BLACK
+    };
+
     Video();
     ~Video();
     void init(Memory *memory);
@@ -22,6 +30,7 @@ public:
     COLOUR getColor(BYTE colourNum, WORD address);
 
 private:
+
     Memory*  m_memory;
     int      m_scanLineCounter;
     GLubyte* m_screenDATA;

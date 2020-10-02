@@ -1,14 +1,13 @@
 #pragma once
 
-#include "header.h"
-#include "registers.h"
+#include "data_types.h"
+#include "cpu_registers.h"
 #include "memory.h"
 
 class Instructions
 {
 public:
     Instructions(Memory *memory, Registers *registers);
-    ~Instructions();
 
     WORD read16();
     BYTE read8();
