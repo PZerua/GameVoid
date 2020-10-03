@@ -780,7 +780,7 @@ void CPU::requestInterrupt(Interrupt id)
         m_haltEnabled = false;
     }
     //cout << "REQ_AFT: " << hex << (int)reqInt << endl;
-    //cout << "ENAB: " << hex << (int)_memory->read(0xFFFF) << endl;
+    // cout << "ENAB: " << hex << (int)m_memory->read(IE) << endl;
 }
 
 void CPU::doInterrupts()
@@ -789,9 +789,6 @@ void CPU::doInterrupts()
 
     BYTE reqInt = m_memory->read(IF);
     BYTE enabInt = m_memory->read(IE);
-
-    //cout << "REQ: " << hex << (int)reqInt << endl;
-    //cout << "ENAB: " << hex << (int)enabInt << endl;
 
     if (reqInt == 0x00) { return; }
 
@@ -854,6 +851,7 @@ void CPU::updateTimers(int cycles)
     }
     
     int freq = getClockFreq();
+    // cout << freq << endl;
 
     m_timeCounter += cycles;
 
@@ -872,10 +870,10 @@ int CPU::getClockFreq() const
 {
     BYTE freq = m_memory->read(TAC) & 0x3;
     switch (freq) {
-    case 0: return 256;    // freq 4096
-    case 1: return 4;      // freq 262144
-    case 2: return 16;     // freq 65536
-    case 3: return 64;     // freq 16382
+    case 0: return 256;    // 4KHz
+    case 1: return 4;      // 256KHz
+    case 2: return 16;     // 64KHz
+    case 3: return 64;     // 16KHz
     }
 
     return 0;

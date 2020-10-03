@@ -24,8 +24,9 @@ public:
     int getClockFreq() const;
     void updateTimers(int cycles);
     bool isClockEnabled();
-    void setDivideCounter(int value) { m_divideCounter = value; }
     int getDivideCounter() { return m_divideCounter; }
+    void resetTimeCounter() { m_timeCounter = 0; }
+    void resetDivideCounter() { m_divideCounter = 0; }
 
 private:
 

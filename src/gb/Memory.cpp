@@ -55,13 +55,13 @@ void Memory::write(WORD address, BYTE value)
     else if (address == DIV)
     {
         m_memory[address] = 0;
-        _resetDiv = true;
     }
     // If we write to this registers, they are set to 0
     else if (address == TAC)
     {
-        m_timerTriger = true;
-        m_timerData = value;
+        BYTE prevValue = m_memory[address];
+        m_memory[address] = value;
+
     }
     else if (address == 0xFF44)
         m_memory[0xFF44] = 0;
@@ -114,22 +114,6 @@ void Memory::DMATransfer(BYTE data)
     {
         write(0xFE00 + i, read(address + i));
     }
-}
-
-bool Memory::timerTriger()
-{
-    return m_timerTriger;
-}
-
-void Memory::resetTimerTriger()
-{
-    m_timerData = 0;
-    m_timerTriger = false;
-}
-
-BYTE Memory::getTimerData()
-{
-    return m_timerData;
 }
 
 BYTE *Memory::getMemoryData()

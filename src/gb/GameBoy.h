@@ -8,6 +8,7 @@
 #include "graphics/window.h"
 
 constexpr auto MAXCYCLES = 69905;
+constexpr double MICROSECONDS_PER_CYCLE = 0.2384;
 
 class GameBoy
 {
@@ -23,4 +24,5 @@ private:
     CPU m_cpu;
     Controller m_controller;
     gfx::Window m_window;
+    double m_deltaTime = 0;
 };
