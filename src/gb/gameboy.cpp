@@ -1,6 +1,5 @@
 #include "gameboy.h"
 
-#include <chrono>
 #include <sstream>
 #include <iomanip>
 #include <iostream>
@@ -10,60 +9,39 @@
 
 bool GameBoy::init(const std::string romPath)
 {
-    if (!m_window.init("GameVoid", 640, 576)) {
+    if (!cartridge.initGame(romPath)) {
         return false;
     }
 
-    if (!m_game.initGame(romPath)) {
-        return false;
-    }
-
-    m_memory.init(&m_game, &m_controller);
-    m_video.init(&m_memory);
-    m_cpu.init(&m_memory);
-    m_controller.init(m_memory.getMemoryData());
+    memory.init(&cartridge, &controller);
+    video.init(&memory);
+    cpu.init(&memory);
+    controller.init(memory.getMemoryData());
 
     return true;
 }
 
-void GameBoy::start()
+void GameBoy::tick(double deltaTime)
 {
-    input::Keyboard &input = input::Keyboard::getInstance();
+    unsigned int cyclesExecuted = 0;
+    unsigned int cyclesToExecute = static_cast<unsigned int>((deltaTime * 1000000.0) / MICROSECONDS_PER_CYCLE);
 
-    while (!input.isPressed(GLFW_KEY_ESCAPE) && !m_window.isClosed())
+    controller.checkControls();
+
+    while (cyclesExecuted < cyclesToExecute)
     {
-        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-
-        unsigned int cyclesExecuted = 0;
-        unsigned int cyclesToExecute = static_cast<unsigned int>((m_deltaTime * 1000000.0) / MICROSECONDS_PER_CYCLE);
-
-        m_window.pollEvents();
-        m_controller.checkControls();
-
-        while (cyclesExecuted < cyclesToExecute)
+        if (controller.interruptRequested())
         {
-            if (m_controller.interruptRequested())
-            {
-                m_cpu.requestInterrupt(Interrupt::JoyPad);
-                m_controller.setInterruptRequested(false);
-            }
-            int cycles = m_cpu.fetch();
-            m_cpu.updateTimers(cycles);
-            m_video.updateGraphics(cycles, m_cpu);
-            m_cpu.doInterrupts();
-            cyclesExecuted += cycles;
+            cpu.requestInterrupt(Interrupt::JoyPad);
+            controller.setInterruptRequested(false);
         }
 
-        m_window.clear();
-        m_video.render();
-        m_window.swap();
-
-        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-
-        std::stringstream stream;
-        m_deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() * 0.001;
-        stream << std::fixed << std::setprecision(2) << 1.0 / m_deltaTime;
-        m_window.setWindowTitle("GameVoid " + stream.str());
-        //std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds> (end - begin).count() << "[ms]" << std::endl;
+        int cycles = cpu.fetch();
+        cpu.updateTimers(cycles);
+        video.updateGraphics(cycles, cpu);
+        cpu.doInterrupts();
+        cyclesExecuted += cycles;
     }
+
+    video.render();
 }

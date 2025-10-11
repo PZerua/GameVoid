@@ -15,14 +15,12 @@ class GameBoy
 public:
     GameBoy() = default;
     bool init(const std::string romPath);
-    void start();
+    void tick(double deltaTime);
 
 private:
-    Cartridge m_game;
-    Memory m_memory;
-    Video m_video;
-    CPU m_cpu;
-    Controller m_controller;
-    gfx::Window m_window;
-    double m_deltaTime = 0;
+    Cartridge cartridge;
+    Memory memory;
+    Video video;
+    CPU cpu;
+    Controller controller;
 };

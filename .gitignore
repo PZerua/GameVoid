@@ -4,3 +4,4 @@
 .vs/*
 .vscode/*
 x64/*
+imgui.ini

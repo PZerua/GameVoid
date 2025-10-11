@@ -32,7 +32,7 @@ public:
 
 private:
 
-    Memory*  m_memory = nullptr;
+    Memory*  memory = nullptr;
     int      m_scanLineCounter = 456;
     GLubyte* m_screenDATA = nullptr;
 
