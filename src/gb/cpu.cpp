@@ -796,6 +796,7 @@ void CPU::doInterrupts()
     for (int i = 0; i < 5; i++) {
         if (testBit(reqInt, i) && testBit(enabInt, i)) {
             serviceInterrupt(static_cast<Interrupt>(i));
+            return;
         }
     }
 }

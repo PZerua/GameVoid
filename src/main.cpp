@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
     }
 
     gfx::Window window;
-    if (!window.init("GameVoid", 640, 576)) {
+    if (!window.init("GameVoid", 960, 864)) {
         return false;
     }
 
@@ -100,16 +100,17 @@ int main(int argc, char* argv[])
         if (gameboy) {
             gameboy->tick(deltaTime);
         }
+        else {
+            // Start the Dear ImGui frame
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
 
-        // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+            drawGUI(&gameboy);
 
-        drawGUI(&gameboy);
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        }
 
         window.swap();
 

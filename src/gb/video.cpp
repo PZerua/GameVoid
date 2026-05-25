@@ -6,6 +6,9 @@
 #include "utils/debug_utils.h"
 #include "memory.h"
 
+#include <cassert>
+#include <algorithm>
+
 using namespace utils;
 
 const char* vertexShader =  R"(#version 330 core
@@ -133,23 +136,29 @@ void Video::updateGraphics(int cycles, CPU &cpu)
 
     if (m_scanLineCounter <= 0)
     {
+        LYC_interrupt_served = false;
+        window_y_counter = 0;
+
         BYTE currentline = memory->read(LY);
-        m_scanLineCounter = 456;
 
-        // we have entered vertical blank period
-        if (currentline == 144)
-            cpu.requestInterrupt(VBlank);
+        m_scanLineCounter += 456;
 
-        // if gone past scanline 153 reset to 0
-        else if (currentline > 153)
+        if (currentline <= 153) {
+            // we have entered vertical blank period
+            if (currentline == 144)
+                cpu.requestInterrupt(VBlank);
+
+            // draw the current scanline 
+            else if (currentline < 144)
+                drawScanLine();
+
+            // time to move onto next scanline
+            memory->directModification(LY, currentline + 1);
+        }
+        else {
+            // if gone past scanline 153 reset to 0
             memory->directModification(LY, 0x00);
-
-        // draw the current scanline 
-        else if (currentline < 144)
-            drawScanLine();
-
-        // time to move onto next scanline
-        memory->directModification(LY, memory->read(LY) + 1);
+        }
     }
 }
 
@@ -212,7 +221,7 @@ void Video::setLCDStatus(CPU &cpuTemp)
         }
     }
 
-    // just entered a new mode so request interupt
+    // just entered a new mode so request interrupt
     if (reqInt && (mode != currentmode))
         cpuTemp.requestInterrupt(LCD);
 
@@ -220,8 +229,10 @@ void Video::setLCDStatus(CPU &cpuTemp)
     if (memory->read(LY) == memory->read(LYC))
     {
         status = bitSet(status, 2);
-        if (testBit(status, 6))
+        if (testBit(status, 6) && !LYC_interrupt_served) {
             cpuTemp.requestInterrupt(LCD);
+            LYC_interrupt_served = true;
+        }
     }
     else
     {
@@ -237,163 +248,138 @@ bool Video::isLCDEnabled()
 
 void Video::drawScanLine()
 {
-    BYTE control = memory->read(LCDC);
-    if (testBit(control, 0))
-        renderTiles();
-
-    if (testBit(control, 1))
-       renderSprites();
-}
-
-void Video::renderTiles()
-{
-    WORD tileData = 0;
-    WORD backgroundMemory = 0;
-    bool unsig = true;
-
     // where to draw the visual area and the window
-    BYTE scrollY = memory->read(SCY);
-    BYTE scrollX = memory->read(SCX);
-    BYTE windowY = memory->read(WY);
-    BYTE windowX = memory->read(WX) - 7;
+    BYTE ly = memory->read(LY);
+    WORD scrollX = memory->read(SCX);
+    WORD scrollY = memory->read(SCY);
+    WORD windowY = memory->read(WY);
+    WORD windowX = memory->read(WX) - 7;
 
-    bool usingWindow = false;
+    BYTE LCDC_flags = memory->read(LCDC);
 
-    // is the window enabled?
-    if (testBit(memory->read(LCDC), 5))
-    {
-        // is the current scanline we're drawing 
-        // within the windows Y pos?,
-        if (windowY < memory->read(LY))
-            usingWindow = true;
-    }
+    bool windowEnable = testBit(LCDC_flags, 5);
 
-    // which tile data are we using? 
-    if (testBit(memory->read(LCDC), 4))
-    {
-        tileData = 0x8000;
-    }
-    else
-    {
-        // IMPORTANT: This memory region uses signed 
-        // bytes as tile identifiers
-        tileData = 0x8800;
-        unsig = false;
-    }
+    int spriteHeight = 8;
 
-    // which background mem?
-    if (!usingWindow)
-    {
-        if (testBit(memory->read(LCDC), 3))
-            backgroundMemory = 0x9C00;
-        else
-            backgroundMemory = 0x9800;
-    }
-    else
-    {
-        // which window memory?
-        if (testBit(memory->read(LCDC), 6))
-            backgroundMemory = 0x9C00;
-        else
-            backgroundMemory = 0x9800;
-    }
+    if (testBit(memory->read(LCDC), 2))
+        spriteHeight = 16;
 
-    BYTE yPos = 0;
+    std::vector<Sprite> sprites = getSprites(memory->read(LY), spriteHeight);
 
-    // yPos is used to calculate which of 32 vertical tiles the 
-    // current scanline is drawing
-    if (!usingWindow)
-        yPos = scrollY + memory->read(LY);
-    else
-        yPos = memory->read(LY) - windowY;
-
-    // which of the 8 vertical pixels of the current 
-    // tile is the scanline on?
-    WORD tileRow = (((BYTE)(yPos / 8)) * 32);
-
-    // time to start drawing the 160 horizontal pixels
-    // for this scanline
     for (int pixel = 0; pixel < 160; pixel++)
     {
-        BYTE xPos = pixel + scrollX;
+        int tileX = 0;
+        int tileY = 0;
 
-        // translate the current x pos to window space if necessary
-        if (usingWindow)
-        {
-            if (pixel >= windowX)
+        const Sprite* drawnSprite = nullptr;
+
+        COLOUR spriteColor;
+
+        // OBJ Enabled
+        if (testBit(LCDC_flags, 1)) {
+
+            BYTE objX = pixel + 8;
+            for (const Video::Sprite& sprite : sprites)
             {
-                xPos = pixel - windowX;
+                if (objX < sprite.x + 8 && objX >= sprite.x) {
+                    bool yFlip = testBit(sprite.flags, 6);
+                    bool xFlip = testBit(sprite.flags, 5);
+
+                    tileX = pixel - sprite.x - 8;
+                    tileX %= 8;
+
+                    // read the sprite in backwards in the y axis
+                    if (xFlip)
+                    {
+                        tileX = 7 - tileX;
+                    }
+
+                    int scanline = memory->read(LY);
+
+                    tileY = scanline - sprite.y - 16;
+                    tileY %= spriteHeight;
+
+                    // read the sprite in backwards in the y axis
+                    if (yFlip)
+                    {
+                        tileY = spriteHeight - 1 - tileY;
+                    }
+
+                    BYTE tileIndex = sprite.tileIndex;
+                    if (spriteHeight == 16) {
+                        tileIndex &= 0b11111110;
+                        if (tileY >= 8) {
+                            tileY -= 8;
+                            tileIndex += 1;
+                        }
+                    }
+
+                    BYTE colId = getTileColor(tileX, tileY, tileIndex, false);
+
+                    // not transparent
+                    if (colId != 0) {
+                        drawnSprite = &sprite;
+                        WORD palette = testBit(sprite.flags, 4) ? 0xFF49 : 0xFF48;
+                        spriteColor = getColor(colId, palette);
+                        break;
+                    }
+                }
             }
         }
 
-        // which of the 32 horizontal tiles does this xPos fall within?
-        WORD tileCol = (xPos / 8);
-        SWORD tileNum;
+        bool spriteOnBackground = false;
+        if (drawnSprite) {
+            if (testBit(drawnSprite->flags, 7) == 0) {
+                setPixel(pixel, ly, spriteColor);
+                continue;
+            }
 
-        // get the tile identity number. Remember it can be signed
-        // or unsigned
-        WORD tileAddrss = backgroundMemory + tileRow + tileCol;
-        if (unsig)
-            tileNum = (BYTE)memory->read(tileAddrss);
-        else
-            tileNum = (SBYTE)memory->read(tileAddrss);
-
-        // deduce where this tile identifier is in memory. Remember i 
-        // shown this algorithm earlier
-        WORD tileLocation = tileData;
-
-        if (unsig)
-            tileLocation += (tileNum * 16);
-        else
-            tileLocation += ((tileNum + 128) * 16);
-
-        // find the correct vertical line we're on of the 
-        // tile to get the tile data 
-        // from in memory
-        BYTE line = yPos % 8;
-        line *= 2; // each vertical line takes up two bytes of memory
-        BYTE data1 = memory->read(tileLocation + line);
-        BYTE data2 = memory->read(tileLocation + line + 1);
-
-        // pixel 0 in the tile is it 7 of data 1 and data2.
-        // Pixel 1 is bit 6 etc..
-        int colourBit = xPos % 8;
-        colourBit -= 7;
-        colourBit *= -1;
-
-        // combine data 2 and data 1 to get the colour id for this pixel 
-        // in the tile
-        int colourNum = bitGetVal(data2, colourBit);
-        colourNum <<= 1;
-        colourNum |= bitGetVal(data1, colourBit);
-
-        // now we have the colour id get the actual 
-        // colour from palette 0xFF47
-        COLOUR col = getColor(colourNum, BGP);
-        int red = 0;
-        int green = 0;
-        int blue = 0;
-
-        // setup the RGB values
-        switch (col)
-        {
-        case WHITE:         red = 0xFF; green = 0xFF; blue = 0xFF; break;
-        case LIGHT_GREY:    red = 0xCC; green = 0xCC; blue = 0xCC; break;
-        case DARK_GREY:     red = 0x77; green = 0x77; blue = 0x77; break;
+            spriteOnBackground = true;
         }
 
-        int finaly = memory->read(LY);
+        bool bgWindowEnable = testBit(LCDC_flags, 0);
+        if (!bgWindowEnable) {
+            if (spriteOnBackground) {
+                setPixel(pixel, ly, spriteColor);
+            }
+            else {
+                COLOUR col = getColor(0, BGP);
+                setPixel(pixel, ly, col);
+            }
 
-        // safety check to make sure what im about 
-        // to set is in the 160x144 bounds
-        if ((finaly<0) || (finaly>143) || (pixel<0) || (pixel>159))
-        {
             continue;
         }
 
-        m_screenDATA[finaly * 160 * 3 + (pixel * 3)] = red;
-        m_screenDATA[finaly * 160 * 3 + (pixel * 3) + 1] = green;
-        m_screenDATA[finaly * 160 * 3 + (pixel * 3) + 2] = blue;
+        bool usingWindow = windowEnable && pixel >= windowX && ly >= windowY;
+
+        // translate the current x pos to window space if necessary
+        if (!usingWindow)
+        {
+            tileX = (pixel + scrollX) % 256;
+            tileY = (scrollY + ly) % 256;
+        } else {
+            tileX = (pixel - windowX);
+            tileY = window_y_counter;
+        }
+
+        WORD tileIndex = getTileIndex(tileX, tileY, testBit(memory->read(LCDC), usingWindow ? 6 : 3));
+
+        // combine data 2 and data 1 to get the colour id for this pixel 
+        // in the tile
+        int colourNum = getTileColor(tileX, tileY, tileIndex, !testBit(memory->read(LCDC), 4));
+
+        if (colourNum == 0 && spriteOnBackground)
+        {
+            setPixel(pixel, ly, spriteColor);
+        }
+        else {
+            COLOUR col = getColor(colourNum, BGP);
+            setPixel(pixel, ly, col);
+        }
+
+        if (windowEnable && windowX < 160 && windowY <= ly) {
+            window_y_counter++;
+        }
     }
 }
 
@@ -430,106 +416,89 @@ Video::COLOUR Video::getColor(BYTE colourNum, WORD address)
     return res;
 }
 
-void Video::renderSprites()
+BYTE Video::getTileIndex(BYTE x, BYTE y, bool tileMap)
 {
-    bool use8x16 = false;
-    if (testBit(memory->read(LCDC), 2))
-        use8x16 = true;
+    WORD tileMapIndex = ((WORD(y) / 8) * 32) + WORD(x) / 8;
+    WORD tileRoot = tileMap ? 0x1C00 : 0x1800;
 
-    for (int sprite = 0; sprite < 40; sprite++)
+    return memory->read(0x8000 + tileRoot + tileMapIndex);
+}
+
+BYTE Video::getTileColor(BYTE x, BYTE y, BYTE tileIndex, bool addressingMode)
+{
+    WORD byteIndex = (16 * WORD(tileIndex)) + (2 * (WORD(y) % 8));
+
+    if (addressingMode && tileIndex < 128) {
+        byteIndex += 0x1000;
+    }
+
+    BYTE data1 = memory->read(0x8000 + byteIndex);
+    BYTE data2 = memory->read(0x8000 + byteIndex + 1);
+
+    BYTE a = (data1 & (0b10000000 >> (x % 8))) != 0;
+    BYTE b = (data2 & (0b10000000 >> (x % 8))) != 0;
+
+    // Get color ID from the two bits
+    return a | (b << 1);
+}
+
+void Video::setPixel(BYTE x, BYTE y, COLOUR col)
+{
+    int red = 0x08;
+    int green = 0x18;
+    int blue = 0x20;
+
+    // setup the RGB values
+    switch (col)
     {
+    case WHITE:         red = 0xE0; green = 0xF8; blue = 0xD0; break;
+    case LIGHT_GREY:    red = 0x88; green = 0xC0; blue = 0x70; break;
+    case DARK_GREY:     red = 0x34; green = 0x68; blue = 0x56; break;
+    }
+
+    // safety check to make sure what im about 
+    // to set is in the 160x144 bounds
+    if ((y < 0) || (y > 143) || (x < 0) || (x > 159))
+    {
+        assert(0);
+    }
+
+    m_screenDATA[y * 160 * 3 + (x * 3)] = red;
+    m_screenDATA[y * 160 * 3 + (x * 3) + 1] = green;
+    m_screenDATA[y * 160 * 3 + (x * 3) + 2] = blue;
+}
+
+bool compareByX(const Video::Sprite& a, const Video::Sprite& b)
+{
+    return a.x < b.x;
+}
+
+std::vector<Video::Sprite> Video::getSprites(BYTE y, WORD spriteHeight)
+{
+    std::vector<Sprite> sprites;
+    BYTE objY = y + 16;
+
+    for (int spriteIdx = 0; spriteIdx < 40; spriteIdx++)
+    {
+        Sprite sprite;
         // sprite occupies 4 bytes in the sprite attributes table
-        BYTE index = sprite * 4;
-        BYTE yPos = memory->read(0xFE00 + index) - 16;
-        BYTE xPos = memory->read(0xFE00 + index + 1) - 8;
-        BYTE tileLocation = memory->read(0xFE00 + index + 2);
-        BYTE attributes = memory->read(0xFE00 + index + 3);
+        BYTE index = spriteIdx * 4;
+        sprite.y = memory->read(0xFE00 + index);
+        sprite.x = memory->read(0xFE00 + index + 1);
+        sprite.tileIndex = memory->read(0xFE00 + index + 2);
+        sprite.flags = memory->read(0xFE00 + index + 3);
 
-        bool yFlip = testBit(attributes, 6);
-        bool xFlip = testBit(attributes, 5);
+        if (objY < (sprite.y + spriteHeight) && objY >= sprite.y) {
+            sprites.push_back(sprite);
 
-        int scanline = memory->read(LY);
-
-        int ysize = 8;
-        if (use8x16)
-            ysize = 16;
-
-        // does this sprite intercept with the scanline?
-        if ((scanline >= yPos) && (scanline < (yPos + ysize)))
-        {
-            int line = scanline - yPos;
-
-            // read the sprite in backwards in the y axis
-            if (yFlip)
-            {
-                line -= ysize;
-                line *= -1;
-            }
-
-            line *= 2; // same as for tiles
-            WORD dataAddress = (0x8000 + (tileLocation * 16)) + line;
-            BYTE data1 = memory->read(dataAddress);
-            BYTE data2 = memory->read(dataAddress + 1);
-
-            // its easier to read in from right to left as pixel 0 is 
-            // bit 7 in the colour data, pixel 1 is bit 6 etc...
-            for (int tilePixel = 7; tilePixel >= 0; tilePixel--)
-            {
-                int colourbit = tilePixel;
-                // read the sprite in backwards for the x axis 
-                if (xFlip)
-                {
-                    colourbit -= 7;
-                    colourbit *= -1;
-                }
-
-                // the rest is the same as for tiles
-                int colourNum = bitGetVal(data2, colourbit);
-                colourNum <<= 1;
-                colourNum |= bitGetVal(data1, colourbit);
-
-                WORD colourAddress = testBit(attributes, 4) ? 0xFF49 : 0xFF48;
-                COLOUR col = getColor(colourNum, colourAddress);
-
-                // white is transparent for sprites.
-                if (col == WHITE)
-                    continue;
-
-                int red = 0;
-                int green = 0;
-                int blue = 0;
-
-                switch (col)
-                {
-                case WHITE:         red = 0xFF; green = 0xFF; blue = 0xFF; break;
-                case LIGHT_GREY:    red = 0xCC; green = 0xCC; blue = 0xCC; break;
-                case DARK_GREY:     red = 0x77; green = 0x77; blue = 0x77; break;
-                }
-
-                int xPix = 0 - tilePixel;
-                xPix += 7;
-
-                int pixel = xPos + xPix;
-
-                // sanity check
-                if ((scanline<0) || (scanline>143) || (pixel<0) || (pixel>159))
-                {
-                    continue;
-                }
-
-                // check if pixel is hidden behind background
-                if (testBit(attributes, 7) == 1)
-                {
-                    if (((m_screenDATA[scanline * 160 + pixel]) != 0xFF) || ((m_screenDATA[scanline * 160 + pixel + 1] & 0xFF) != 0xFF) || ((m_screenDATA[scanline * 160 + pixel + 2] & 0xFF) != 0xFF))
-                        continue;
-                }
-
-                m_screenDATA[scanline * 160 * 3 + (pixel * 3)] = red;
-                m_screenDATA[scanline * 160 * 3 + (pixel * 3) + 1] = green;
-                m_screenDATA[scanline * 160 * 3 + (pixel * 3) + 2] = blue;
-            }
+            if (sprites.size() == 10)
+                break;
         }
     }
+
+    std::sort(sprites.begin(), sprites.end(), compareByX);
+
+    return sprites;
 }
 
 void Video::render()

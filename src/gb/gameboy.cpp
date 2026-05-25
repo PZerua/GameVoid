@@ -28,7 +28,7 @@ void GameBoy::tick(double deltaTime)
 
     controller.checkControls();
 
-    while (cyclesExecuted < cyclesToExecute)
+    while (cyclesExecuted < MAXCYCLES)
     {
         if (controller.interruptRequested())
         {

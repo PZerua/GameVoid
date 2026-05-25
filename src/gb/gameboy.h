@@ -7,7 +7,7 @@
 #include "controller.h"
 #include "graphics/window.h"
 
-constexpr auto MAXCYCLES = 69905;
+constexpr auto MAXCYCLES = 70224;
 constexpr double MICROSECONDS_PER_CYCLE = 0.2384;
 
 class GameBoy

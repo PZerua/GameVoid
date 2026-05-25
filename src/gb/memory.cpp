@@ -27,6 +27,11 @@ BYTE Memory::read(WORD address)
 
 void Memory::write(WORD address, BYTE value)
 {
+    if (address == LCDC) {
+        int test = 0;
+        BYTE ly = read(LY);
+        int a = 0;
+    }
     // We are writing data to ROM or internal Cartridge RAM
     if (address < 0x8000 || (address >= 0xA000 && address < 0xC000))
     {
@@ -63,8 +68,8 @@ void Memory::write(WORD address, BYTE value)
         m_memory[address] = value;
 
     }
-    else if (address == 0xFF44)
-        m_memory[0xFF44] = 0;
+    else if (address == LY)
+        m_memory[LY] = 0;
     // DMA Transfer
     else if (address == 0xFF46)
     {
