@@ -26,4 +26,9 @@ BYTE bitGetVal(BYTE byte, int bit)
     return tempByte;
 }
 
+bool bitIntersect(BYTE byte, BYTE bit)
+{
+    return byte & bit;
+}
+
 } // namespace utils

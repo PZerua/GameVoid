@@ -92,7 +92,7 @@ add_library(imgui STATIC
     libraries/imgui/imstb_truetype.h
 )
 
-set_property(TARGET imgui PROPERTY CXX_STANDARD 11)
+set_property(TARGET imgui PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(imgui PUBLIC glfw)
 target_include_directories(imgui PUBLIC libraries/imgui)
@@ -100,5 +100,5 @@ target_link_libraries(${PROJECT_NAME} PUBLIC imgui)
 set_property(TARGET imgui PROPERTY FOLDER "External/imgui")
 
 # Properties
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD_REQUIRED ON)

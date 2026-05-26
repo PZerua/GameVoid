@@ -11,6 +11,24 @@ class Video
 {
 public:
 
+    enum eLCDControl {
+        BG_WINDOW_ENABLE = 1 << 0,
+        OBJ_ENABLE       = 1 << 1,
+        OBJ_SIZE         = 1 << 2,
+        BG_TILE_MAP      = 1 << 3,
+        TILE_DATA_AREA   = 1 << 4,
+        WINDOW_ENABLE    = 1 << 5,
+        WINDOW_TILE_MAP  = 1 << 6,
+        ENABLE           = 1 << 7,
+    };
+
+    enum eSpriteFlags {
+        PALETTE = 1 << 4,
+        X_FLIP = 1 << 5,
+        Y_FLIP = 1 << 6,
+        PRIORITY = 1 << 7,
+    };
+
     enum COLOUR {
         WHITE,
         LIGHT_GREY,

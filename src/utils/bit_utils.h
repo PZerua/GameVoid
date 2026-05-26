@@ -9,5 +9,6 @@ BYTE bitSet(BYTE byte, int bit);
 BYTE bitReset(BYTE byte, int bit);
 bool testBit(BYTE byte, int bit);
 BYTE bitGetVal(BYTE byte, int bit);
+bool bitIntersect(BYTE byte, BYTE bit);
 
 } // namespace utils

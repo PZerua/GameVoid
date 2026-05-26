@@ -243,7 +243,7 @@ void Video::setLCDStatus(CPU &cpuTemp)
 
 bool Video::isLCDEnabled()
 {
-    return ((memory->read(LCDC) & 0x80) == 0x80);
+    return bitIntersect(memory->read(LCDC), eLCDControl::ENABLE);
 }
 
 void Video::drawScanLine()
@@ -253,20 +253,18 @@ void Video::drawScanLine()
     WORD scrollX = memory->read(SCX);
     WORD scrollY = memory->read(SCY);
     WORD windowY = memory->read(WY);
-    WORD windowX = memory->read(WX) - 7;
+    WORD windowX = std::clamp((int)memory->read(WX) - 7, 0, 255);
 
     BYTE LCDC_flags = memory->read(LCDC);
 
-    bool windowEnable = testBit(LCDC_flags, 5);
-
     int spriteHeight = 8;
 
-    if (testBit(memory->read(LCDC), 2))
+    if (bitIntersect(memory->read(LCDC), eLCDControl::OBJ_SIZE))
         spriteHeight = 16;
 
     std::vector<Sprite> sprites = getSprites(memory->read(LY), spriteHeight);
 
-    for (int pixel = 0; pixel < 160; pixel++)
+    for (int x = 0; x < 160; x++)
     {
         int tileX = 0;
         int tileY = 0;
@@ -276,16 +274,16 @@ void Video::drawScanLine()
         COLOUR spriteColor;
 
         // OBJ Enabled
-        if (testBit(LCDC_flags, 1)) {
+        if (bitIntersect(LCDC_flags, eLCDControl::OBJ_ENABLE)) {
 
-            BYTE objX = pixel + 8;
+            BYTE objX = x + 8;
             for (const Video::Sprite& sprite : sprites)
             {
-                if (objX < sprite.x + 8 && objX >= sprite.x) {
-                    bool yFlip = testBit(sprite.flags, 6);
-                    bool xFlip = testBit(sprite.flags, 5);
+                if (objX < std::clamp(WORD(sprite.x) + 8, 0, 255) && objX >= sprite.x) {
+                    bool yFlip = bitIntersect(sprite.flags, eSpriteFlags::Y_FLIP);
+                    bool xFlip = bitIntersect(sprite.flags, eSpriteFlags::X_FLIP);
 
-                    tileX = pixel - sprite.x - 8;
+                    tileX = x - (int(sprite.x) - 8);
                     tileX %= 8;
 
                     // read the sprite in backwards in the y axis
@@ -296,7 +294,7 @@ void Video::drawScanLine()
 
                     int scanline = memory->read(LY);
 
-                    tileY = scanline - sprite.y - 16;
+                    tileY = scanline - (int(sprite.y) - 16);
                     tileY %= spriteHeight;
 
                     // read the sprite in backwards in the y axis
@@ -306,8 +304,8 @@ void Video::drawScanLine()
                     }
 
                     BYTE tileIndex = sprite.tileIndex;
-                    if (spriteHeight == 16) {
-                        tileIndex &= 0b11111110;
+                    if (bitIntersect(memory->read(LCDC), eLCDControl::OBJ_SIZE)) {
+                        tileIndex &= 0b1111'1110;
                         if (tileY >= 8) {
                             tileY -= 8;
                             tileIndex += 1;
@@ -319,7 +317,7 @@ void Video::drawScanLine()
                     // not transparent
                     if (colId != 0) {
                         drawnSprite = &sprite;
-                        WORD palette = testBit(sprite.flags, 4) ? 0xFF49 : 0xFF48;
+                        WORD palette = bitIntersect(sprite.flags, eSpriteFlags::PALETTE) ? 0xFF49 : 0xFF48;
                         spriteColor = getColor(colId, palette);
                         break;
                     }
@@ -329,57 +327,53 @@ void Video::drawScanLine()
 
         bool spriteOnBackground = false;
         if (drawnSprite) {
-            if (testBit(drawnSprite->flags, 7) == 0) {
-                setPixel(pixel, ly, spriteColor);
+            if (!bitIntersect(drawnSprite->flags, eSpriteFlags::PRIORITY)) {
+                setPixel(x, ly, spriteColor);
                 continue;
             }
 
             spriteOnBackground = true;
         }
 
-        bool bgWindowEnable = testBit(LCDC_flags, 0);
-        if (!bgWindowEnable) {
+        if (!bitIntersect(LCDC_flags, eLCDControl::BG_WINDOW_ENABLE)) {
             if (spriteOnBackground) {
-                setPixel(pixel, ly, spriteColor);
+                setPixel(x, ly, spriteColor);
             }
             else {
                 COLOUR col = getColor(0, BGP);
-                setPixel(pixel, ly, col);
+                setPixel(x, ly, col);
             }
 
             continue;
         }
 
-        bool usingWindow = windowEnable && pixel >= windowX && ly >= windowY;
+        bool usingWindow = bitIntersect(LCDC_flags, eLCDControl::WINDOW_ENABLE) && x >= windowX && ly >= windowY;
 
-        // translate the current x pos to window space if necessary
         if (!usingWindow)
         {
-            tileX = (pixel + scrollX) % 256;
-            tileY = (scrollY + ly) % 256;
+            tileX = WORD(x + scrollX) % 256;
+            tileY = WORD(ly + scrollY) % 256;
         } else {
-            tileX = (pixel - windowX);
+            tileX = (x - windowX);
             tileY = window_y_counter;
         }
 
-        WORD tileIndex = getTileIndex(tileX, tileY, testBit(memory->read(LCDC), usingWindow ? 6 : 3));
+        WORD tileIndex = getTileIndex(tileX, tileY, bitIntersect(memory->read(LCDC), usingWindow ? eLCDControl::WINDOW_TILE_MAP : eLCDControl::BG_TILE_MAP));
 
-        // combine data 2 and data 1 to get the colour id for this pixel 
-        // in the tile
-        int colourNum = getTileColor(tileX, tileY, tileIndex, !testBit(memory->read(LCDC), 4));
+        BYTE colourNum = getTileColor(tileX, tileY, tileIndex, !bitIntersect(memory->read(LCDC), eLCDControl::TILE_DATA_AREA));
 
         if (colourNum == 0 && spriteOnBackground)
         {
-            setPixel(pixel, ly, spriteColor);
+            setPixel(x, ly, spriteColor);
         }
         else {
             COLOUR col = getColor(colourNum, BGP);
-            setPixel(pixel, ly, col);
+            setPixel(x, ly, col);
         }
+    }
 
-        if (windowEnable && windowX < 160 && windowY <= ly) {
-            window_y_counter++;
-        }
+    if (bitIntersect(LCDC_flags, eLCDControl::WINDOW_ENABLE) && windowX < 160 && windowY <= ly) {
+        window_y_counter++;
     }
 }
 
